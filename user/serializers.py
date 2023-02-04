@@ -1,8 +1,10 @@
-from django.contrib import auth
+from django.contrib.auth import authenticate
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
+from django.utils import timezone
 
-from .models import User
+from django.contrib.auth import get_user_model
+from .models import OTP
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -10,7 +12,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(min_length=8, write_only=True, required=True)
 
     class Meta:
-        model = User
+        model = get_user_model()
         fields = ('id', 'email', 'username', 'is_verified', 'password', 'password2', 'tokens')
         read_only_fields = ('id', 'tokens')
 
@@ -35,7 +37,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return email
 
     def create(self, validated_data):
-        user = User.objects.create_user(
+        user = self.Meta.model.objects.create_user(
             email=validated_data['email'],
             username=validated_data['username'],
             password=validated_data['password'],
@@ -48,7 +50,7 @@ class UserLoginSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
 
     class Meta:
-        model = User
+        model = get_user_model()
         fields = ('id', 'email', 'username', 'is_verified', 'password', 'tokens')
         read_only_fields = ('id', 'email', 'tokens')
 
@@ -56,10 +58,10 @@ class UserLoginSerializer(serializers.ModelSerializer):
         username = attrs.get('username')
         password = attrs.get('password')
 
-        user = auth.authenticate(username=username, password=password)
+        user = authenticate(username=username, password=password)
 
         if not user:
-            raise AuthenticationFailed('Invalid credentials.')      # it will return 403
+            raise AuthenticationFailed('Invalid credentials.')  # It will return 403
         if not user.is_verified:
             raise serializers.ValidationError({'email': 'Your email is not verified.'})
 
@@ -68,4 +70,35 @@ class UserLoginSerializer(serializers.ModelSerializer):
         attrs['email'] = user.email
         attrs['is_verified'] = user.is_verified
         attrs['tokens'] = user.tokens()
+        return attrs
+
+
+class OTPRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OTP
+        fields = '__all__'
+        read_only_fields = ('id', 'code', 'created_at', 'expire_at')
+
+    def create(self, validated_data):
+        user = validated_data.pop('user')
+        otp = OTP.generate_otp(user)
+        return otp
+
+
+class OTPVerifySerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+    code = serializers.CharField(max_length=10)
+
+    def validate(self, attrs):
+        user_id = attrs.get('user_id')
+        code = attrs.get('code')
+
+        otp_objects = OTP.objects.filter(user_id=user_id, code=code)
+
+        if not otp_objects.exists():
+            raise serializers.ValidationError({'code': 'Code is not valid.'})
+
+        if timezone.now() > otp_objects.first().expire_at:
+            raise serializers.ValidationError({'expire_at': 'Code is expired.'})
+
         return attrs
