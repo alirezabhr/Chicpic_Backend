@@ -2,7 +2,10 @@ from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
 
-from .models import User
+from django.contrib.auth import get_user_model
+from .models import OTP
+
+User = get_user_model()
 
 
 class UserTest(APITestCase):
@@ -132,3 +135,55 @@ class UserTest(APITestCase):
         self.assertTrue('email' in response_dict_keys)
         self.assertTrue('tokens' in response_dict_keys)
         self.assertFalse('password' in response_dict_keys)
+
+
+class OTPTest(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user_email = 'usER@teSt.com'
+        cls.user_username = 'usER@teSt.com'
+
+    def setUp(self) -> None:
+        self.user = User.objects.create_user(username=self.user_username, email=self.user_email, password='test1234')
+        self.user_access_token = self.user.tokens().get('access')
+
+    def test_create_otp_object(self):
+        otp = OTP.generate_otp(self.user)
+        self.assertEqual(otp.id, 1)
+
+    def request_otp_api(self, user_id):
+        url = reverse('request_otp')
+        return self.client.post(
+            url, data={'user': user_id},
+            **{'HTTP_AUTHORIZATION': f'Bearer {self.user_access_token}'}
+        )
+
+    def test_request_otp(self):
+        response = self.request_otp_api(self.user.id)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        response = self.request_otp_api(self.user.id)
+        self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
+
+    def test_verify_otp(self):
+        self.request_otp_api(self.user.id)
+        otp_code = OTP.objects.filter(user_id=self.user.id).first().code
+
+        url = reverse('verify_otp')
+
+        """Wrong OTP"""
+        response = self.client.post(
+            url, data={'user_id': self.user.id, 'code': '-----'},
+            **{'HTTP_AUTHORIZATION': f'Bearer {self.user_access_token}'}
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertTrue('code' in response.json())
+        self.assertFalse(User.objects.get(id=self.user.id).is_verified)
+
+        """Correct OTP"""
+        response = self.client.post(
+            url, data={'user_id': self.user.id, 'code': otp_code},
+            **{'HTTP_AUTHORIZATION': f'Bearer {self.user_access_token}'}
+        )
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        self.assertTrue(User.objects.get(id=self.user.id).is_verified)
