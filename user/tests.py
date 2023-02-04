@@ -152,6 +152,21 @@ class UserTest(APITestCase):
         self.assertTrue('isVerified' in response_dict_keys)
         self.assertFalse('password' in response_dict_keys)
 
+    def test_refresh_token(self):
+        url = reverse('refresh_token')
+
+        user = User.objects.create_user(**self.user1_data)
+        tokens = user.tokens()
+        previous_access_token = tokens.get('access')
+        previous_refresh_token = tokens.get('refresh')
+
+        response = self.client.post(url, {'refresh': previous_refresh_token})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Both access and refresh token should change
+        self.assertNotEqual(previous_access_token, response.json().get('access'))
+        self.assertNotEqual(previous_refresh_token, response.json().get('refresh'))
+
 
 class OTPTest(APITestCase):
     @classmethod
