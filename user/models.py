@@ -55,5 +55,5 @@ class OTP(models.Model):
     @classmethod
     def generate_otp(cls, user):
         code = ''.join(choices(string.digits, k=6))
-        expire_at = timezone.now() + timezone.timedelta(minutes=2)
+        expire_at = timezone.now() + timezone.timedelta(minutes=10)
         return cls.objects.create(user=user, code=code, expire_at=expire_at)
