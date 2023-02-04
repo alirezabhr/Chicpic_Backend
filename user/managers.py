@@ -22,5 +22,6 @@ class CustomUserManager(BaseUserManager):
             password=password,
         )
         user.is_superuser = True
+        user.is_staff = True
         user.save()
         return user
