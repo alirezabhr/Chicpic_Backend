@@ -136,6 +136,22 @@ class UserTest(APITestCase):
         self.assertTrue('tokens' in response_dict_keys)
         self.assertFalse('password' in response_dict_keys)
 
+    def test_retrieve_user_details(self):
+        url = reverse('user_detail')
+
+        user = User.objects.create_user(**self.user1_data)
+
+        response = self.client.get(url, **{'HTTP_AUTHORIZATION': f'Bearer {user.tokens().get("access")}'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response_dict_keys = response.json().keys()
+        self.assertTrue('id' in response_dict_keys)
+        self.assertTrue('username' in response_dict_keys)
+        self.assertTrue('email' in response_dict_keys)
+        self.assertTrue('tokens' in response_dict_keys)
+        self.assertTrue('isVerified' in response_dict_keys)
+        self.assertFalse('password' in response_dict_keys)
+
 
 class OTPTest(APITestCase):
     @classmethod

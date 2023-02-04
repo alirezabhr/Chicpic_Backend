@@ -73,6 +73,13 @@ class UserLoginSerializer(serializers.ModelSerializer):
         return attrs
 
 
+class UserReadonlySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ('id', 'email', 'username', 'is_verified', 'tokens')
+        read_only_fields = ('id', 'email', 'username', 'is_verified', 'tokens')
+
+
 class OTPRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = OTP
