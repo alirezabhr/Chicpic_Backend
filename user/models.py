@@ -1,5 +1,9 @@
+import string
+from random import choices
+
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.utils import timezone
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .managers import CustomUserManager
@@ -35,3 +39,21 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
+
+
+class OTP(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expire_at = models.DateTimeField()
+
+    class Meta:
+        ordering = ('-created_at',)
+        verbose_name = 'One Time Password'
+        verbose_name_plural = 'One Time Passwords'
+
+    @classmethod
+    def generate_otp(cls, user):
+        code = ''.join(choices(string.digits, k=6))
+        expire_at = timezone.now() + timezone.timedelta(minutes=2)
+        return cls.objects.create(user=user, code=code, expire_at=expire_at)
