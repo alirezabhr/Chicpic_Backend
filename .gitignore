@@ -405,3 +405,5 @@ poetry.toml
 
 # ruff
 .ruff_cache/
+
+media/
