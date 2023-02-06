@@ -33,3 +33,21 @@ class Product(models.Model):
     original_price = models.DecimalField(max_digits=5, decimal_places=2)
     final_price = models.DecimalField(max_digits=5, decimal_places=2, null=True)
     is_deleted = models.BooleanField(default=False)
+
+
+class SavedProduct(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    saved_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'product')
+
+
+class TrackedProduct(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    tracked_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'product')

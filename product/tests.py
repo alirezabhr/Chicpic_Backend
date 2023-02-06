@@ -5,7 +5,7 @@ from rest_framework import status
 
 from django.contrib.auth import get_user_model
 
-from .models import Category, Brand, Product
+from .models import Category, Brand, Product, SavedProduct, TrackedProduct
 
 User = get_user_model()
 
@@ -133,3 +133,19 @@ class ProductTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()), Product.objects.filter(category_id=category_id).count())
         self.assertEqual(response.json()[0].get('category'), category_id)
+
+    def test_get_product_detail(self):
+        SavedProduct.objects.create(user=self.user, product=self.product1)
+        TrackedProduct.objects.create(user=self.user, product=self.product1)
+        TrackedProduct.objects.create(user=self.user, product=self.product2)
+
+        for product, is_saved, is_tracked in [
+            (self.product1, True, True),
+            (self.product2, False, True),
+            (self.product3, False, False)
+        ]:
+            url = reverse('product_detail', kwargs={'product_id': product.id})
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.json().get('isSaved'), is_saved)
+            self.assertEqual(response.json().get('isTracked'), is_tracked)

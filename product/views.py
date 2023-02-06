@@ -1,7 +1,7 @@
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView
 
 from .models import Category, Product
-from .serializers import CategorySerializer, ProductSerializer
+from .serializers import CategorySerializer, ProductSerializer, ProductDetailSerializer
 
 
 class CategoriesView(ListAPIView):
@@ -19,3 +19,10 @@ class CategoryProductsView(ListAPIView):
 
     def get_queryset(self):
         return Product.objects.filter(category_id=self.kwargs.get('category_id'))
+
+
+class ProductDetailView(RetrieveAPIView):
+    serializer_class = ProductDetailSerializer
+
+    def get_object(self):
+        return Product.objects.get(id=self.kwargs.get('product_id'))
