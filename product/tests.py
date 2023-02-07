@@ -149,3 +149,16 @@ class ProductTest(APITestCase):
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.json().get('isSaved'), is_saved)
             self.assertEqual(response.json().get('isTracked'), is_tracked)
+
+    def test_search_products(self):
+        url = reverse('search_product') + '?q=NiKe'
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 2)
+
+        url = reverse('search_product') + '?q=shirt'
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 1)

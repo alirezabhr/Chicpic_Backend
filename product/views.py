@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 
 from .models import Category, Product
@@ -26,3 +27,15 @@ class ProductDetailView(RetrieveAPIView):
 
     def get_object(self):
         return Product.objects.get(id=self.kwargs.get('product_id'))
+
+
+class ProductSearch(ListAPIView):
+    serializer_class = ProductSerializer
+
+    def get_queryset(self):
+        query = self.request.query_params.get('q')
+        return Product.objects.filter(
+            Q(title__icontains=query) |
+            Q(brand__name__icontains=query) |
+            Q(description__icontains=query)
+        )
