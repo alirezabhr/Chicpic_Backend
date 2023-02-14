@@ -8,7 +8,7 @@ from rest_framework.throttling import UserRateThrottle
 from django.contrib.auth import get_user_model
 
 from .serializers import UserRegistrationSerializer, UserLoginSerializer, UserReadonlySerializer,\
-    OTPRequestSerializer, OTPVerifySerializer
+    OTPRequestSerializer, OTPVerificationSerializer
 
 
 class OncePerMinuteThrottle(UserRateThrottle):
@@ -40,6 +40,7 @@ class UserDetailView(RetrieveAPIView):
 
 
 class RequestOTPView(APIView):
+    permission_classes = (AllowAny,)
     throttle_classes = (OncePerMinuteThrottle,)
 
     def post(self, request):
@@ -53,10 +54,12 @@ class RequestOTPView(APIView):
 
 
 class VerifyOTPView(APIView):
+    permission_classes = (AllowAny,)
+
     def post(self, request):
-        ser = OTPVerifySerializer(data=request.data)
+        ser = OTPVerificationSerializer(data=request.data)
         if ser.is_valid():
-            user = get_user_model().objects.get(id=ser.data.get('user_id'))
+            user = get_user_model().objects.get(email=ser.data.get('email'))
             user.is_verified = True
             user.save()
             return Response(status=status.HTTP_202_ACCEPTED)

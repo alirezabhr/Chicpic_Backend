@@ -7,12 +7,15 @@ from django.contrib.auth import get_user_model
 from .models import OTP
 
 
+User = get_user_model()
+
+
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(min_length=8, write_only=True, required=True)
     password2 = serializers.CharField(min_length=8, write_only=True, required=True)
 
     class Meta:
-        model = get_user_model()
+        model = User
         fields = ('id', 'email', 'username', 'is_verified', 'password', 'password2', 'tokens')
         read_only_fields = ('id', 'tokens')
 
@@ -50,7 +53,7 @@ class UserLoginSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
 
     class Meta:
-        model = get_user_model()
+        model = User
         fields = ('id', 'email', 'username', 'is_verified', 'password', 'tokens')
         read_only_fields = ('id', 'email', 'tokens')
 
@@ -75,37 +78,39 @@ class UserLoginSerializer(serializers.ModelSerializer):
 
 class UserReadonlySerializer(serializers.ModelSerializer):
     class Meta:
-        model = get_user_model()
+        model = User
         fields = ('id', 'email', 'username', 'is_verified', 'tokens')
         read_only_fields = ('id', 'email', 'username', 'is_verified', 'tokens')
 
 
-class OTPRequestSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OTP
-        fields = '__all__'
-        read_only_fields = ('id', 'code', 'created_at', 'expire_at')
+class OTPRequestSerializer(serializers.Serializer):
+    user = None
+    email = serializers.EmailField()
+
+    def validate_email(self, email):
+        try:
+            self.user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User with this email does not exist.")
+        return email
 
     def create(self, validated_data):
-        user = validated_data.pop('user')
-        otp = OTP.generate_otp(user)
-        return otp
+        return OTP.generate_otp(self.user)
 
 
-class OTPVerifySerializer(serializers.Serializer):
-    user_id = serializers.IntegerField()
-    code = serializers.CharField(max_length=10)
+class OTPVerificationSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField(max_length=6)
 
     def validate(self, attrs):
-        user_id = attrs.get('user_id')
-        code = attrs.get('code')
+        try:
+            user = User.objects.get(email=attrs['email'])
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User with this email does not exist.")
 
-        otp_objects = OTP.objects.filter(user_id=user_id, code=code)
-
-        if not otp_objects.exists():
-            raise serializers.ValidationError({'code': 'Code is not valid.'})
-
-        if timezone.now() > otp_objects.first().expire_at:
-            raise serializers.ValidationError({'expire_at': 'Code is expired.'})
-
+        otp = OTP.objects.filter(user=user, code=attrs['code']).order_by('-created_at').first()
+        if not otp:
+            raise serializers.ValidationError({"code": "Code is not valid."})
+        if otp.expire_at < timezone.now():
+            raise serializers.ValidationError({"code": "OTP code has expired."})
         return attrs

@@ -182,38 +182,39 @@ class OTPTest(APITestCase):
         otp = OTP.generate_otp(self.user)
         self.assertEqual(otp.id, 1)
 
-    def request_otp_api(self, user_id):
+    def request_otp_api(self, user_email):
         url = reverse('request_otp')
         return self.client.post(
-            url, data={'user': user_id},
+            url, data={'email': user_email},
             **{'HTTP_AUTHORIZATION': f'Bearer {self.user_access_token}'}
         )
 
     def test_request_otp(self):
-        response = self.request_otp_api(self.user.id)
+        response = self.request_otp_api(self.user.email)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        response = self.request_otp_api(self.user.id)
+        response = self.request_otp_api(self.user.email)
         self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
 
     def test_verify_otp(self):
-        self.request_otp_api(self.user.id)
-        otp_code = OTP.objects.filter(user_id=self.user.id).first().code
+        self.request_otp_api(self.user.email)
+        otp_code = OTP.objects.filter(user__email=self.user.email).first().code
 
         url = reverse('verify_otp')
 
         """Wrong OTP"""
         response = self.client.post(
-            url, data={'user_id': self.user.id, 'code': '-----'},
+            url, data={'email': self.user.email, 'code': '-----'},
             **{'HTTP_AUTHORIZATION': f'Bearer {self.user_access_token}'}
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertTrue('code' in response.json())
+        self.assertEqual(response.json().get('code'), ['Code is not valid.'])
         self.assertFalse(User.objects.get(id=self.user.id).is_verified)
 
         """Correct OTP"""
         response = self.client.post(
-            url, data={'user_id': self.user.id, 'code': otp_code},
+            url, data={'email': self.user.email, 'code': otp_code},
             **{'HTTP_AUTHORIZATION': f'Bearer {self.user_access_token}'}
         )
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
