@@ -11,13 +11,19 @@ User = get_user_model()
 
 
 def create_categories():
+    category_image = SimpleUploadedFile(
+            name='category_image.png',
+            content=open('media/category_images/default.png', 'rb').read(),
+            content_type='image/png',
+        )
+
     Category.objects.bulk_create([
-        Category(title='New In', gender=Category.GenderChoices.FEMALE),
-        Category(title='Clothing', gender=Category.GenderChoices.FEMALE),
-        Category(title='Dresses', gender=Category.GenderChoices.FEMALE),
-        Category(title='Shoes', gender=Category.GenderChoices.FEMALE),
-        Category(title='Pants', gender=Category.GenderChoices.MALE),
-        Category(title='Shoes', gender=Category.GenderChoices.MALE),
+        Category(title='New In', gender=Category.GenderChoices.FEMALE, image=category_image),
+        Category(title='Clothing', gender=Category.GenderChoices.FEMALE, image=category_image),
+        Category(title='Dresses', gender=Category.GenderChoices.FEMALE, image=category_image),
+        Category(title='Shoes', gender=Category.GenderChoices.FEMALE, image=category_image),
+        Category(title='Pants', gender=Category.GenderChoices.MALE, image=category_image),
+        Category(title='Shoes', gender=Category.GenderChoices.MALE, image=category_image),
     ])
     return Category.objects.all()
 

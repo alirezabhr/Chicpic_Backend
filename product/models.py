@@ -10,6 +10,7 @@ class Category(models.Model):
 
     title = models.CharField(max_length=40)
     gender = models.CharField(max_length=1, choices=GenderChoices.choices)
+    image = models.ImageField(upload_to='category_images/')
 
 
 class Brand(models.Model):
