@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('product', '0003_brand_product'),
+        ('clothing', '0003_brand_product'),
     ]
 
     operations = [
@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('tracked_at', models.DateTimeField(auto_now_add=True)),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='product.product')),
+                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='clothing.product')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('saved_at', models.DateTimeField(auto_now_add=True)),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='product.product')),
+                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='clothing.product')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={

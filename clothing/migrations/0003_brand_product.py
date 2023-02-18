@@ -2,13 +2,13 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import product.models
+import clothing.models
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('product', '0002_alter_category_gender'),
+        ('clothing', '0002_alter_category_gender'),
     ]
 
     operations = [
@@ -26,13 +26,13 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('title', models.CharField(max_length=80)),
                 ('description', models.CharField(blank=True, max_length=350)),
-                ('image', models.ImageField(upload_to=product.models.product_image_upload_path)),
+                ('image', models.ImageField(upload_to=clothing.models.product_image_upload_path)),
                 ('link', models.URLField(max_length=256)),
                 ('original_price', models.DecimalField(decimal_places=2, max_digits=5)),
                 ('final_price', models.DecimalField(decimal_places=2, max_digits=5, null=True)),
                 ('is_deleted', models.BooleanField(default=False)),
-                ('brand', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='products', to='product.brand')),
-                ('category', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='products', to='product.category')),
+                ('brand', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='products', to='clothing.brand')),
+                ('category', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='products', to='clothing.category')),
             ],
         ),
     ]
