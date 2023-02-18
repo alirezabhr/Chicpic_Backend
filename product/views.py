@@ -37,5 +37,6 @@ class ProductSearch(ListAPIView):
         return Product.objects.filter(
             Q(title__icontains=query) |
             Q(shop__name__icontains=query) |
+            Q(brand__icontains=query) |
             Q(description__icontains=query)
         )

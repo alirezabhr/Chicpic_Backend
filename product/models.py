@@ -39,6 +39,7 @@ def product_image_upload_path(product_obj, uploaded_file_name):
 
 class Product(models.Model):
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='products')
+    brand = models.CharField(max_length=30)
     title = models.CharField(max_length=80)
     description = models.CharField(max_length=350, blank=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='products')
