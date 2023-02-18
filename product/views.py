@@ -1,8 +1,8 @@
 from django.db.models import Q
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 
-from .models import Category, Product
-from .serializers import CategorySerializer, ProductSerializer, ProductDetailSerializer
+from .models import Category, Product, Shop
+from .serializers import CategorySerializer, ProductSerializer, ProductDetailSerializer, ShopSerializer
 
 
 class CategoriesView(ListAPIView):
@@ -40,3 +40,15 @@ class ProductSearch(ListAPIView):
             Q(brand__icontains=query) |
             Q(description__icontains=query)
         )
+
+
+class ShopsView(ListAPIView):
+    serializer_class = ShopSerializer
+    queryset = Shop.objects.all()
+
+
+class ShopProductsView(ListAPIView):
+    serializer_class = ProductSerializer
+
+    def get_queryset(self):
+        return Product.objects.filter(shop_id=self.kwargs.get('shop_id'))
