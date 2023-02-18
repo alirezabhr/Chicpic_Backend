@@ -2,7 +2,7 @@ from django.db.models import Q
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 
 from .models import Category, Product, Shop
-from .serializers import CategorySerializer, ProductSerializer, ProductDetailSerializer, ShopSerializer
+from .serializers import CategorySerializer, ProductSerializer, ProductSavedTrackedSerializer, ShopSerializer
 
 
 class CategoriesView(ListAPIView):
@@ -35,12 +35,12 @@ class ShopProductsView(ListAPIView):
 
 
 class ProductView(ListAPIView):
-    serializer_class = ProductSerializer
+    serializer_class = ProductSavedTrackedSerializer
     queryset = Product.objects.all()
 
 
 class ProductDetailView(RetrieveAPIView):
-    serializer_class = ProductDetailSerializer
+    serializer_class = ProductSavedTrackedSerializer
 
     def get_object(self):
         return Product.objects.get(id=self.kwargs.get('product_id'))

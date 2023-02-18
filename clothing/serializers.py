@@ -16,12 +16,15 @@ class ShopSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    category = CategorySerializer()
+    shop = ShopSerializer()
+
     class Meta:
         model = Product
         fields = '__all__'
 
 
-class ProductDetailSerializer(serializers.ModelSerializer):
+class ProductSavedTrackedSerializer(ProductSerializer):
     is_saved = serializers.SerializerMethodField(read_only=True)
     is_tracked = serializers.SerializerMethodField(read_only=True)
 
