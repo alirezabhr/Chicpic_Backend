@@ -22,6 +22,23 @@ class CategoryProductsView(ListAPIView):
         return Product.objects.filter(category_id=self.kwargs.get('category_id'))
 
 
+class ShopsView(ListAPIView):
+    serializer_class = ShopSerializer
+    queryset = Shop.objects.all()
+
+
+class ShopProductsView(ListAPIView):
+    serializer_class = ProductSerializer
+
+    def get_queryset(self):
+        return Product.objects.filter(shop_id=self.kwargs.get('shop_id'))
+
+
+class ProductView(ListAPIView):
+    serializer_class = ProductSerializer
+    queryset = Product.objects.all()
+
+
 class ProductDetailView(RetrieveAPIView):
     serializer_class = ProductDetailSerializer
 
@@ -40,15 +57,3 @@ class ProductSearch(ListAPIView):
             Q(brand__icontains=query) |
             Q(description__icontains=query)
         )
-
-
-class ShopsView(ListAPIView):
-    serializer_class = ShopSerializer
-    queryset = Shop.objects.all()
-
-
-class ShopProductsView(ListAPIView):
-    serializer_class = ProductSerializer
-
-    def get_queryset(self):
-        return Product.objects.filter(shop_id=self.kwargs.get('shop_id'))
