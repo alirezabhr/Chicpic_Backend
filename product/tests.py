@@ -5,7 +5,7 @@ from rest_framework import status
 
 from django.contrib.auth import get_user_model
 
-from .models import Category, Brand, Product, SavedProduct, TrackedProduct
+from .models import Category, Shop, Product, SavedProduct, TrackedProduct
 
 User = get_user_model()
 
@@ -28,19 +28,19 @@ def create_categories():
     return Category.objects.all()
 
 
-def create_brands():
-    Brand.objects.bulk_create([
-        Brand(name='Nike'),
-        Brand(name='Gap'),
-        Brand(name='H&M'),
+def create_shops():
+    Shop.objects.bulk_create([
+        Shop(name='Nike'),
+        Shop(name='Gap'),
+        Shop(name='H&M'),
     ])
-    return Brand.objects.all()
+    return Shop.objects.all()
 
 
 def create_products(product_image):
     Product.objects.bulk_create([
         Product(
-            brand=Brand.objects.get(name='Nike'),
+            shop=Shop.objects.get(name='Nike'),
             title='Nike Sportswear Swoosh',
             description="Women's Woven Jacket",
             category=Category.objects.get(title='Clothing'),
@@ -49,7 +49,7 @@ def create_products(product_image):
             original_price=120,
         ),
         Product(
-            brand=Brand.objects.get(name='Nike'),
+            shop=Shop.objects.get(name='Nike'),
             title='Nike Zenvy',
             description="Women's Gentle-Support High-Waisted 7/8 Leggings",
             category=Category.objects.get(title='Clothing'),
@@ -58,7 +58,7 @@ def create_products(product_image):
             original_price=70,
         ),
         Product(
-            brand=Brand.objects.get(name='Gap'),
+            shop=Shop.objects.get(name='Gap'),
             title='Twill Shirt',
             description='',
             category=Category.objects.get(title='Dresses'),
@@ -117,8 +117,8 @@ class ProductTest(APITestCase):
         # Create categories
         create_categories()
 
-        # Create brands
-        create_brands()
+        # Create shops
+        create_shops()
 
         self.product_image = SimpleUploadedFile(
             name='product_image.jpg',

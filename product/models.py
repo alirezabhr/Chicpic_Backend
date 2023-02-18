@@ -13,19 +13,32 @@ class Category(models.Model):
     image = models.ImageField(upload_to='category_images/')
 
 
-class Brand(models.Model):
+def shop_image_upload_path(shop_obj, uploaded_file_name):
+    file_format = uploaded_file_name.split('.')[-1]
+    file_name_and_format = f'image.{file_format}'
+    return f'shops/{shop_obj.name}/{file_name_and_format}'
+
+
+class Shop(models.Model):
     name = models.CharField(max_length=50, unique=True)
+    image = models.ImageField(upload_to=shop_image_upload_path)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name
 
 
 def product_image_upload_path(product_obj, uploaded_file_name):
     file_format = uploaded_file_name.split('.')[-1]
     file_name_and_format = f'image.{file_format}'
-    return f'products/{product_obj.brand.name}/{product_obj.title}/{file_name_and_format}'
+    return f'products/{product_obj.shop.name}/{product_obj.title}/{file_name_and_format}'
 
 
 class Product(models.Model):
-    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_name='products')
+    shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='products')
     title = models.CharField(max_length=80)
     description = models.CharField(max_length=350, blank=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='products')

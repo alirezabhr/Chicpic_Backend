@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Category, Brand, Product, SavedProduct, TrackedProduct
+from .models import Category, Shop, Product, SavedProduct, TrackedProduct
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -9,9 +9,9 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class BrandSerializer(serializers.ModelSerializer):
+class ShopSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Brand
+        model = Shop
         fields = '__all__'
 
 
