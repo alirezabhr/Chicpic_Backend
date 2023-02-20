@@ -37,8 +37,64 @@ class User(AbstractBaseUser, PermissionsMixin):
             'refresh': str(tokens),
         }
 
+    @property
+    def user_additional(self):
+        return self.additional
+
     def __str__(self):
         return self.username
+
+
+class UserAdditional(models.Model):
+    class GenderChoices(models.TextChoices):
+        FEMALE = 'F', 'Female'
+        MALE = 'M', 'Male'
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='additional')
+    gender_interested = models.CharField(max_length=10, choices=GenderChoices.choices)
+    weight = models.PositiveSmallIntegerField()
+    height = models.PositiveSmallIntegerField()
+    birth_date = models.DateField()
+    bust_size = models.PositiveSmallIntegerField()  # cm
+    waist_size = models.PositiveSmallIntegerField()  # cm
+    hip_size = models.PositiveSmallIntegerField()  # cm
+    leg_length = models.PositiveSmallIntegerField()  # cm
+    shoe_size = models.PositiveSmallIntegerField()  # standard EU shoe sizes
+
+    @property
+    def shirt_fits(self):
+        return ShirtFit.objects.filter(user_additional=self)
+
+    @property
+    def trouser_fits(self):
+        return TrouserFit.objects.filter(user_additional=self)
+
+
+class ShirtFit(models.Model):
+    class ShirtFitChoices(models.TextChoices):
+        SLIM = 'Slim', 'Slim'
+        REGULAR = 'Regular', 'Regular'
+
+    user_additional = models.ForeignKey(UserAdditional, on_delete=models.CASCADE)
+    fit_type = models.CharField(max_length=10, choices=ShirtFitChoices.choices)
+
+    class Meta:
+        unique_together = ('user_additional', 'fit_type')
+
+
+class TrouserFit(models.Model):
+    class TrouserFitChoices(models.TextChoices):
+        SKINNY = 'Skinny', 'Skinny'
+        SLIM = 'Slim', 'Slim'
+        NORMAL = 'Normal', 'Normal'
+        LOOSE = 'Loose', 'Loose'
+        TAPERED = 'Tapered', 'Tapered'
+
+    user_additional = models.ForeignKey(UserAdditional, on_delete=models.CASCADE)
+    fit_type = models.CharField(max_length=10, choices=TrouserFitChoices.choices)
+
+    class Meta:
+        unique_together = ('user_additional', 'fit_type')
 
 
 class OTP(models.Model):

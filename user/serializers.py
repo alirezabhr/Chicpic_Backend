@@ -4,8 +4,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from django.utils import timezone
 
 from django.contrib.auth import get_user_model
-from .models import OTP
-
+from .models import OTP, UserAdditional, ShirtFit, TrouserFit
 
 User = get_user_model()
 
@@ -76,11 +75,48 @@ class UserLoginSerializer(serializers.ModelSerializer):
         return attrs
 
 
+class ShirtFitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShirtFit
+        fields = '__all__'
+        read_only_fields = ('id', 'user_additional')
+
+
+class TrouserFitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TrouserFit
+        fields = '__all__'
+        read_only_fields = ('id', 'user_additional')
+
+
+class UserAdditionalWriteSerializer(serializers.ModelSerializer):
+    shirt_fits = ShirtFitSerializer(many=True, required=False)
+    trouser_fits = TrouserFitSerializer(many=True, required=False)
+
+    class Meta:
+        model = UserAdditional
+        fields = '__all__'
+
+    def create(self, validated_data):
+        shirt_fits_data = validated_data.pop('shirt_fits', [])
+        trouser_fits_data = validated_data.pop('trouser_fits', [])
+
+        user_additional = UserAdditional.objects.create(**validated_data)
+
+        for shirt_fit_data in shirt_fits_data:
+            ShirtFit.objects.create(user_additional=user_additional, **shirt_fit_data)
+
+        for trouser_fit_data in trouser_fits_data:
+            TrouserFit.objects.create(user_additional=user_additional, **trouser_fit_data)
+
+        return user_additional
+
+
 class UserReadonlySerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'email', 'username', 'is_verified', 'tokens')
-        read_only_fields = ('id', 'email', 'username', 'is_verified', 'tokens')
+        fields = ('id', 'email', 'username', 'is_verified', 'tokens', 'user_additional')
+        read_only_fields = ('id', 'email', 'username', 'is_verified', 'tokens', 'user_additional')
 
 
 class OTPRequestSerializer(serializers.Serializer):

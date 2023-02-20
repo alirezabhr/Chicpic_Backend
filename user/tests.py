@@ -1,4 +1,5 @@
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework.test import APITestCase
 from rest_framework import status
 
@@ -58,7 +59,6 @@ class UserTest(APITestCase):
         return response.status_code, response.json()
 
     def test_signup(self):
-
         """Test signup with acceptable credentials"""
 
         # User 1
@@ -145,12 +145,13 @@ class UserTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         response_dict_keys = response.json().keys()
-        self.assertTrue('id' in response_dict_keys)
-        self.assertTrue('username' in response_dict_keys)
-        self.assertTrue('email' in response_dict_keys)
-        self.assertTrue('tokens' in response_dict_keys)
-        self.assertTrue('isVerified' in response_dict_keys)
-        self.assertFalse('password' in response_dict_keys)
+        self.assertIn('id', response_dict_keys)
+        self.assertIn('username', response_dict_keys)
+        self.assertIn('email', response_dict_keys)
+        self.assertIn('tokens', response_dict_keys)
+        self.assertIn('isVerified', response_dict_keys)
+        self.assertNotIn('password', response_dict_keys)
+        self.assertIn('userAdditional', response_dict_keys)
 
     def test_refresh_token(self):
         url = reverse('refresh_token')
@@ -166,6 +167,73 @@ class UserTest(APITestCase):
         # Both access and refresh token should change
         self.assertNotEqual(previous_access_token, response.json().get('access'))
         self.assertNotEqual(previous_refresh_token, response.json().get('refresh'))
+
+
+class UserAdditionalTest(APITestCase):
+    def setUp(self) -> None:
+        self.user1 = User.objects.create_user(email='test1@gmail.com', username='test1_username', password='test_1234')
+        self.user2 = User.objects.create_user(email='test2@gmail.com', username='test2_username', password='test_1234')
+        self.client.login(username='test1@gmail.com', password='test_1234')
+
+    def test_user_additional_create_api(self):
+        url = reverse('user_additional')
+
+        user_additional1_data = {
+            'user': self.user1.id,
+            'gender_interested': 'M',
+            'weight': 78,
+            'height': 185,
+            'birthDate': timezone.datetime(year=2000, month=6, day=25).date(),
+            'bustSize': 68,
+            'waistSize': 50,
+            'hipSize': 72,
+            'legLength': 140,
+            'shoeSize': 40,
+        }
+        response = self.client.post(url, data=user_additional1_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(
+            {'id', 'user', 'weight', 'height', 'birthDate', 'bustSize', 'waistSize', 'hipSize',
+             'legLength', 'shoeSize', 'genderInterested', 'shirtFits', 'trouserFits'}, set(response.json().keys()))
+        self.assertEqual([], response.json().get('shirtFits'))
+        self.assertEqual([], response.json().get('trouserFits'))
+
+        user_additional2_data = {
+            "user": self.user2.id,
+            "weight": 60,
+            "height": 170,
+            'gender_interested': 'F',
+            "birthDate": "1990-01-01",
+            "bustSize": 90,
+            "waistSize": 75,
+            "hipSize": 95,
+            "legLength": 75,
+            "shoeSize": 42,
+            "shirtFits": [
+                {"fitType": "Slim"},
+            ],
+            "trouserFits": [
+                {"fitType": "Skinny"},
+                {"fitType": "Slim"},
+                {"fitType": "Normal"},
+                {"fitType": "Loose"},
+            ],
+        }
+
+        response = self.client.post(url, data=user_additional2_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        self.assertEqual(len(user_additional2_data.get('shirtFits')), 1)
+        self.assertEqual(len(user_additional2_data.get('shirtFits')), len(response.json().get('shirtFits')))
+        self.assertEqual({'id', 'userAdditional', 'fitType'}, set(response.json().get('shirtFits')[0].keys()))
+        self.assertEqual(len(user_additional2_data.get('trouserFits')), 4)
+        self.assertEqual(len(user_additional2_data.get('trouserFits')), len(response.json().get('trouserFits')))
+        self.assertEqual({'id', 'userAdditional', 'fitType'}, set(response.json().get('trouserFits')[0].keys()))
+
+        response = self.client.post(url, data=user_additional2_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('user', response.json().keys())
+        self.assertIn('user additional with this user already exists.', response.json().get('user'))
 
 
 class OTPTest(APITestCase):
