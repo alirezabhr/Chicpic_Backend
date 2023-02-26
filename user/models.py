@@ -59,7 +59,7 @@ class UserAdditional(models.Model):
     waist_size = models.PositiveSmallIntegerField()  # cm
     hip_size = models.PositiveSmallIntegerField()  # cm
     leg_length = models.PositiveSmallIntegerField()  # cm
-    shoe_size = models.PositiveSmallIntegerField()  # standard EU shoe sizes
+    shoe_size = models.DecimalField(max_digits=3, decimal_places=1)  # standard US/CA shoe size
 
     @property
     def shirt_fits(self):
