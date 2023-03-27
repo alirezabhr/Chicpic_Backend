@@ -43,11 +43,61 @@ class Product(models.Model):
     title = models.CharField(max_length=80)
     description = models.CharField(max_length=350, blank=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='products')
+
+
+class Variant(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
     image = models.ImageField(upload_to=product_image_upload_path)
     link = models.URLField(max_length=256)
     original_price = models.DecimalField(max_digits=5, decimal_places=2)
-    final_price = models.DecimalField(max_digits=5, decimal_places=2, null=True)
-    is_deleted = models.BooleanField(default=False)
+    final_price = models.DecimalField(max_digits=5, decimal_places=2)
+    is_available = models.BooleanField()
+
+    @property
+    def attributes(self):
+        return Attribute.objects.filter(variant=self)
+
+    @property
+    def size_guides(self):
+        return SizeGuide.objects.filter(variant=self)
+
+
+class Attribute(models.Model):
+    class AttributeChoices(models.TextChoices):
+        COLOR = 'Color', 'Color'
+        SIZE = 'Size', 'Size'
+        LENGTH = 'Length', 'Length'
+
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='attributes')
+    attribute = models.CharField(max_length=15, choices=AttributeChoices.choices)
+    value = models.CharField(max_length=15)
+
+    class Meta:
+        unique_together = ('variant', 'attribute')
+
+    def __str__(self):
+        return f'{self.attribute} - {self.value}'
+
+
+class SizeGuide(models.Model):
+    class SizeGuideOptionChoices(models.TextChoices):
+        BUST = 'Bust', 'Bust'
+        WAIST = 'Waist', 'Waist'
+        INSEAM = 'Inseam', 'Inseam'
+        HIPS = 'Hips', 'Hips'
+        SHOULDER = 'Shoulder', 'Shoulder'
+        CHEST = 'Chest', 'Chest'
+        HEIGHT = 'Height', 'Height'
+
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='size_guides')
+    option = models.CharField(max_length=20, choices=SizeGuideOptionChoices.choices)
+    value = models.PositiveSmallIntegerField()
+
+    class Meta:
+        unique_together = ('variant', 'option')
+
+    def __str__(self):
+        return f'{self.option} - {self.value}'
 
 
 class SavedProduct(models.Model):
