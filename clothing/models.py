@@ -44,6 +44,13 @@ class Product(models.Model):
     description = models.CharField(max_length=350, blank=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='products')
 
+    @property
+    def variants(self):
+        return Variant.objects.filter(product=self)
+
+    def __str__(self):
+        return self.title
+
 
 class Variant(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
