@@ -18,12 +18,12 @@ def create_categories():
         )
 
     Category.objects.bulk_create([
-        Category(title='New In', gender=Category.GenderChoices.FEMALE, image=category_image),
-        Category(title='Clothing', gender=Category.GenderChoices.FEMALE, image=category_image),
-        Category(title='Dresses', gender=Category.GenderChoices.FEMALE, image=category_image),
-        Category(title='Shoes', gender=Category.GenderChoices.FEMALE, image=category_image),
-        Category(title='Pants', gender=Category.GenderChoices.MALE, image=category_image),
-        Category(title='Shoes', gender=Category.GenderChoices.MALE, image=category_image),
+        Category(title='New In', gender=Category.GenderChoices.WOMEN, image=category_image),
+        Category(title='Clothing', gender=Category.GenderChoices.WOMEN, image=category_image),
+        Category(title='Dresses', gender=Category.GenderChoices.WOMEN, image=category_image),
+        Category(title='Shoes', gender=Category.GenderChoices.WOMEN, image=category_image),
+        Category(title='Pants', gender=Category.GenderChoices.MEN, image=category_image),
+        Category(title='Shoes', gender=Category.GenderChoices.MEN, image=category_image),
     ])
     return Category.objects.all()
 
@@ -77,7 +77,7 @@ class CategoryTest(APITestCase):
         self.client.login(username='user_user', password='test1234')
 
     def test_object_creation(self):
-        category1_data = {'title': 'shirt', 'gender': 'F'}
+        category1_data = {'title': 'shirt', 'gender': 'W'}
         category2_data = {'title': 'pants', 'gender': 'M'}
         Category.objects.create(**category1_data)
         Category.objects.create(**category2_data)
@@ -91,22 +91,22 @@ class CategoryTest(APITestCase):
         create_categories()
 
         # ALL Categories
-        url = reverse('get_categories')
+        url = reverse('categories')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()), Category.objects.count())
 
         # Men's Categories
-        url = reverse('get_categories') + '?gender=M'
+        url = reverse('categories') + '?gender=M'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()), Category.objects.filter(gender=Category.GenderChoices.MALE).count())
+        self.assertEqual(len(response.json()), Category.objects.filter(gender=Category.GenderChoices.MEN).count())
 
         # Women's Categories
-        url = reverse('get_categories') + '?gender=F'
+        url = reverse('categories') + '?gender=W'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()), Category.objects.filter(gender=Category.GenderChoices.FEMALE).count())
+        self.assertEqual(len(response.json()), Category.objects.filter(gender=Category.GenderChoices.WOMEN).count())
 
 
 class ProductTest(APITestCase):

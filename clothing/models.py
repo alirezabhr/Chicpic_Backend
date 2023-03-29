@@ -5,8 +5,8 @@ from user.models import User
 
 class Category(models.Model):
     class GenderChoices(models.TextChoices):
-        FEMALE = 'F', 'Female'
-        MALE = 'M', 'Male'
+        WOMEN = 'W', 'Women'
+        MEN = 'M', 'Men'
 
     title = models.CharField(max_length=40)
     gender = models.CharField(max_length=1, choices=GenderChoices.choices)
