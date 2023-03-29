@@ -1,0 +1,122 @@
+[
+  {
+    "model": "clothing.category",
+    "fields": {
+      "title": "Tops & Shirts",
+      "gender": "W",
+      "image": "fixtures/categories/women_top.png"
+    }
+  },
+  {
+    "model": "clothing.category",
+    "fields": {
+      "title": "Dresses",
+      "gender": "W",
+      "image": "fixtures/categories/women_dress.png"
+    }
+  },
+  {
+    "model": "clothing.category",
+    "fields": {
+      "title": "Bottoms",
+      "gender": "W",
+      "image": "fixtures/categories/women_bottom.png"
+    }
+  },
+  {
+    "model": "clothing.category",
+    "fields": {
+      "title": "Outerwear",
+      "gender": "W",
+      "image": "fixtures/categories/women_outwear.png"
+    }
+  },
+  {
+    "model": "clothing.category",
+    "fields": {
+      "title": "Activewear",
+      "gender": "W",
+      "image": "fixtures/categories/women_activewear.png"
+    }
+  },
+  {
+    "model": "clothing.category",
+    "fields": {
+      "title": "Sweaters & Cardigans",
+      "gender": "W",
+      "image": "fixtures/categories/women_sweater.png"
+    }
+  },
+  {
+    "model": "clothing.category",
+    "fields": {
+      "title": "Lingerie and Intimates",
+      "gender": "W",
+      "image": "fixtures/categories/women_lingerie.png"
+    }
+  },
+  {
+    "model": "clothing.category",
+    "fields": {
+      "title": "Shoes",
+      "gender": "W",
+      "image": "fixtures/categories/women_shoes.png"
+    }
+  },
+  {
+    "model": "clothing.category",
+    "fields": {
+      "title": "Shirts",
+      "gender": "M",
+      "image": "fixtures/categories/men_shirt.png"
+    }
+  },
+  {
+    "model": "clothing.category",
+    "fields": {
+      "title": "Pants",
+      "gender": "M",
+      "image": "fixtures/categories/men_pants.png"
+    }
+  },
+  {
+    "model": "clothing.category",
+    "fields": {
+      "title": "Outerwear",
+      "gender": "M",
+      "image": "fixtures/categories/men_outwear.png"
+    }
+  },
+  {
+    "model": "clothing.category",
+    "fields": {
+      "title": "Activewear",
+      "gender": "M",
+      "image": "fixtures/categories/men_activewear.png"
+    }
+  },
+  {
+    "model": "clothing.category",
+    "fields": {
+      "title": "Sweaters",
+      "gender": "M",
+      "image": "fixtures/categories/men_sweater.png"
+    }
+  },
+  {
+    "model": "clothing.category",
+    "fields": {
+      "title": "Underwear",
+      "gender": "M",
+      "image": "fixtures/categories/men_underwear.png"
+    }
+  },
+  {
+    "model": "clothing.category",
+    "fields": {
+      "title": "Shoes",
+      "gender": "M",
+      "image": "fixtures/categories/men_shoes.png"
+    }
+  }
+]
