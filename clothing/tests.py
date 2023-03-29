@@ -109,6 +109,25 @@ class CategoryTest(APITestCase):
         self.assertEqual(len(response.json()), Category.objects.filter(gender=Category.GenderChoices.WOMEN).count())
 
 
+class ShopTest(APITestCase):
+    def test_shop_creation(self):
+        shop_image = SimpleUploadedFile(
+            name='shop_image.jpg',
+            content=open('media/default.png', 'rb').read(),
+            content_type='image/png',
+        )
+        shop1_data = {'name': 'Shop one', 'image': shop_image}
+        shop2_data = {'name': 'Shop two'}
+
+        Shop.objects.create(**shop1_data)
+        Shop.objects.create(**shop2_data)
+
+        shops = Shop.objects.all().order_by('created_at')
+
+        self.assertEqual(shops.count(), 2)
+        self.assertEqual(shops[0].name, shop1_data.get('name'))
+
+
 class ProductTest(APITestCase):
     def setUp(self) -> None:
         self.user = User.objects.create_user(email='user@chicpic.app', username='user_user', password='test1234')
