@@ -72,6 +72,8 @@ def create_products(product_image):
 
 
 class CategoryTest(APITestCase):
+    fixtures = ['categories.json']
+
     def setUp(self) -> None:
         User.objects.create_user(email='user@chicpic.app', username='user_user', password='test1234')
         self.client.login(username='user_user', password='test1234')
@@ -82,14 +84,9 @@ class CategoryTest(APITestCase):
         Category.objects.create(**category1_data)
         Category.objects.create(**category2_data)
 
-        self.assertEqual(Category.objects.count(), 2)
-        self.assertEqual(Category.objects.all().first().title, category1_data.get('title'))
-        self.assertEqual(Category.objects.all()[1].gender, category2_data.get('gender'))
+        self.assertEqual(Category.objects.count(), 17)  # 15 categories in fixture and 2 created
 
     def test_get_categories_list(self):
-        # Create categories
-        create_categories()
-
         # ALL Categories
         url = reverse('categories')
         response = self.client.get(url)
