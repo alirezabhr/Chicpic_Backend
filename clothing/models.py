@@ -4,6 +4,9 @@ from user.models import User
 
 
 class Category(models.Model):
+    class Meta:
+        verbose_name_plural = 'Categories'
+
     class GenderChoices(models.TextChoices):
         WOMEN = 'W', 'Women'
         MEN = 'M', 'Men'
@@ -11,6 +14,9 @@ class Category(models.Model):
     title = models.CharField(max_length=40)
     gender = models.CharField(max_length=1, choices=GenderChoices.choices)
     image = models.ImageField(upload_to='category_images/')
+
+    def __str__(self):
+        return f'{self.title} / {self.get_gender_display()}'
 
 
 def shop_image_upload_path(shop_obj, uploaded_file_name):
@@ -21,7 +27,7 @@ def shop_image_upload_path(shop_obj, uploaded_file_name):
 
 class Shop(models.Model):
     name = models.CharField(max_length=50, unique=True)
-    image = models.ImageField(upload_to=shop_image_upload_path)
+    image = models.ImageField(upload_to=shop_image_upload_path, default='default.png')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
