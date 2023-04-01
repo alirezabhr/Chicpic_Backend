@@ -37,12 +37,6 @@ class Shop(models.Model):
         return self.name
 
 
-def product_image_upload_path(product_obj, uploaded_file_name):
-    file_format = uploaded_file_name.split('.')[-1]
-    file_name_and_format = f'image.{file_format}'
-    return f'products/{product_obj.shop.name}/{product_obj.title}/{file_name_and_format}'
-
-
 class Product(models.Model):
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='products')
     brand = models.CharField(max_length=30)
@@ -58,9 +52,15 @@ class Product(models.Model):
         return self.title
 
 
+def variant_image_upload_path(variant_obj, uploaded_file_name):
+    file_format = uploaded_file_name.split('.')[-1]
+    file_name_and_format = f'image.{file_format}'
+    return f'products/shop_{variant_obj.product.shop.id}/product_{variant_obj.product.id}/{file_name_and_format}'
+
+
 class Variant(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
-    image = models.ImageField(upload_to=product_image_upload_path)
+    image = models.ImageField(upload_to=variant_image_upload_path)
     link = models.URLField(max_length=256)
     original_price = models.DecimalField(max_digits=5, decimal_places=2)
     final_price = models.DecimalField(max_digits=5, decimal_places=2)
@@ -73,6 +73,9 @@ class Variant(models.Model):
     @property
     def size_guides(self):
         return SizeGuide.objects.filter(variant=self)
+
+    def __str__(self):
+        return f'{self.id}: {self.product.shop.name} - {self.product.title}'
 
 
 class Attribute(models.Model):

@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
             name='Variant',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('image', models.ImageField(upload_to=clothing.models.product_image_upload_path)),
+                ('image', models.ImageField(upload_to=clothing.models.variant_image_upload_path)),
                 ('link', models.URLField(max_length=256)),
                 ('original_price', models.DecimalField(decimal_places=2, max_digits=5)),
                 ('final_price', models.DecimalField(decimal_places=2, max_digits=5)),
