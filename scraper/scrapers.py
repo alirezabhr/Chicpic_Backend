@@ -1,9 +1,10 @@
 import os
 from abc import ABC, abstractmethod
-import re
 import json
 import requests
 import logging
+
+from scraper import utils
 
 
 class ShopifyScraper(ABC):
@@ -53,7 +54,7 @@ class ShopifyScraper(ABC):
                 page += 1
 
         return self._products
-    
+
     def save_data(self, file_name, data):
         data_dir = 'data'
         file_full_name = f'{self.shop_name}__{file_name}.json'
@@ -71,12 +72,8 @@ class ShopifyScraper(ABC):
     def load_products(self, products: list):
         self._products = products
 
-    def remove_html_tags(self, html_data: str):
-        clean = re.compile('<.*?>')  # compile the regular expression pattern to match HTML tags
-        return re.sub(clean, '', html_data)  # remove the matched tags from the input string
-
     @abstractmethod
-    def _parse_product(self, product: dict):
+    def _product_description(self, product: dict):
         pass
 
     @abstractmethod
@@ -95,6 +92,18 @@ class ShopifyScraper(ABC):
     def _product_size_guide(self, product: dict):
         pass
 
+    def _parse_product(self, product: dict):
+        return {
+            'product_id': product['id'],
+            'title': product['title'],
+            'category': product['product_type'],
+            'description': self._product_description(product),
+            'tags': product['tags'],
+            'size_guide': self._product_size_guide(product),
+            'genders': self._product_genders(product),
+            'variants': self._parse_variants(product),
+        }
+
     def parse_products(self):
         parsed_products = []
 
@@ -103,12 +112,7 @@ class ShopifyScraper(ABC):
                 self.logger.info(f'Product is accessory. Product ID: {product["id"]}.')
                 continue
 
-            parsed = self._parse_product(product)
-            parsed['size_guide'] = self._product_size_guide(product)
-            parsed['genders'] = self._product_genders(product)
-            parsed['variants'] = self._parse_variants(product)
-
-            parsed_products.append(parsed)
+            parsed_products.append(self._parse_product(product))
 
         return parsed_products
 
@@ -123,33 +127,24 @@ class KitAndAceScraper(ShopifyScraper):
                 return True
         return False
 
+    def _product_description(self, product: dict):
+        return utils.remove_html_tags(product['body_html'])
+
     def _product_genders(self, product: dict) -> list:
-        genders = []
-        for tag in product['tags'].copy():
-            if tag == 'Men':
-                genders.append('Men')
-                product['tags'].remove('Men')
-            elif tag == 'Women':
-                genders.append('Women')
-                product['tags'].remove('Women')
-        return genders
+        genders = set()
+        for tag in product['tags']:
+            if tag.lower().find("men") != -1:
+                genders.add('Men')
+            elif tag.lower().find("women") != -1:
+                genders.add('Women')
+        return list(genders)
 
     def _product_size_guide(self, product: dict):
         size_guide_text = 'SizeGuide::'
         for tag in product['tags']:
             if tag.find(size_guide_text) != -1:
-                product['tags'].remove(tag)
                 return f'{self.shop_name}::{tag[len(size_guide_text):]}'
         return None
-
-    def _parse_product(self, product: dict):
-        return {
-            'product_id': product['id'],
-            'title': product['title'],
-            'category': product['product_type'],
-            'description': self.remove_html_tags(product['body_html']),
-            'tags': product['tags'],
-        }
 
     def _parse_variants(self, product: dict):
         product_variants = product['variants']
@@ -169,7 +164,8 @@ class KitAndAceScraper(ShopifyScraper):
 
             featured_image = variant.get('featured_image')
             if featured_image is None:
-                self.logger.warning(f'featured image is NULL. product id: {v["product_id"]}. variant id: {v["variant_id"]}')
+                self.logger.warning(
+                    f'featured image is NULL. product id: {v["product_id"]}. variant id: {v["variant_id"]}')
                 continue
             else:
                 v['image'] = {
@@ -182,12 +178,5 @@ class KitAndAceScraper(ShopifyScraper):
                 v['attributes'][f'{opt["name"]}'] = variant[f'option{opt["position"]}']
 
             variants.append(v)
-        
+
         return variants
-        
-
-if __name__ == '__main__':
-    with open('Kit And Ace_parsed_products.json', 'r') as f:
-        data = json.loads(f.read())
-
-
