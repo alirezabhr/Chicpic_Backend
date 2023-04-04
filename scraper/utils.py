@@ -1,4 +1,17 @@
 import re
+import json
+import os
+
+
+def save_products_data(file_name, data):
+    data_dir = 'data'
+    file_path = os.path.join(data_dir, file_name)
+
+    if not os.path.isdir(data_dir):
+        os.makedirs(data_dir)
+
+    with open(file_path, 'w') as f:
+        f.write(json.dumps(data))
 
 
 def remove_html_tags(html_data: str):
