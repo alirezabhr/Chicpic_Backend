@@ -114,6 +114,14 @@
   {
     "model": "clothing.category",
     "fields": {
+      "title": "Shorts",
+      "gender": "M",
+      "image": "fixtures/categories/men_short.png"
+    }
+  },
+  {
+    "model": "clothing.category",
+    "fields": {
       "title": "Shoes",
       "gender": "M",
       "image": "fixtures/categories/men_shoes.png"
