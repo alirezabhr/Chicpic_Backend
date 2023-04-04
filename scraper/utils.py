@@ -1,5 +1,4 @@
 import re
-import json
 import os
 
 
@@ -11,7 +10,7 @@ def save_products_data(file_name, data):
         os.makedirs(data_dir)
 
     with open(file_path, 'w') as f:
-        f.write(json.dumps(data))
+        f.write(data)
 
 
 def remove_html_tags(html_data: str):
