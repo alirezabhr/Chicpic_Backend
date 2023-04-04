@@ -4,7 +4,7 @@ import json
 import requests
 import logging
 
-from scraper import utils
+from scraper import utils, constants
 
 
 class ShopifyScraper(ABC):
@@ -55,19 +55,13 @@ class ShopifyScraper(ABC):
 
         return self._products
 
-    def save_data(self, file_name, data):
-        data_dir = 'data'
-        file_full_name = f'{self.shop_name}__{file_name}.json'
-        file_path = os.path.join(data_dir, file_full_name)
+    def save_products(self, products: list, is_parsed: bool):
+        if is_parsed:
+            file_name = constants.PARSED_PRODUCTS_FILE_NAME.format(shop_name=self.shop_name)
+        else:
+            file_name = constants.SCRAPED_PRODUCTS_FILE_NAME.format(shop_name=self.shop_name)
 
-        if not os.path.isdir(data_dir):
-            os.makedirs(data_dir)
-
-        with open(file_path, 'w') as f:
-            f.write(json.dumps(data))
-
-    def save_products(self):
-        self.save_data('products', self._products)
+        utils.save_products_data(file_name, json.dumps(products))
 
     def load_products(self, products: list):
         self._products = products
@@ -119,7 +113,7 @@ class ShopifyScraper(ABC):
 
 class KitAndAceScraper(ShopifyScraper):
     def __init__(self):
-        super().__init__('Kit And Ace', 'https://www.kitandace.com/')
+        super().__init__(constants.Shops.KIT_AND_ACE.value, 'https://www.kitandace.com/')
 
     def _is_accessory(self, product: dict) -> bool:
         for tag in product['tags']:
@@ -143,7 +137,7 @@ class KitAndAceScraper(ShopifyScraper):
         size_guide_text = 'SizeGuide::'
         for tag in product['tags']:
             if tag.find(size_guide_text) != -1:
-                return f'{self.shop_name}::{tag[len(size_guide_text):]}'
+                return constants.SIZE_GUIDE.format(shop_name=self.shop_name, type=tag[len(size_guide_text):])
         return None
 
     def _parse_variants(self, product: dict):
