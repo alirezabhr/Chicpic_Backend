@@ -79,20 +79,20 @@ class Variant(models.Model):
 
 
 class Attribute(models.Model):
-    class AttributeChoices(models.TextChoices):
+    class AttributeNameChoices(models.TextChoices):
         COLOR = 'Color', 'Color'
         SIZE = 'Size', 'Size'
         LENGTH = 'Length', 'Length'
 
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='attributes')
-    attribute = models.CharField(max_length=15, choices=AttributeChoices.choices)
+    name = models.CharField(max_length=15, choices=AttributeNameChoices.choices)
     value = models.CharField(max_length=15)
 
     class Meta:
-        unique_together = ('variant', 'attribute')
+        unique_together = ('variant', 'name')
 
     def __str__(self):
-        return f'{self.attribute} - {self.value}'
+        return f'{self.name} - {self.value}'
 
 
 class SizeGuide(models.Model):
