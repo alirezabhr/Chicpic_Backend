@@ -1,3 +1,4 @@
+import json
 import os
 import django
 from abc import ABC, abstractmethod
@@ -15,25 +16,45 @@ class DataConverter(ABC):
     def __init__(self, shop_name: str):
         self._shop_name = shop_name
 
+    @utils.log_function_call
     @abstractmethod
     def convert_product(self, product: dict, shop: Shop) -> Product:
         pass
 
+    @utils.log_function_call
     @abstractmethod
     def convert_variant(self, variant: dict, product: Product) -> Variant:
         pass
 
+    @utils.log_function_call
     @abstractmethod
     def convert_attribute(self, name: str, value: str, variant: Variant) -> Attribute:
         pass
 
+    @utils.log_function_call
     @abstractmethod
-    def convert_size_guide(self, option: str, value: str, variant: Variant) -> SizeGuide:
+    def convert_size_guide(self, size_guide_type: str, size_value: str, variant: Variant) -> SizeGuide:
         pass
 
-    @abstractmethod
+    @utils.log_function_call
     def convert_category(self, category_title: str, category_gender: str) -> Category:
-        pass
+        # Load shop categories file
+        with open(constants.SHOP_CATEGORIES_FILE_PATH.format(shop_name=self._shop_name), 'r') as f:
+            kit_and_ace_categories = json.loads(f.read())
+
+        # Find proper chicpic category similar according to shop categories
+        selected_category = None
+        for category in kit_and_ace_categories:
+            if category['gender'] == category_gender and category['title'] == category_title:
+                selected_category = category
+                break
+        else:
+            # TODO log error
+            print(f'category_title: {category_title}, category_gender: {category_gender}')
+
+        if selected_category is not None:
+            gender = utils.find_proper_choice(Category.GenderChoices.choices, selected_category['gender'])
+            return Category.objects.get(title=selected_category['equivalent_chicpic_name'], gender=gender)
 
     @property
     def shop(self) -> Shop:
@@ -66,7 +87,7 @@ class KitAndAceDataConverter(DataConverter):
     def convert_variant(self, variant: dict, product: Product) -> Variant:
         return Variant.objects.create(
             product=product,
-            image=variant['image']['src'],
+            image_src=variant['image']['src'],
             link=variant['link'],
             original_price=variant['original_price'],
             final_price=variant['final_price'],
@@ -77,41 +98,11 @@ class KitAndAceDataConverter(DataConverter):
         attr_name = utils.find_proper_choice(Attribute.AttributeNameChoices.choices, name)
         return Attribute.objects.create(variant=variant, name=attr_name, value=value)
 
-    def convert_size_guide(self, option: str, value: str, variant: Variant) -> SizeGuide:
-        pass
+    def convert_size_guide(self, size_guide_type: str, size_value: str, variant: Variant) -> SizeGuide:
         # TODO implement
-        # with open(f'shop_size_guides/{constants.SIZE_GUIDE.format(shop_name=self.__SHOP_NAME, type=)}.csv', 'r') as f:
-        #
+        pass
+        # file_path = constants.SHOP_SIZE_GUIDES_FILE_PATH.format(shop_name=self._shop_name, size_guide_type=size_guide_type)
+        # with open(file_path, 'r') as f:
+        #     pass
         # option_choice = utils.find_proper_choice(SizeGuide.SizeGuideOptionChoices.choices, option)
         # SizeGuide.objects.create(variant=variant, option=option_choice, value=value)
-
-    def convert_category(self, category_title: str, category_gender: str) -> Category:
-        # Find the equivalent name in clothing.fixtures.categories file
-
-        kit_and_ace_categories = [
-            {'gender': 'Women', 'title': 'T-Shirts & Tank Tops', 'equivalent_chicpic_name': 'Tops & Shirts'},
-            {'gender': 'Women', 'title': 'Long Sleeve Shirts', 'equivalent_chicpic_name': 'Tops & Shirts'},
-            {'gender': 'Women', 'title': 'Dresses & Jumpsuits', 'equivalent_chicpic_name': 'Dresses'},
-            {'gender': 'Women', 'title': 'Pants', 'equivalent_chicpic_name': 'Bottoms'},
-            {'gender': 'Women', 'title': 'Sweatshirts & Hoodies', 'equivalent_chicpic_name': 'Outerwear'},
-            {'gender': 'Women', 'title': 'Sweaters', 'equivalent_chicpic_name': 'Sweaters & Cardigans'},
-            {'gender': 'Women', 'title': 'Shirts & Blouses', 'equivalent_chicpic_name': 'Tops & Shirts'},
-            {'gender': 'Women', 'title': 'Jackets', 'equivalent_chicpic_name': 'Outerwear'},
-            {'gender': 'Women', 'title': 'Shorts & Skirts', 'equivalent_chicpic_name': 'Bottoms'},
-            {'gender': 'Men', 'title': 'T-Shirts', 'equivalent_chicpic_name': 'Shirts'},
-            {'gender': 'Men', 'title': 'Long Sleeve Shirts', 'equivalent_chicpic_name': 'Shirts'},
-            {'gender': 'Men', 'title': 'Pants', 'equivalent_chicpic_name': 'Pants'},
-            {'gender': 'Men', 'title': 'Sweatshirts & Hoodies', 'equivalent_chicpic_name': 'Outerwear'},
-            {'gender': 'Men', 'title': 'Sweaters', 'equivalent_chicpic_name': 'Sweaters'},
-            {'gender': 'Men', 'title': 'Shirts', 'equivalent_chicpic_name': 'Shirts'},
-            {'gender': 'Men', 'title': 'Jackets & Blazers', 'equivalent_chicpic_name': 'Outerwear'},
-            {'gender': 'Men', 'title': 'Shorts', 'equivalent_chicpic_name': 'Shorts'}
-        ]
-
-        selected_category = None
-        for category in kit_and_ace_categories:
-            if category['gender'] == category_gender and category['title'] == category_title:
-                selected_category = category
-                break
-
-        return Category.objects.get(title=selected_category['equivalent_chicpic_name'])
