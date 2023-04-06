@@ -48,6 +48,10 @@ class Product(models.Model):
     def variants(self):
         return Variant.objects.filter(product=self)
 
+    @property
+    def preview_image(self):
+        return Variant.objects.first().image_src
+
     def __str__(self):
         return self.title
 
@@ -60,7 +64,7 @@ def variant_image_upload_path(variant_obj, uploaded_file_name):
 
 class Variant(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
-    image = models.ImageField(upload_to=variant_image_upload_path)
+    image_src = models.URLField(max_length=300)
     link = models.URLField(max_length=256)
     original_price = models.DecimalField(max_digits=5, decimal_places=2)
     final_price = models.DecimalField(max_digits=5, decimal_places=2)
