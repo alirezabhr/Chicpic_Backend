@@ -15,7 +15,7 @@ class ShopifyScraper(ABC):
         self.__config_logger()
 
     def __config_logger(self):
-        self.logger = logging.getLogger(self.shop_name)
+        self.logger = logging.getLogger()
         self.logger.setLevel(logging.INFO)
         log_file_formatter = logging.Formatter(
             fmt=f"%(levelname)s %(asctime)s - %(message)s",
@@ -24,7 +24,7 @@ class ShopifyScraper(ABC):
 
         # Create log file if does not exit
         logs_dir = 'logs'
-        log_file_name = f'{self.shop_name}.log'
+        log_file_name = 'scrapers.log'
         log_file_path = os.path.join(logs_dir, log_file_name)
 
         if not os.path.isdir(logs_dir):
@@ -39,6 +39,7 @@ class ShopifyScraper(ABC):
         file_handler.setLevel(level=logging.INFO)
         self.logger.addHandler(file_handler)
 
+    @utils.log_function_call
     def fetch_products(self):
         self._products = []
         page = 1
@@ -66,26 +67,32 @@ class ShopifyScraper(ABC):
     def load_products(self, products: list):
         self._products = products
 
+    @utils.log_function_call
     @abstractmethod
     def _product_description(self, product: dict):
         pass
 
+    @utils.log_function_call
     @abstractmethod
     def _parse_variants(self, product: dict):
         pass
 
+    @utils.log_function_call
     @abstractmethod
     def _is_accessory(self, product: dict) -> bool:
         pass
 
+    @utils.log_function_call
     @abstractmethod
     def _product_genders(self, product: dict) -> list:
         pass
 
+    @utils.log_function_call
     @abstractmethod
     def _product_size_guide(self, product: dict):
         pass
 
+    @utils.log_function_call
     def _parse_product(self, product: dict):
         return {
             'product_id': product['id'],
@@ -98,6 +105,7 @@ class ShopifyScraper(ABC):
             'variants': self._parse_variants(product),
         }
 
+    @utils.log_function_call
     def parse_products(self):
         parsed_products = []
 
@@ -106,7 +114,12 @@ class ShopifyScraper(ABC):
                 self.logger.info(f'Product is accessory. Product ID: {product["id"]}.')
                 continue
 
-            parsed_products.append(self._parse_product(product))
+            try:
+                parsed = self._parse_product(product)
+                parsed_products.append(parsed)
+            except Exception as error:
+                self.logger.exception(f'Product {product["id"]}, ERROR: {error}')
+                continue
 
         return parsed_products
 
@@ -127,10 +140,14 @@ class KitAndAceScraper(ShopifyScraper):
     def _product_genders(self, product: dict) -> list:
         genders = set()
         for tag in product['tags']:
-            if tag.lower().find("men") != -1:
-                genders.add('Men')
-            elif tag.lower().find("women") != -1:
+            if tag.lower().find("women") != -1:
                 genders.add('Women')
+            elif tag.lower().find("men") != -1:
+                genders.add('Men')
+
+        if len(genders) == 0:
+            raise Exception("Can not find product gender.")
+
         return list(genders)
 
     def _product_size_guide(self, product: dict):
