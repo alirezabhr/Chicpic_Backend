@@ -8,9 +8,9 @@ from scraper import utils, constants
 
 
 class ShopifyScraper(ABC):
-    def __init__(self, shop_name: str, base_url: str):
-        self.base_url = base_url
-        self.shop_name = shop_name
+    def __init__(self, shop: constants.ShopConstant):
+        self.shop_website: str = shop.website
+        self.shop_name: str = shop.name
         self._products = []
         self.__config_logger()
 
@@ -43,7 +43,7 @@ class ShopifyScraper(ABC):
         page = 1
 
         while True:
-            response = requests.get(f'{self.base_url}products.json?limit=250&page={page}')
+            response = requests.get(f'{self.shop_website}products.json?limit=250&page={page}')
             data = response.json()
 
             if len(data.get('products')) == 0:
@@ -56,11 +56,17 @@ class ShopifyScraper(ABC):
 
     def save_products(self, products: list, is_parsed: bool):
         if is_parsed:
-            file_name = constants.PARSED_PRODUCTS_FILE_NAME.format(shop_name=self.shop_name)
+            file_path = constants.PARSED_PRODUCTS_FILE_PATH.format(shop_name=self.shop_name)
         else:
-            file_name = constants.SCRAPED_PRODUCTS_FILE_NAME.format(shop_name=self.shop_name)
+            file_path = constants.SCRAPED_PRODUCTS_FILE_PATH.format(shop_name=self.shop_name)
 
-        utils.save_products_data(file_name, json.dumps(products))
+        # Make directory if does not exist
+        if not os.path.isdir(constants.DATA_DIR):
+            os.makedirs(constants.DATA_DIR)
+
+        # save data in file
+        with open(file_path, 'w') as f:
+            f.write(json.dumps(products))
 
     def load_products(self, products: list):
         self._products = products
@@ -124,7 +130,7 @@ class ShopifyScraper(ABC):
 
 class KitAndAceScraper(ShopifyScraper):
     def __init__(self):
-        super().__init__(constants.Shops.KIT_AND_ACE.value, 'https://www.kitandace.com/')
+        super().__init__(shop=constants.Shops.KIT_AND_ACE.value)
 
     def _is_accessory(self, product: dict) -> bool:
         for tag in product['tags']:
@@ -168,7 +174,7 @@ class KitAndAceScraper(ShopifyScraper):
                 'original_price': variant['compare_at_price'],
                 'final_price': variant['price'],
                 'attributes': dict(),
-                'link': f'{self.base_url}products/{product["handle"]}?variant={variant["id"]}',
+                'link': f'{self.shop_website}products/{product["handle"]}?variant={variant["id"]}',
             }
 
             featured_image = variant.get('featured_image')

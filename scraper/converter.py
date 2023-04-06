@@ -13,8 +13,9 @@ from clothing.models import Category, Shop, Product, Variant, Attribute, SizeGui
 
 
 class DataConverter(ABC):
-    def __init__(self, shop_name: str):
-        self._shop_name = shop_name
+    def __init__(self, shop: constants.ShopConstant):
+        self.shop_name: str = shop.name
+        self.shop_website: str = shop.website
 
     @utils.log_function_call
     @abstractmethod
@@ -39,7 +40,7 @@ class DataConverter(ABC):
     @utils.log_function_call
     def convert_category(self, category_title: str, category_gender: str) -> Category:
         # Load shop categories file
-        with open(constants.SHOP_CATEGORIES_FILE_PATH.format(shop_name=self._shop_name), 'r') as f:
+        with open(constants.SHOP_CATEGORIES_FILE_PATH.format(shop_name=self.shop_name), 'r') as f:
             kit_and_ace_categories = json.loads(f.read())
 
         # Find proper chicpic category similar according to shop categories
@@ -59,18 +60,17 @@ class DataConverter(ABC):
     @property
     def shop(self) -> Shop:
         try:
-            shop = Shop.objects.get(name__iexact=self._shop_name)
+            shop = Shop.objects.get(name__iexact=self.shop_name)
         except Shop.DoesNotExist:
-            shop = Shop.objects.create(name=self._shop_name)
+            shop = Shop.objects.create(name=self.shop_name, website=self.shop_website)
         return shop
 
 
 class KitAndAceDataConverter(DataConverter):
-    __SHOP_NAME = constants.Shops.KIT_AND_ACE.value
-    __BRAND_NAME = constants.Shops.KIT_AND_ACE.value
+    __BRAND_NAME = constants.Shops.KIT_AND_ACE.value.name
 
     def __init__(self):
-        super().__init__(self.__SHOP_NAME)
+        super().__init__(shop=constants.Shops.KIT_AND_ACE.value)
 
     def convert_product(self, product: dict, shop: Shop) -> Product:
         # TODO check if it has more than 1 gender
