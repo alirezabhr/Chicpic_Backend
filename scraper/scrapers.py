@@ -23,12 +23,10 @@ class ShopifyScraper(ABC):
         )
 
         # Create log file if does not exit
-        logs_dir = 'logs'
-        log_file_name = 'scrapers.log'
-        log_file_path = os.path.join(logs_dir, log_file_name)
+        if not os.path.isdir(constants.LOGS_DIR):
+            os.makedirs(constants.LOGS_DIR)
 
-        if not os.path.isdir(logs_dir):
-            os.makedirs(logs_dir)
+        log_file_path = constants.LOGS_FILE_PATH.format(module_name='scrapers.log')
 
         if not os.path.exists(log_file_path):
             open(log_file_path, "w").close()
@@ -154,7 +152,7 @@ class KitAndAceScraper(ShopifyScraper):
         size_guide_text = 'SizeGuide::'
         for tag in product['tags']:
             if tag.find(size_guide_text) != -1:
-                return constants.SIZE_GUIDE.format(shop_name=self.shop_name, type=tag[len(size_guide_text):])
+                return tag[len(size_guide_text):]
         return None
 
     def _parse_variants(self, product: dict):
