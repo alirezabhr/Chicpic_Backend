@@ -58,6 +58,14 @@
   {
     "model": "clothing.category",
     "fields": {
+      "title": "Sleepwear & Loungewear",
+      "gender": "W",
+      "image": "fixtures/categories/women_sleepwear.png"
+    }
+  },
+  {
+    "model": "clothing.category",
+    "fields": {
       "title": "Shoes",
       "gender": "W",
       "image": "fixtures/categories/women_shoes.png"
@@ -117,6 +125,14 @@
       "title": "Shorts",
       "gender": "M",
       "image": "fixtures/categories/men_short.png"
+    }
+  },
+  {
+    "model": "clothing.category",
+    "fields": {
+      "title": "Sleepwear & Loungewear",
+      "gender": "M",
+      "image": "fixtures/categories/men_sleepwear.png"
     }
   },
   {
