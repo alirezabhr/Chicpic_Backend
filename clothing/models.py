@@ -27,6 +27,7 @@ def shop_image_upload_path(shop_obj, uploaded_file_name):
 
 class Shop(models.Model):
     name = models.CharField(max_length=50, unique=True)
+    website = models.URLField()
     image = models.ImageField(upload_to=shop_image_upload_path, default='default.png')
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -41,7 +42,7 @@ class Product(models.Model):
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='products')
     brand = models.CharField(max_length=30)
     title = models.CharField(max_length=80)
-    description = models.CharField(max_length=350, blank=True)
+    description = models.TextField(blank=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='products')
 
     @property
@@ -90,7 +91,7 @@ class Attribute(models.Model):
 
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='attributes')
     name = models.CharField(max_length=15, choices=AttributeNameChoices.choices)
-    value = models.CharField(max_length=15)
+    value = models.CharField(max_length=40)
 
     class Meta:
         unique_together = ('variant', 'name')
