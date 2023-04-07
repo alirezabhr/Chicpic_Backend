@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import django
 from abc import ABC, abstractmethod
@@ -16,6 +17,30 @@ class DataConverter(ABC):
     def __init__(self, shop: constants.ShopConstant):
         self.shop_name: str = shop.name
         self.shop_website: str = shop.website
+        self.__config_logger()
+
+    def __config_logger(self):
+        self.logger = logging.getLogger()
+        self.logger.setLevel(logging.INFO)
+        log_file_formatter = logging.Formatter(
+            fmt=f"%(levelname)s %(asctime)s - %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+
+        # Create log file if does not exit
+        if not os.path.isdir(constants.LOGS_DIR):
+            os.makedirs(constants.LOGS_DIR)
+
+        log_file_path = constants.LOGS_FILE_PATH.format(module_name='converters.log')
+
+        if not os.path.exists(log_file_path):
+            open(log_file_path, "w").close()
+
+        # Add a file handler to the logger
+        file_handler = logging.FileHandler(filename=log_file_path)
+        file_handler.setFormatter(log_file_formatter)
+        file_handler.setLevel(level=logging.INFO)
+        self.logger.addHandler(file_handler)
 
     @utils.log_function_call
     @abstractmethod
@@ -50,8 +75,7 @@ class DataConverter(ABC):
                 selected_category = category
                 break
         else:
-            # TODO log error
-            print(f'category_title: {category_title}, category_gender: {category_gender}')
+            self.logger.error(f'Proper category not found. title: {category_title}, gender: {category_gender}.')
 
         if selected_category is not None:
             gender = utils.find_proper_choice(Category.GenderChoices.choices, selected_category['gender'])
@@ -60,10 +84,10 @@ class DataConverter(ABC):
     @property
     def shop(self) -> Shop:
         try:
-            shop = Shop.objects.get(name__iexact=self.shop_name)
+            shop_obj = Shop.objects.get(name__iexact=self.shop_name)
         except Shop.DoesNotExist:
-            shop = Shop.objects.create(name=self.shop_name, website=self.shop_website)
-        return shop
+            shop_obj = Shop(name=self.shop_name, website=self.shop_website)
+        return shop_obj
 
 
 class KitAndAceDataConverter(DataConverter):
@@ -76,7 +100,7 @@ class KitAndAceDataConverter(DataConverter):
         # TODO check if it has more than 1 gender
         category = self.convert_category(product['category'], product['genders'][0])
 
-        return Product.objects.create(
+        return Product(
             shop=shop,
             brand=self.__BRAND_NAME,
             title=product['title'],
@@ -85,7 +109,7 @@ class KitAndAceDataConverter(DataConverter):
         )
 
     def convert_variant(self, variant: dict, product: Product) -> Variant:
-        return Variant.objects.create(
+        return Variant(
             product=product,
             image_src=variant['image']['src'],
             link=variant['link'],
@@ -96,7 +120,7 @@ class KitAndAceDataConverter(DataConverter):
 
     def convert_attribute(self, name: str, value: str, variant: Variant) -> Attribute:
         attr_name = utils.find_proper_choice(Attribute.AttributeNameChoices.choices, name)
-        return Attribute.objects.create(variant=variant, name=attr_name, value=value)
+        return Attribute(variant=variant, name=attr_name, value=value)
 
     def convert_size_guide(self, size_guide_type: str, size_value: str, variant: Variant) -> SizeGuide:
         # TODO implement
@@ -105,4 +129,4 @@ class KitAndAceDataConverter(DataConverter):
         # with open(file_path, 'r') as f:
         #     pass
         # option_choice = utils.find_proper_choice(SizeGuide.SizeGuideOptionChoices.choices, option)
-        # SizeGuide.objects.create(variant=variant, option=option_choice, value=value)
+        # SizeGuide(variant=variant, option=option_choice, value=value)
