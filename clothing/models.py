@@ -51,7 +51,7 @@ class Product(models.Model):
 
     @property
     def preview_image(self):
-        return Variant.objects.first().image_src
+        return Variant.objects.filter(product=self).first().image_src
 
     def __str__(self):
         return self.title
@@ -81,6 +81,9 @@ class Variant(models.Model):
 
     def __str__(self):
         return f'{self.id}: {self.product.shop.name} - {self.product.title}'
+
+    class Meta:
+        ordering = ('id',)
 
 
 class Attribute(models.Model):
@@ -121,19 +124,19 @@ class SizeGuide(models.Model):
         return f'{self.option} - {self.value}'
 
 
-class SavedProduct(models.Model):
+class SavedVariant(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
     saved_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'product')
+        unique_together = ('user', 'variant')
 
 
-class TrackedProduct(models.Model):
+class TrackedVariant(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
     tracked_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'product')
+        unique_together = ('user', 'variant')
