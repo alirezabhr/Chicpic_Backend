@@ -1,8 +1,9 @@
 from django.db.models import Q
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 
-from .models import Category, Product, Shop
-from .serializers import CategorySerializer, ProductSerializer, ProductSavedTrackedSerializer, ShopSerializer
+from .models import Category, Product, Shop, Variant
+from .serializers import CategorySerializer, ShopSerializer, ProductPreviewSerializer,\
+    VariantPreviewSerializer, ProductDetailSerializer
 
 
 class CategoriesView(ListAPIView):
@@ -16,7 +17,7 @@ class CategoriesView(ListAPIView):
 
 
 class CategoryProductsView(ListAPIView):
-    serializer_class = ProductSerializer
+    serializer_class = ProductPreviewSerializer
 
     def get_queryset(self):
         return Product.objects.filter(category_id=self.kwargs.get('category_id'))
@@ -28,26 +29,26 @@ class ShopsView(ListAPIView):
 
 
 class ShopProductsView(ListAPIView):
-    serializer_class = ProductSerializer
+    serializer_class = ProductPreviewSerializer
 
     def get_queryset(self):
         return Product.objects.filter(shop_id=self.kwargs.get('shop_id'))
 
 
-class ProductView(ListAPIView):
-    serializer_class = ProductSavedTrackedSerializer
-    queryset = Product.objects.all()
+class VariantsView(ListAPIView):
+    serializer_class = VariantPreviewSerializer
+    queryset = Variant.objects.all()
 
 
 class ProductDetailView(RetrieveAPIView):
-    serializer_class = ProductSavedTrackedSerializer
+    serializer_class = ProductDetailSerializer
 
     def get_object(self):
         return Product.objects.get(id=self.kwargs.get('product_id'))
 
 
 class ProductSearch(ListAPIView):
-    serializer_class = ProductSerializer
+    serializer_class = ProductPreviewSerializer
 
     def get_queryset(self):
         query = self.request.query_params.get('q')
