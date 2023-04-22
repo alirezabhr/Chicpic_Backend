@@ -38,12 +38,22 @@ class Shop(models.Model):
         return self.name
 
 
+class Attribute(models.Model):
+    name = models.CharField(max_length=20, unique=True, verbose_name='Attribute Name')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Product(models.Model):
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='products')
     brand = models.CharField(max_length=30)
     title = models.CharField(max_length=80)
     description = models.TextField(blank=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='products')
+    attributes = models.ManyToManyField(Attribute, through='ProductAttribute')
+    created_at = models.DateTimeField(auto_now_add=True)
 
     @property
     def variants(self):
@@ -55,6 +65,24 @@ class Product(models.Model):
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        ordering = ('-id',)
+
+
+class ProductAttribute(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_attributes')
+    attribute = models.ForeignKey(Attribute, on_delete=models.CASCADE, related_name='product_attributes')
+    position = models.PositiveSmallIntegerField()
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(check=models.Q(position__in=[0, 1, 2, 3]), name='valid_position'),
+            models.UniqueConstraint(fields=['product', 'attribute'], name='unique_product_attribute'),
+            models.UniqueConstraint(fields=['product', 'position'], condition=models.Q(position__gt=0),
+                                    name='unique_product_position'),
+        ]
+        ordering = ('position',)
 
 
 def variant_image_upload_path(variant_obj, uploaded_file_name):
@@ -69,11 +97,10 @@ class Variant(models.Model):
     link = models.URLField(max_length=256)
     original_price = models.DecimalField(max_digits=5, decimal_places=2)
     final_price = models.DecimalField(max_digits=5, decimal_places=2)
-    is_available = models.BooleanField()
-
-    @property
-    def attributes(self):
-        return Attribute.objects.filter(variant=self)
+    is_available = models.BooleanField(verbose_name='Available')
+    option1 = models.CharField(max_length=40, null=True, blank=True)
+    option2 = models.CharField(max_length=40, null=True, blank=True)
+    option3 = models.CharField(max_length=40, null=True, blank=True)
 
     @property
     def size_guides(self):
@@ -83,24 +110,7 @@ class Variant(models.Model):
         return f'{self.id}: {self.product.shop.name} - {self.product.title}'
 
     class Meta:
-        ordering = ('id',)
-
-
-class Attribute(models.Model):
-    class AttributeNameChoices(models.TextChoices):
-        COLOR = 'Color', 'Color'
-        SIZE = 'Size', 'Size'
-        LENGTH = 'Length', 'Length'
-
-    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='attributes')
-    name = models.CharField(max_length=15, choices=AttributeNameChoices.choices)
-    value = models.CharField(max_length=40)
-
-    class Meta:
-        unique_together = ('variant', 'name')
-
-    def __str__(self):
-        return f'{self.name} - {self.value}'
+        ordering = ('-id',)
 
 
 class SizeGuide(models.Model):

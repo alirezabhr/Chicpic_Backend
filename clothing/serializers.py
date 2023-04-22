@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Category, Shop, Product, Variant, Attribute, SavedVariant, TrackedVariant
+from .models import Category, Shop, Product, Attribute, Variant, SavedVariant, TrackedVariant
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -15,10 +15,18 @@ class ShopSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class AttributeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attribute
+        fields = '__all__'
+
+
 class ProductPreviewSerializer(serializers.ModelSerializer):
+    attributes = AttributeSerializer(many=True)
+
     class Meta:
         model = Product
-        fields = ['id', 'title', 'preview_image', 'brand']
+        fields = ('id', 'title', 'preview_image', 'brand', 'attributes')
 
 
 class VariantPreviewSerializer(serializers.ModelSerializer):
@@ -27,14 +35,7 @@ class VariantPreviewSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class AttributeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Attribute
-        fields = ('name', 'value')
-
-
 class VariantDetailSerializer(serializers.ModelSerializer):
-    attributes = AttributeSerializer(many=True)
     is_saved = serializers.SerializerMethodField(read_only=True)
     is_tracked = serializers.SerializerMethodField(read_only=True)
 
@@ -56,6 +57,7 @@ class VariantDetailSerializer(serializers.ModelSerializer):
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
+    preview_image = serializers.ReadOnlyField()
     shop = ShopSerializer()
     variants = VariantDetailSerializer(many=True)
 
