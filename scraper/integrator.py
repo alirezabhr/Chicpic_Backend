@@ -4,7 +4,7 @@ from django.db import transaction, IntegrityError, DataError
 
 from scraper import constants
 from scraper.scrapers import ShopifyScraper, KitAndAceScraper
-from scraper.converter import DataConverter, KitAndAceDataConverter
+from scraper.converters import DataConverter, KitAndAceDataConverter
 
 
 class DataIntegrator:
@@ -28,21 +28,37 @@ class DataIntegrator:
         try:
             with transaction.atomic():
                 shop_obj = self._converter.shop
+                shop_obj.save()
 
                 for product in self._parsed_products:
                     product_obj = self._converter.convert_product(product=product, shop=shop_obj)
+                    product_obj.save()
+
+                    for attr in product.get('attributes'):
+                        # Create or find Attribute object
+                        attribute_obj = self._converter.convert_attribute(attribute_name=attr['name'])
+                        attribute_obj.save()
+
+                        # Create ProductAttribute object
+                        self._converter.convert_product_attribute(
+                            product=product_obj,
+                            attribute=attribute_obj,
+                            position=attr['position'],
+                        ).save()
 
                     for v in product.get('variants'):
                         variant_obj = self._converter.convert_variant(variant=v, product=product_obj)
-                        for attr_key, attr_value in v.get('attributes').items():
-                            self._converter.convert_attribute(name=attr_key, value=attr_value, variant=variant_obj)
+                        variant_obj.save()
+
         except (IntegrityError, DataError) as error:
+            self.logger.exception(error)
+        except Exception as error:
             self.logger.exception(error)
 
 
 if __name__ == '__main__':
     # TODO create a log file if not exists (file and dir)
-    handler = logging.FileHandler(constants.LOGS_FILE_PATH.format(module_name='integrators'))
+    handler = logging.FileHandler(constants.LOGS_FILE_PATH.format(module_name='integrator'))
     formatter = logging.Formatter(
         fmt=f"%(asctime)s %(module)s %(levelname)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",

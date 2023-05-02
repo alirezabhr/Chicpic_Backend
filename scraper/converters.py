@@ -10,7 +10,7 @@ from scraper import utils, constants
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "chicpic.settings")
 django.setup()
 
-from clothing.models import Category, Shop, Product, Variant, Attribute, SizeGuide
+from clothing.models import Category, Shop, Attribute, Product, ProductAttribute, Variant, SizeGuide
 
 
 class DataConverter(ABC):
@@ -42,22 +42,24 @@ class DataConverter(ABC):
         file_handler.setLevel(level=logging.INFO)
         self.logger.addHandler(file_handler)
 
-    @utils.log_function_call
+    def convert_attribute(self, attribute_name: str) -> Attribute:
+        try:
+            attribute_obj = Attribute.objects.get(name__iexact=attribute_name)
+        except Attribute.DoesNotExist:
+            attribute_obj = Attribute(name=attribute_name.capitalize())
+        return attribute_obj
+
     @abstractmethod
     def convert_product(self, product: dict, shop: Shop) -> Product:
         pass
 
-    @utils.log_function_call
+    def convert_product_attribute(self, product: Product, attribute: Attribute, position: int) -> ProductAttribute:
+        return ProductAttribute(product=product, attribute=attribute, position=position)
+
     @abstractmethod
     def convert_variant(self, variant: dict, product: Product) -> Variant:
         pass
 
-    @utils.log_function_call
-    @abstractmethod
-    def convert_attribute(self, name: str, value: str, variant: Variant) -> Attribute:
-        pass
-
-    @utils.log_function_call
     @abstractmethod
     def convert_size_guide(self, size_guide_type: str, size_value: str, variant: Variant) -> SizeGuide:
         pass
@@ -96,6 +98,7 @@ class KitAndAceDataConverter(DataConverter):
     def __init__(self):
         super().__init__(shop=constants.Shops.KIT_AND_ACE.value)
 
+    @utils.log_function_call
     def convert_product(self, product: dict, shop: Shop) -> Product:
         # TODO check if it has more than 1 gender
         category = self.convert_category(product['category'], product['genders'][0])
@@ -108,6 +111,7 @@ class KitAndAceDataConverter(DataConverter):
             category=category
         )
 
+    @utils.log_function_call
     def convert_variant(self, variant: dict, product: Product) -> Variant:
         return Variant(
             product=product,
@@ -115,13 +119,13 @@ class KitAndAceDataConverter(DataConverter):
             link=variant['link'],
             original_price=variant['original_price'],
             final_price=variant['final_price'],
-            is_available=variant['available']
+            is_available=variant['available'],
+            option1=variant['option1'],
+            option2=variant['option2'],
+            option3=variant['option3'],
         )
 
-    def convert_attribute(self, name: str, value: str, variant: Variant) -> Attribute:
-        attr_name = utils.find_proper_choice(Attribute.AttributeNameChoices.choices, name)
-        return Attribute(variant=variant, name=attr_name, value=value)
-
+    @utils.log_function_call
     def convert_size_guide(self, size_guide_type: str, size_value: str, variant: Variant) -> SizeGuide:
         # TODO implement
         pass
