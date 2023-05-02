@@ -26,7 +26,7 @@ class ShopifyScraper(ABC):
         if not os.path.isdir(constants.LOGS_DIR):
             os.makedirs(constants.LOGS_DIR)
 
-        log_file_path = constants.LOGS_FILE_PATH.format(module_name='scrapers.log')
+        log_file_path = constants.LOGS_FILE_PATH.format(module_name='scrapers')
 
         if not os.path.exists(log_file_path):
             open(log_file_path, "w").close()
@@ -43,7 +43,8 @@ class ShopifyScraper(ABC):
         page = 1
 
         while True:
-            response = requests.get(f'{self.shop_website}products.json?limit=250&page={page}')
+            url = f'{self.shop_website}products.json?limit=250&page={page}'
+            response = requests.get(url=url)
             data = response.json()
 
             if len(data.get('products')) == 0:
@@ -82,6 +83,10 @@ class ShopifyScraper(ABC):
         pass
 
     @utils.log_function_call
+    def _parse_attributes(self, product: dict):
+        return list(map(lambda attr: {"name": attr['name'], 'position': attr['position']}, product['options']))
+
+    @utils.log_function_call
     @abstractmethod
     def _is_accessory(self, product: dict) -> bool:
         pass
@@ -107,6 +112,7 @@ class ShopifyScraper(ABC):
             'size_guide': self._product_size_guide(product),
             'genders': self._product_genders(product),
             'variants': self._parse_variants(product),
+            'attributes': self._parse_attributes(product),
         }
 
     @utils.log_function_call
@@ -163,7 +169,6 @@ class KitAndAceScraper(ShopifyScraper):
 
     def _parse_variants(self, product: dict):
         product_variants = product['variants']
-        product_options = product['options']
 
         variants = []
         for variant in product_variants:
@@ -173,7 +178,9 @@ class KitAndAceScraper(ShopifyScraper):
                 'available': variant['available'],
                 'original_price': variant['compare_at_price'],
                 'final_price': variant['price'],
-                'attributes': dict(),
+                'option1': variant['option1'],
+                'option2': variant['option2'],
+                'option3': variant['option3'],
                 'link': f'{self.shop_website}products/{product["handle"]}?variant={variant["id"]}',
             }
 
@@ -188,9 +195,6 @@ class KitAndAceScraper(ShopifyScraper):
                     'height': featured_image['height'],
                     'src': featured_image['src'],
                 }
-
-            for opt in product_options:
-                v['attributes'][f'{opt["name"]}'] = variant[f'option{opt["position"]}']
 
             variants.append(v)
 
