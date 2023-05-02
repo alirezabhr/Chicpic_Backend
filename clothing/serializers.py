@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Category, Shop, Product, Attribute, Variant, SavedVariant, TrackedVariant
+from .models import Category, Shop, Attribute, Product, ProductAttribute, Variant, SavedVariant, TrackedVariant
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -21,8 +21,14 @@ class AttributeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ProductAttributeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductAttribute
+        fields = ('id', 'position', 'name', 'values')
+
+
 class ProductPreviewSerializer(serializers.ModelSerializer):
-    attributes = AttributeSerializer(many=True)
+    attributes = ProductAttributeSerializer(many=True)
 
     class Meta:
         model = Product
@@ -60,6 +66,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     preview_image = serializers.ReadOnlyField()
     shop = ShopSerializer()
     variants = VariantDetailSerializer(many=True)
+    attributes = ProductAttributeSerializer(many=True)
 
     class Meta:
         model = Product

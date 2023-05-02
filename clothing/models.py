@@ -45,6 +45,9 @@ class Attribute(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ('-id',)
+
 
 class Product(models.Model):
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='products')
@@ -52,7 +55,6 @@ class Product(models.Model):
     title = models.CharField(max_length=80)
     description = models.TextField(blank=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='products')
-    attributes = models.ManyToManyField(Attribute, through='ProductAttribute')
     created_at = models.DateTimeField(auto_now_add=True)
 
     @property
@@ -62,6 +64,10 @@ class Product(models.Model):
     @property
     def preview_image(self):
         return Variant.objects.filter(product=self).first().image_src
+
+    @property
+    def attributes(self):
+        return ProductAttribute.objects.filter(product=self)
 
     def __str__(self):
         return self.title
@@ -74,6 +80,15 @@ class ProductAttribute(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_attributes')
     attribute = models.ForeignKey(Attribute, on_delete=models.CASCADE, related_name='product_attributes')
     position = models.PositiveSmallIntegerField()
+
+    @property
+    def name(self):
+        return self.attribute.name
+
+    @property
+    def values(self):
+        field_name = f'option{self.position}'
+        return self.product.variants.values_list(field_name, flat=True).distinct().order_by()
 
     class Meta:
         constraints = [
