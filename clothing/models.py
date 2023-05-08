@@ -92,7 +92,7 @@ class ProductAttribute(models.Model):
 
     class Meta:
         constraints = [
-            models.CheckConstraint(check=models.Q(position__in=[0, 1, 2, 3]), name='valid_position'),
+            models.CheckConstraint(check=models.Q(position__in=[0, 1, 2]), name='valid_position'),
             models.UniqueConstraint(fields=['product', 'attribute'], name='unique_product_attribute'),
             models.UniqueConstraint(fields=['product', 'position'], condition=models.Q(position__gt=0),
                                     name='unique_product_position'),
@@ -113,9 +113,9 @@ class Variant(models.Model):
     original_price = models.DecimalField(max_digits=5, decimal_places=2)
     final_price = models.DecimalField(max_digits=5, decimal_places=2)
     is_available = models.BooleanField(verbose_name='Available')
+    color = models.CharField(max_length=20, null=True, blank=True)
     option1 = models.CharField(max_length=40, null=True, blank=True)
     option2 = models.CharField(max_length=40, null=True, blank=True)
-    option3 = models.CharField(max_length=40, null=True, blank=True)
 
     @property
     def size_guides(self):
