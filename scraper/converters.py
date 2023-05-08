@@ -67,7 +67,7 @@ class DataConverter(ABC):
     @utils.log_function_call
     def convert_category(self, category_title: str, category_gender: str) -> Category:
         # Load shop categories file
-        with open(constants.SHOP_CATEGORIES_FILE_PATH.format(shop_name=self.shop_name), 'r') as f:
+        with open(constants.SHOP_CATEGORIES_CONVERTER_FILE_PATH.format(shop_name=self.shop_name), 'r') as f:
             kit_and_ace_categories = json.loads(f.read())
 
         # Find proper chicpic category similar according to shop categories
@@ -111,6 +111,12 @@ class KitAndAceDataConverter(DataConverter):
             category=category
         )
 
+    def __convert_color(self, color_name: str) -> str:
+        file_path = constants.COLORS_CONVERTER_FILE_PATH.format(shop_name=self.shop_name)
+        with open(file_path, 'r') as f:
+            colors_data = json.loads(f.read())
+        return colors_data.get(color_name)
+
     @utils.log_function_call
     def convert_variant(self, variant: dict, product: Product) -> Variant:
         return Variant(
@@ -122,7 +128,7 @@ class KitAndAceDataConverter(DataConverter):
             is_available=variant['available'],
             option1=variant['option1'],
             option2=variant['option2'],
-            option3=variant['option3'],
+            color=self.__convert_color(variant['color']),
         )
 
     @utils.log_function_call

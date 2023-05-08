@@ -5,14 +5,18 @@ LOGS_DIR = 'logs'
 LOGS_FILE_PATH = os.path.join(LOGS_DIR, '{module_name}.log')
 
 DATA_DIR = 'data'
-SCRAPED_PRODUCTS_FILE_NAME = '{shop_name}__products.json'
-PARSED_PRODUCTS_FILE_NAME = '{shop_name}__parsed.json'
-SCRAPED_PRODUCTS_FILE_PATH = os.path.join(DATA_DIR, SCRAPED_PRODUCTS_FILE_NAME)
-PARSED_PRODUCTS_FILE_PATH = os.path.join(DATA_DIR, PARSED_PRODUCTS_FILE_NAME)
+SHOP_CATEGORIES_FILE_NAME = 'categories.json'
+SCRAPED_PRODUCTS_FILE_NAME = 'scraped_products.json'
+PARSED_PRODUCTS_FILE_NAME = 'parsed_product.json'
+SCRAPED_PRODUCTS_FILE_PATH = os.path.join(DATA_DIR, '{shop_name}', SCRAPED_PRODUCTS_FILE_NAME)
+PARSED_PRODUCTS_FILE_PATH = os.path.join(DATA_DIR, '{shop_name}', PARSED_PRODUCTS_FILE_NAME)
+SHOP_CATEGORIES_FILE_PATH = os.path.join(DATA_DIR, '{shop_name}', SHOP_CATEGORIES_FILE_NAME)
 
 FIXTURES_DIR = 'fixtures'
-CATEGORIES_DIR = os.path.join(FIXTURES_DIR, 'categories')
-SHOP_CATEGORIES_FILE_PATH = os.path.join(CATEGORIES_DIR, '{shop_name}__categories.json')
+CATEGORIES_CONVERTER_DIR = os.path.join(FIXTURES_DIR, 'categories')
+SHOP_CATEGORIES_CONVERTER_FILE_PATH = os.path.join(CATEGORIES_CONVERTER_DIR, '{shop_name}.json')
+COLORS_CONVERTER_DIR = os.path.join(FIXTURES_DIR, 'colors')
+COLORS_CONVERTER_FILE_PATH = os.path.join(COLORS_CONVERTER_DIR, '{shop_name}.json')
 SHOP_SIZE_GUIDES_DIR = os.path.join(FIXTURES_DIR, 'shop_size_guide')
 SHOP_SIZE_GUIDES_FILE_PATH = os.path.join(SHOP_SIZE_GUIDES_DIR, '{shop_name}', '{size_guide_type}.csv')
 

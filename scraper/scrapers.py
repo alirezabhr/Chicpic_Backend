@@ -1,6 +1,5 @@
 import os
 from abc import ABC, abstractmethod
-import json
 import requests
 import logging
 
@@ -9,8 +8,7 @@ from scraper import utils, constants
 
 class ShopifyScraper(ABC):
     def __init__(self, shop: constants.ShopConstant):
-        self.shop_website: str = shop.website
-        self.shop_name: str = shop.name
+        self.shop = shop
         self._products = []
         self.__config_logger()
 
@@ -37,13 +35,39 @@ class ShopifyScraper(ABC):
         file_handler.setLevel(level=logging.INFO)
         self.logger.addHandler(file_handler)
 
+    def find_all_product_types(self) -> set:
+        if len(self._products) == 0:
+            self.fetch_products()
+
+        product_types = set()
+        for product in self._products:
+            if product['product_type'] not in product_types:
+                product_types.add(product['product_type'])
+
+        file_path = constants.SHOP_CATEGORIES_FILE_PATH.format(shop_name=self.shop.name)
+        utils.save_data_file(file_full_path=file_path, data=list(product_types))
+
+        return product_types
+
+    def find_all_product_attributes(self) -> set:
+        if len(self._products) == 0:
+            self.fetch_products()
+
+        product_attributes = set()
+        for product in self._products:
+            for opt_name in list(map(lambda opt: opt['name'], product['options'])):
+                product_attributes.add(opt_name)
+
+        return product_attributes
+
     @utils.log_function_call
     def fetch_products(self):
         self._products = []
         page = 1
 
         while True:
-            url = f'{self.shop_website}products.json?limit=250&page={page}'
+            url = f'{self.shop.website}products.json?limit=250&page={page}'
+            print(f'Request URL: {url}')
             response = requests.get(url=url)
             data = response.json()
 
@@ -57,17 +81,11 @@ class ShopifyScraper(ABC):
 
     def save_products(self, products: list, is_parsed: bool):
         if is_parsed:
-            file_path = constants.PARSED_PRODUCTS_FILE_PATH.format(shop_name=self.shop_name)
+            file_path = constants.PARSED_PRODUCTS_FILE_PATH.format(shop_name=self.shop.name)
         else:
-            file_path = constants.SCRAPED_PRODUCTS_FILE_PATH.format(shop_name=self.shop_name)
+            file_path = constants.SCRAPED_PRODUCTS_FILE_PATH.format(shop_name=self.shop.name)
 
-        # Make directory if does not exist
-        if not os.path.isdir(constants.DATA_DIR):
-            os.makedirs(constants.DATA_DIR)
-
-        # save data in file
-        with open(file_path, 'w') as f:
-            f.write(json.dumps(products))
+        utils.save_data_file(file_full_path=file_path, data=products)
 
     def load_products(self, products: list):
         self._products = products
@@ -82,13 +100,28 @@ class ShopifyScraper(ABC):
     def _parse_variants(self, product: dict):
         pass
 
+    def _get_color_option_position(self, product: dict):
+        for opt in product['options']:
+            if opt['name'] == 'Color':
+                return opt['position']
+        return None
+
     @utils.log_function_call
     def _parse_attributes(self, product: dict):
-        return list(map(lambda attr: {"name": attr['name'], 'position': attr['position']}, product['options']))
+        attributes = []
+        position = 1
+
+        for opt in product['options']:
+            if opt['name'] == 'Color':
+                continue
+            attributes.append({'name': opt['name'], 'position': position})
+            position += 1
+
+        return attributes
 
     @utils.log_function_call
     @abstractmethod
-    def _is_accessory(self, product: dict) -> bool:
+    def _is_unacceptable_product(self, product: dict) -> bool:
         pass
 
     @utils.log_function_call
@@ -120,8 +153,8 @@ class ShopifyScraper(ABC):
         parsed_products = []
 
         for product in self._products:
-            if self._is_accessory(product):
-                self.logger.info(f'Product is accessory. Product ID: {product["id"]}.')
+            if self._is_unacceptable_product(product):
+                self.logger.info(f'Product is unacceptable. Product ID: {product["id"]}.')
                 continue
 
             try:
@@ -135,12 +168,17 @@ class ShopifyScraper(ABC):
 
 
 class KitAndAceScraper(ShopifyScraper):
+    UNACCEPTABLE_PRODUCT_TYPES = ['Scarves', 'Underwear & Socks', 'Gift Cards', 'Hats']
+    UNACCEPTABLE_TAGS = ['Accessories']
+
     def __init__(self):
         super().__init__(shop=constants.Shops.KIT_AND_ACE.value)
 
-    def _is_accessory(self, product: dict) -> bool:
-        for tag in product['tags']:
-            if tag == 'Accessories':
+    def _is_unacceptable_product(self, product: dict) -> bool:
+        if product['product_type'] in self.UNACCEPTABLE_PRODUCT_TYPES:
+            return True
+        for unacceptable_tag in self.UNACCEPTABLE_TAGS:
+            if unacceptable_tag in product['tags']:
                 return True
         return False
 
@@ -169,19 +207,34 @@ class KitAndAceScraper(ShopifyScraper):
 
     def _parse_variants(self, product: dict):
         product_variants = product['variants']
+        color_opt_position = self._get_color_option_position(product)
 
         variants = []
         for variant in product_variants:
+            color = None
+            option1 = variant['option1']
+            option2 = variant['option2']
+
+            if color_opt_position is not None:
+                color = variant[f'option{color_opt_position}']
+
+                if color_opt_position == 1:
+                    option1 = variant['option2']
+                    option2 = variant['option3']
+                elif color_opt_position == 2:
+                    option1 = variant['option1']
+                    option2 = variant['option3']
+
             v = {
                 'variant_id': variant['id'],
                 'product_id': variant['product_id'],
                 'available': variant['available'],
                 'original_price': variant['compare_at_price'],
                 'final_price': variant['price'],
-                'option1': variant['option1'],
-                'option2': variant['option2'],
-                'option3': variant['option3'],
-                'link': f'{self.shop_website}products/{product["handle"]}?variant={variant["id"]}',
+                'option1': option1,
+                'option2': option2,
+                'color': color,
+                'link': f'{self.shop.website}products/{product["handle"]}?variant={variant["id"]}',
             }
 
             featured_image = variant.get('featured_image')
