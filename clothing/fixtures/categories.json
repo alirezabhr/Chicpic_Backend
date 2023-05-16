@@ -82,9 +82,9 @@
   {
     "model": "clothing.category",
     "fields": {
-      "title": "Pants",
+      "title": "Bottoms",
       "gender": "M",
-      "image": "fixtures/categories/men_pants.png"
+      "image": "fixtures/categories/men_bottom.png"
     }
   },
   {
