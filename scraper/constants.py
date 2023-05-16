@@ -17,7 +17,7 @@ CATEGORIES_CONVERTER_DIR = os.path.join(FIXTURES_DIR, 'categories')
 SHOP_CATEGORIES_CONVERTER_FILE_PATH = os.path.join(CATEGORIES_CONVERTER_DIR, '{shop_name}.json')
 COLORS_CONVERTER_DIR = os.path.join(FIXTURES_DIR, 'colors')
 COLORS_CONVERTER_FILE_PATH = os.path.join(COLORS_CONVERTER_DIR, '{shop_name}.json')
-SHOP_SIZE_GUIDES_DIR = os.path.join(FIXTURES_DIR, 'shop_size_guide')
+SHOP_SIZE_GUIDES_DIR = os.path.join(FIXTURES_DIR, 'shop_size_guides')
 SHOP_SIZE_GUIDES_FILE_PATH = os.path.join(SHOP_SIZE_GUIDES_DIR, '{shop_name}', '{size_guide_type}.csv')
 
 
@@ -32,3 +32,4 @@ class ShopConstant:
 
 class Shops(Enum):
     KIT_AND_ACE = ShopConstant(name='Kit and Ace', website='https://www.kitandace.com/')
+    FRANK_AND_OAK = ShopConstant(name='Frank and Oak', website='https://ca.frankandoak.com/')

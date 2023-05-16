@@ -100,12 +100,6 @@ class ShopifyScraper(ABC):
     def _parse_variants(self, product: dict):
         pass
 
-    def _get_color_option_position(self, product: dict):
-        for opt in product['options']:
-            if opt['name'] == 'Color':
-                return opt['position']
-        return None
-
     @utils.log_function_call
     def _parse_attributes(self, product: dict):
         attributes = []
@@ -182,6 +176,13 @@ class KitAndAceScraper(ShopifyScraper):
                 return True
         return False
 
+    @staticmethod
+    def get_color_option_position(product: dict):
+        for opt in product['options']:
+            if opt['name'] == 'Color':
+                return opt['position']
+        return None
+
     def _product_description(self, product: dict):
         return utils.remove_html_tags(product['body_html'])
 
@@ -207,7 +208,7 @@ class KitAndAceScraper(ShopifyScraper):
 
     def _parse_variants(self, product: dict):
         product_variants = product['variants']
-        color_opt_position = self._get_color_option_position(product)
+        color_opt_position = self.get_color_option_position(product)
 
         variants = []
         for variant in product_variants:
@@ -252,3 +253,90 @@ class KitAndAceScraper(ShopifyScraper):
             variants.append(v)
 
         return variants
+
+
+class FrankAndOakScraper(ShopifyScraper):
+    UNACCEPTABLE_PRODUCT_TYPES = ['', 'Lifestyle', 'Bodywear', 'Swimwear', 'Accessories', 'Gift Card', 'Grooming']
+    UNACCEPTABLE_TAGS = []
+
+    def __init__(self):
+        super().__init__(shop=constants.Shops.FRANK_AND_OAK.value)
+
+    def _is_unacceptable_product(self, product: dict) -> bool:
+        if product['product_type'] in self.UNACCEPTABLE_PRODUCT_TYPES:
+            return True
+        if len(self._product_genders(product)) > 1:
+            return True  # Remove products with more than 1 gender because of confusion in frank & oak size guide
+        return False
+
+    def _product_description(self, product: dict):
+        return utils.remove_html_tags(product['body_html'])
+
+    def _product_genders(self, product: dict) -> list:
+        division_key = 'division:'
+        division_tags = list(
+            map(lambda t2: t2[len(division_key):], filter(lambda t: division_key in t, product['tags'])))
+
+        genders = []
+        for tag in division_tags:
+            if tag == 'Men':
+                genders.append('Men')
+            elif tag == 'Women':
+                genders.append('Women')
+
+        return genders
+
+    def _product_size_guide(self, product: dict):
+        size_guide_text = 'SizeGuide::'
+        for tag in product['tags']:
+            if tag.find(size_guide_text) != -1:
+                return tag[len(size_guide_text):]
+        return None
+
+    def _parse_variants(self, product: dict):
+        product_variants = product['variants']
+
+        variants = []
+        color = self.product_color(product)
+        for variant in product_variants:
+            final_price = float(variant['price'])
+            original_price = float(variant['compare_at_price'])
+            if original_price < final_price:
+                original_price = final_price
+
+            v = {
+                'variant_id': variant['id'],
+                'product_id': variant['product_id'],
+                'available': variant['available'],
+                'original_price': original_price,
+                'final_price': final_price,
+                'option1': variant['option1'],
+                'option2': variant['option2'],
+                'color': color,
+                'link': f'{self.shop.website}products/{product["handle"]}',
+            }
+
+            image = product['images'][0]
+            v['image'] = {
+                'width': image['width'],
+                'height': image['height'],
+                'src': image['src'],
+            }
+
+            variants.append(v)
+
+        return variants
+
+    @staticmethod
+    def product_color(product: dict):
+        tag_key = 'color_hex:'
+        hex_color_tag = list(filter(lambda tag: tag[:len(tag_key)] == tag_key, product['tags']))
+
+        if len(hex_color_tag) == 0:
+            return None
+
+        hex_color = hex_color_tag[-1][len(tag_key):]
+        if hex_color == '000':
+            hex_color = '000000'
+
+        return hex_color
