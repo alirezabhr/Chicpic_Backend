@@ -68,18 +68,18 @@ class DataConverter(ABC):
     def convert_category(self, category_title: str, category_gender: str) -> Category:
         # Load shop categories file
         with open(constants.SHOP_CATEGORIES_CONVERTER_FILE_PATH.format(shop_name=self.shop_name), 'r') as f:
-            kit_and_ace_categories = json.loads(f.read())
+            shop_categories_mapping = json.loads(f.read())
 
         # Find proper chicpic category similar according to shop categories
         selected_category = None
-        for category in kit_and_ace_categories:
+        for category in shop_categories_mapping:
             if category['gender'] == category_gender and category['title'] == category_title:
                 selected_category = category
                 break
-        else:
-            self.logger.error(f'Proper category not found. title: {category_title}, gender: {category_gender}.')
 
-        if selected_category is not None:
+        if selected_category is None:
+            self.logger.error(f'Proper category not found. title: {category_title}, gender: {category_gender}.')
+        else:
             gender = utils.find_proper_choice(Category.GenderChoices.choices, selected_category['gender'])
             return Category.objects.get(title=selected_category['equivalent_chicpic_name'], gender=gender)
 
@@ -140,3 +140,44 @@ class KitAndAceDataConverter(DataConverter):
         #     pass
         # option_choice = utils.find_proper_choice(SizeGuide.SizeGuideOptionChoices.choices, option)
         # SizeGuide(variant=variant, option=option_choice, value=value)
+
+
+class FrankAndOakDataConverter(DataConverter):
+    __BRAND_NAME = constants.Shops.FRANK_AND_OAK.value.name
+
+    def __init__(self):
+        super().__init__(shop=constants.Shops.FRANK_AND_OAK.value)
+
+    @utils.log_function_call
+    def convert_product(self, product: dict, shop: Shop) -> Product:
+        if len(product['genders']) == 0:
+            category = None
+        else:
+            category = self.convert_category(product['category'], product['genders'][0])
+
+        return Product(
+            shop=shop,
+            brand=self.__BRAND_NAME,
+            title=product['title'],
+            description=product['description'],
+            category=category
+        )
+
+    @utils.log_function_call
+    def convert_variant(self, variant: dict, product: Product) -> Variant:
+        return Variant(
+            product=product,
+            image_src=variant['image']['src'],
+            link=variant['link'],
+            original_price=variant['original_price'],
+            final_price=variant['final_price'],
+            is_available=variant['available'],
+            option1=variant['option1'],
+            option2=variant['option2'],
+            color=variant['color'],
+        )
+
+    @utils.log_function_call
+    def convert_size_guide(self, size_guide_type: str, size_value: str, variant: Variant) -> SizeGuide:
+        # TODO implement
+        pass
