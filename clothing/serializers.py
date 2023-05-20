@@ -28,11 +28,9 @@ class ProductAttributeSerializer(serializers.ModelSerializer):
 
 
 class ProductPreviewSerializer(serializers.ModelSerializer):
-    attributes = ProductAttributeSerializer(many=True)
-
     class Meta:
         model = Product
-        fields = ('id', 'title', 'preview_image', 'brand', 'attributes')
+        fields = ('id', 'title', 'preview_image', 'brand')
 
 
 class VariantPreviewSerializer(serializers.ModelSerializer):
