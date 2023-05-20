@@ -117,10 +117,6 @@ class Variant(models.Model):
     option1 = models.CharField(max_length=40, null=True, blank=True)
     option2 = models.CharField(max_length=40, null=True, blank=True)
 
-    @property
-    def size_guides(self):
-        return SizeGuide.objects.filter(variant=self)
-
     def __str__(self):
         return f'{self.id}: {self.product.shop.name} - {self.product.title}'
 
@@ -128,8 +124,8 @@ class Variant(models.Model):
         ordering = ('-id',)
 
 
-class SizeGuide(models.Model):
-    class SizeGuideOptionChoices(models.TextChoices):
+class Sizing(models.Model):
+    class SizingOptionChoices(models.TextChoices):
         BUST = 'Bust', 'Bust'
         WAIST = 'Waist', 'Waist'
         INSEAM = 'Inseam', 'Inseam'
@@ -138,8 +134,8 @@ class SizeGuide(models.Model):
         CHEST = 'Chest', 'Chest'
         HEIGHT = 'Height', 'Height'
 
-    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='size_guides')
-    option = models.CharField(max_length=20, choices=SizeGuideOptionChoices.choices)
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='sizings')
+    option = models.CharField(max_length=20, choices=SizingOptionChoices.choices)
     value = models.PositiveSmallIntegerField()
 
     class Meta:
