@@ -8,6 +8,7 @@ from .serializers import CategorySerializer, ShopSerializer, ProductPreviewSeria
 
 class CategoriesView(ListAPIView):
     serializer_class = CategorySerializer
+    pagination_class = None
 
     def get_queryset(self):
         gender = self.request.query_params.get('gender')
