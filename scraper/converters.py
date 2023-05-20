@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import csv
 import django
 from abc import ABC, abstractmethod
 
@@ -10,7 +11,7 @@ from scraper import utils, constants
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "chicpic.settings")
 django.setup()
 
-from clothing.models import Category, Shop, Attribute, Product, ProductAttribute, Variant, SizeGuide
+from clothing.models import Category, Shop, Attribute, Product, ProductAttribute, Variant, Sizing
 
 
 class DataConverter(ABC):
@@ -60,8 +61,27 @@ class DataConverter(ABC):
     def convert_variant(self, variant: dict, product: Product) -> Variant:
         pass
 
+    @utils.log_function_call
+    def get_size_guide(self, sizing_type: str) -> csv.DictReader:
+        file_path = constants.SHOP_SIZE_GUIDES_FILE_PATH.format(shop_name=self.shop_name, size_guide_type=sizing_type)
+        with open(file_path, 'r') as csv_file:
+            reader = csv.DictReader(csv_file)
+        return reader
+
+    @utils.log_function_call
+    def _find_variant_size_value(self, product: dict, variant_id: int):
+        selected_variant = list(filter(lambda v: v['id'] == variant_id, product['variants']))[0]
+
+        size_value = None
+        for attr in product['attributes']:
+            if attr['name'] == 'Size':
+                size_value = selected_variant[f"option{attr['position']}"]
+                break
+
+        return size_value
+
     @abstractmethod
-    def convert_size_guide(self, size_guide_type: str, size_value: str, variant: Variant) -> SizeGuide:
+    def convert_size_guide(self, product: dict, variant: Variant) -> list[Sizing]:
         pass
 
     @utils.log_function_call
@@ -132,14 +152,9 @@ class KitAndAceDataConverter(DataConverter):
         )
 
     @utils.log_function_call
-    def convert_size_guide(self, size_guide_type: str, size_value: str, variant: Variant) -> SizeGuide:
+    def convert_size_guide(self, product: dict, variant: Variant) -> list[Sizing]:
         # TODO implement
         pass
-        # file_path = constants.SHOP_SIZE_GUIDES_FILE_PATH.format(shop_name=self._shop_name, size_guide_type=size_guide_type)
-        # with open(file_path, 'r') as f:
-        #     pass
-        # option_choice = utils.find_proper_choice(SizeGuide.SizeGuideOptionChoices.choices, option)
-        # SizeGuide(variant=variant, option=option_choice, value=value)
 
 
 class FrankAndOakDataConverter(DataConverter):
@@ -178,6 +193,6 @@ class FrankAndOakDataConverter(DataConverter):
         )
 
     @utils.log_function_call
-    def convert_size_guide(self, size_guide_type: str, size_value: str, variant: Variant) -> SizeGuide:
+    def convert_size_guide(self, product: dict, variant: Variant) -> list[Sizing]:
         # TODO implement
         pass
