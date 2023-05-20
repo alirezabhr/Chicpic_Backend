@@ -287,11 +287,10 @@ class FrankAndOakScraper(ShopifyScraper):
         return genders
 
     def _product_size_guide(self, product: dict):
-        size_guide_text = 'SizeGuide::'
-        for tag in product['tags']:
-            if tag.find(size_guide_text) != -1:
-                return tag[len(size_guide_text):]
-        return None
+        genders = self._product_genders(product)
+        if len(genders) == 0:
+            return None
+        return f"{genders[0]}-{product['product_type']}"
 
     def _parse_variants(self, product: dict):
         product_variants = product['variants']
