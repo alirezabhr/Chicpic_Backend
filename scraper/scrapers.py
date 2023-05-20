@@ -114,6 +114,10 @@ class ShopifyScraper(ABC):
         self._products = products
 
     @utils.log_function_call
+    def _product_brand(self, product: dict) -> str:
+        return product['vendor']
+
+    @utils.log_function_call
     @abstractmethod
     def _product_description(self, product: dict):
         pass
@@ -159,6 +163,7 @@ class ShopifyScraper(ABC):
             'category': product['product_type'],
             'description': self._product_description(product),
             'tags': product['tags'],
+            'brand': self._product_brand(product),
             'size_guide': self._product_size_guide(product),
             'genders': self._product_genders(product),
             'variants': self._parse_variants(product),

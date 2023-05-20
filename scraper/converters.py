@@ -113,8 +113,6 @@ class DataConverter(ABC):
 
 
 class KitAndAceDataConverter(DataConverter):
-    __BRAND_NAME = constants.Shops.KIT_AND_ACE.value.name
-
     def __init__(self):
         super().__init__(shop=constants.Shops.KIT_AND_ACE.value)
 
@@ -125,7 +123,7 @@ class KitAndAceDataConverter(DataConverter):
 
         return Product(
             shop=shop,
-            brand=self.__BRAND_NAME,
+            brand=product['brand'],
             title=product['title'],
             description=product['description'],
             category=category
@@ -158,8 +156,6 @@ class KitAndAceDataConverter(DataConverter):
 
 
 class FrankAndOakDataConverter(DataConverter):
-    __BRAND_NAME = constants.Shops.FRANK_AND_OAK.value.name
-
     def __init__(self):
         super().__init__(shop=constants.Shops.FRANK_AND_OAK.value)
 
@@ -172,7 +168,7 @@ class FrankAndOakDataConverter(DataConverter):
 
         return Product(
             shop=shop,
-            brand=self.__BRAND_NAME,
+            brand=product['brand'],
             title=product['title'],
             description=product['description'],
             category=category
