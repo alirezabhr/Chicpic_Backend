@@ -35,6 +35,17 @@ class ShopifyScraper(ABC):
         file_handler.setLevel(level=logging.INFO)
         self.logger.addHandler(file_handler)
 
+    def read_scraped_file_data(self):
+        return utils.read_data_json_file(constants.SCRAPED_PRODUCTS_FILE_PATH.format(shop_name=self.shop.name))
+
+    def read_parsed_file_data(self):
+        return utils.read_data_json_file(constants.PARSED_PRODUCTS_FILE_PATH.format(shop_name=self.shop.name))
+
+    @staticmethod
+    def parsed_product_attribute_position(product: dict, attribute_name: str):
+        attribute = list(filter(lambda attr: attr['name'] == attribute_name, product['attributes']))
+        return attribute[0]['position'] if len(attribute) > 0 else None
+
     def find_all_product_types(self) -> set:
         if len(self._products) == 0:
             self.fetch_products()
