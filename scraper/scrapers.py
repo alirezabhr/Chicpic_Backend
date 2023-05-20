@@ -46,28 +46,40 @@ class ShopifyScraper(ABC):
         attribute = list(filter(lambda attr: attr['name'] == attribute_name, product['attributes']))
         return attribute[0]['position'] if len(attribute) > 0 else None
 
-    def find_all_product_types(self) -> set:
-        if len(self._products) == 0:
-            self.fetch_products()
+    def find_all_vendors(self) -> dict:
+        products = self.read_scraped_file_data()
 
-        product_types = set()
-        for product in self._products:
-            if product['product_type'] not in product_types:
-                product_types.add(product['product_type'])
+        vendors = dict()
+        for product in products:
+            if product['vendor'] not in vendors.keys():
+                vendors[product['vendor']] = 1
+            else:
+                vendors[product['vendor']] += 1
 
-        file_path = constants.SHOP_CATEGORIES_FILE_PATH.format(shop_name=self.shop.name)
-        utils.save_data_file(file_full_path=file_path, data=list(product_types))
+        return vendors
+
+    def find_all_product_types(self) -> dict:
+        products = self.read_scraped_file_data()
+
+        product_types = dict()
+        for product in products:
+            if product['product_type'] not in product_types.keys():
+                product_types[product['product_type']] = 1
+            else:
+                product_types[product['product_type']] += 1
 
         return product_types
 
-    def find_all_product_attributes(self) -> set:
-        if len(self._products) == 0:
-            self.fetch_products()
+    def find_all_product_attributes(self) -> dict:
+        products = self.read_scraped_file_data()
 
-        product_attributes = set()
-        for product in self._products:
+        product_attributes = dict()
+        for product in products:
             for opt_name in list(map(lambda opt: opt['name'], product['options'])):
-                product_attributes.add(opt_name)
+                if opt_name not in product_attributes.keys():
+                    product_attributes[opt_name] = 1
+                else:
+                    product_attributes[opt_name] += 1
 
         return product_attributes
 
