@@ -1,16 +1,18 @@
-import re
+import json
 import os
+import re
+import logging
 
 
-def save_products_data(file_name, data):
-    data_dir = 'data'
-    file_path = os.path.join(data_dir, file_name)
+def log_function_call(func):
+    logger = logging.getLogger(func.__name__)
 
-    if not os.path.isdir(data_dir):
-        os.makedirs(data_dir)
+    def wrapper(*args, **kwargs):
+        logger.info(f"Start function {func.__name__} with args {args} and kwargs {kwargs}")
+        result = func(*args, **kwargs)
+        return result
 
-    with open(file_path, 'w') as f:
-        f.write(data)
+    return wrapper
 
 
 def remove_html_tags(html_data: str):
@@ -19,15 +21,24 @@ def remove_html_tags(html_data: str):
 
 
 def find_proper_choice(choices: list, key: str) -> str:
-    choice_value = ''
-
-    # choices should be a list of tuples contain database value and human readable text
+    # Choices should be a list of tuples contain database value and human readable text
     for choice_db_value, human_readable_text in choices:
-        if (choice_db_value.lower() in key.lower()) or \
-                (key.lower() in choice_db_value.lower()) or \
-                (key.lower() in human_readable_text.lower()) or \
-                (human_readable_text.lower() in key.lower()):
+        if choice_db_value.lower() == key.lower() or human_readable_text.lower() == key.lower():
+            return choice_db_value
 
-            choice_value = choice_db_value
+    raise Exception(f'Choice not found. choices: {choices}, key: {key}')
 
-    return choice_value
+
+def save_data_file(file_full_path: str, data: list):
+    # Make directory if does not exist
+    os.makedirs(os.path.dirname(file_full_path), exist_ok=True)
+
+    # save data in file
+    with open(file_full_path, 'w') as f:
+        f.write(json.dumps(data))
+
+
+def read_data_json_file(file_path: str):
+    with open(file_path, 'r') as f:
+        data = json.loads(f.read())
+    return data
