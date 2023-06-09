@@ -2,6 +2,7 @@ import os
 from abc import ABC, abstractmethod
 import requests
 import logging
+from collections import Counter
 
 from scraper import utils, constants
 
@@ -43,37 +44,29 @@ class ShopifyScraper(ABC):
 
     @staticmethod
     def parsed_product_attribute_position(product: dict, attribute_name: str):
+        # TODO refactor it with next() built-in function
         attribute = list(filter(lambda attr: attr['name'] == attribute_name, product['attributes']))
         return attribute[0]['position'] if len(attribute) > 0 else None
 
-    def find_all_vendors(self) -> dict:
-        products = self.read_scraped_file_data()
+    @staticmethod
+    def find_all_vendors(products: list) -> Counter:
+        return Counter(map(lambda product: product['vendor'], products))
 
-        vendors = dict()
+    @staticmethod
+    def find_all_tags(products: list) -> Counter:
+        tags = Counter()
         for product in products:
-            if product['vendor'] not in vendors.keys():
-                vendors[product['vendor']] = 1
-            else:
-                vendors[product['vendor']] += 1
+            tags.update(product['tags'])
+        return tags
 
-        return vendors
+    @staticmethod
+    def find_all_product_types(products: list) -> Counter:
+        return Counter(map(lambda product: product['product_type'], products))
 
-    def find_all_product_types(self) -> dict:
-        products = self.read_scraped_file_data()
-
-        product_types = dict()
-        for product in products:
-            if product['product_type'] not in product_types.keys():
-                product_types[product['product_type']] = 1
-            else:
-                product_types[product['product_type']] += 1
-
-        return product_types
-
-    def find_all_product_attributes(self) -> dict:
-        products = self.read_scraped_file_data()
-
+    @staticmethod
+    def find_all_product_attributes(products: list) -> dict:
         product_attributes = dict()
+
         for product in products:
             for opt_name in list(map(lambda opt: opt['name'], product['options'])):
                 if opt_name not in product_attributes.keys():
@@ -82,6 +75,20 @@ class ShopifyScraper(ABC):
                     product_attributes[opt_name] += 1
 
         return product_attributes
+
+    @staticmethod
+    def find_all_option_value(products: list, option_name: str) -> Counter:
+        sizes = Counter()
+
+        for product in products:
+            position = next((opt['position'] for opt in product['options'] if opt['name'] == option_name), None)
+            if position is None:
+                continue
+
+            for variant in product['variants']:
+                sizes[variant[f'option{position}']] += 1
+
+        return sizes
 
     @utils.log_function_call
     def fetch_products(self):
@@ -142,7 +149,7 @@ class ShopifyScraper(ABC):
 
     @utils.log_function_call
     @abstractmethod
-    def _is_unacceptable_product(self, product: dict) -> bool:
+    def is_unacceptable_product(self, product: dict) -> bool:
         pass
 
     @utils.log_function_call
@@ -175,7 +182,7 @@ class ShopifyScraper(ABC):
         parsed_products = []
 
         for product in self._products:
-            if self._is_unacceptable_product(product):
+            if self.is_unacceptable_product(product):
                 self.logger.info(f'Product is unacceptable. Product ID: {product["id"]}.')
                 continue
 
@@ -196,7 +203,7 @@ class KitAndAceScraper(ShopifyScraper):
     def __init__(self):
         super().__init__(shop=constants.Shops.KIT_AND_ACE.value)
 
-    def _is_unacceptable_product(self, product: dict) -> bool:
+    def is_unacceptable_product(self, product: dict) -> bool:
         if product['product_type'] in self.UNACCEPTABLE_PRODUCT_TYPES:
             return True
         for unacceptable_tag in self.UNACCEPTABLE_TAGS:
@@ -290,7 +297,7 @@ class FrankAndOakScraper(ShopifyScraper):
     def __init__(self):
         super().__init__(shop=constants.Shops.FRANK_AND_OAK.value)
 
-    def _is_unacceptable_product(self, product: dict) -> bool:
+    def is_unacceptable_product(self, product: dict) -> bool:
         if product['product_type'] in self.UNACCEPTABLE_PRODUCT_TYPES:
             return True
         if len(self._product_genders(product)) > 1:
