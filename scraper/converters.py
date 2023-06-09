@@ -57,9 +57,14 @@ class DataConverter(ABC):
     def convert_product_attribute(self, product: Product, attribute: Attribute, position: int) -> ProductAttribute:
         return ProductAttribute(product=product, attribute=attribute, position=position)
 
+    @utils.log_function_call
     @abstractmethod
     def convert_variant(self, variant: dict, product: Product) -> Variant:
         pass
+
+    @utils.log_function_call
+    def convert_categories(self, product: dict) -> list[Category]:
+        return [self.convert_category(cat, gen) for cat in product['categories'] for gen in product['genders']]
 
     @utils.log_function_call
     def get_size_guide(self, sizing_type: str) -> csv.DictReader:
@@ -118,15 +123,11 @@ class KitAndAceDataConverter(DataConverter):
 
     @utils.log_function_call
     def convert_product(self, product: dict, shop: Shop) -> Product:
-        # TODO check if it has more than 1 gender
-        category = self.convert_category(product['category'], product['genders'][0])
-
         return Product(
             shop=shop,
             brand=product['brand'],
             title=product['title'],
-            description=product['description'],
-            category=category
+            description=product['description']
         )
 
     def __convert_color(self, color_name: str) -> str:
@@ -135,7 +136,6 @@ class KitAndAceDataConverter(DataConverter):
             colors_data = json.loads(f.read())
         return colors_data.get(color_name)
 
-    @utils.log_function_call
     def convert_variant(self, variant: dict, product: Product) -> Variant:
         return Variant(
             product=product,
@@ -152,7 +152,7 @@ class KitAndAceDataConverter(DataConverter):
     @utils.log_function_call
     def convert_size_guide(self, product: dict, variant: Variant) -> list[Sizing]:
         # TODO implement
-        pass
+        return []
 
 
 class FrankAndOakDataConverter(DataConverter):
@@ -161,20 +161,13 @@ class FrankAndOakDataConverter(DataConverter):
 
     @utils.log_function_call
     def convert_product(self, product: dict, shop: Shop) -> Product:
-        if len(product['genders']) == 0:
-            category = None
-        else:
-            category = self.convert_category(product['category'], product['genders'][0])
-
         return Product(
             shop=shop,
             brand=product['brand'],
             title=product['title'],
-            description=product['description'],
-            category=category
+            description=product['description']
         )
 
-    @utils.log_function_call
     def convert_variant(self, variant: dict, product: Product) -> Variant:
         return Variant(
             product=product,
@@ -191,4 +184,4 @@ class FrankAndOakDataConverter(DataConverter):
     @utils.log_function_call
     def convert_size_guide(self, product: dict, variant: Variant) -> list[Sizing]:
         # TODO implement
-        pass
+        return []

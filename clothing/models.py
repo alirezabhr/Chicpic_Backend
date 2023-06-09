@@ -54,7 +54,7 @@ class Product(models.Model):
     brand = models.CharField(max_length=30)
     title = models.CharField(max_length=80)
     description = models.TextField(blank=True)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='products')
+    categories = models.ManyToManyField(Category, related_name='products')
     created_at = models.DateTimeField(auto_now_add=True)
 
     @property

@@ -21,7 +21,7 @@ class ShopifyScraper(ABC):
             datefmt="%Y-%m-%d %H:%M:%S",
         )
 
-        # Create log file if does not exit
+        # Create log file if it does not exist
         if not os.path.isdir(constants.LOGS_DIR):
             os.makedirs(constants.LOGS_DIR)
 
@@ -163,11 +163,16 @@ class ShopifyScraper(ABC):
         pass
 
     @utils.log_function_call
+    @abstractmethod
+    def _product_categories(self, product: dict) -> tuple:
+        pass
+
+    @utils.log_function_call
     def _parse_product(self, product: dict):
         return {
             'product_id': product['id'],
             'title': product['title'],
-            'category': product['product_type'],
+            'categories': self._product_categories(product),
             'description': self._product_description(product),
             'tags': product['tags'],
             'brand': self._product_brand(product),
@@ -217,6 +222,9 @@ class KitAndAceScraper(ShopifyScraper):
             if opt['name'] == 'Color':
                 return opt['position']
         return None
+
+    def _product_categories(self, product: dict) -> tuple:
+        return (product['product_type'],)
 
     def _product_description(self, product: dict):
         return utils.remove_html_tags(product['body_html'])
@@ -303,6 +311,9 @@ class FrankAndOakScraper(ShopifyScraper):
         if len(self._product_genders(product)) > 1:
             return True  # Remove products with more than 1 gender because of confusion in frank & oak size guide
         return False
+
+    def _product_categories(self, product: dict):
+        return (product['product_type'],)
 
     def _product_description(self, product: dict):
         return utils.remove_html_tags(product['body_html'])

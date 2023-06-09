@@ -3,16 +3,29 @@ import logging
 from django.db import transaction, IntegrityError, DataError
 
 from scraper import constants
-from scraper.scrapers import ShopifyScraper, KitAndAceScraper
-from scraper.converters import DataConverter, KitAndAceDataConverter
+from scraper import scrapers
+from scraper import converters
 
 
 class DataIntegrator:
-    def __init__(self, scraper: ShopifyScraper, converter: DataConverter, parsed_products: list = None):
+    def __init__(self, scraper: scrapers.ShopifyScraper, converter: converters.DataConverter,
+                 parsed_products: list = None):
         self._scraper = scraper
         self._converter = converter
         self._parsed_products = [] if parsed_products is None else parsed_products
-        self.logger = logging.getLogger(__name__)
+        self.__config_logger()
+
+    def __config_logger(self):
+        # TODO create a log file if not exists (file and dir)
+        handler = logging.FileHandler(constants.LOGS_FILE_PATH.format(module_name='integrator'))
+        formatter = logging.Formatter(
+            fmt=f"%(asctime)s %(module)s %(levelname)s - %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+        handler.setFormatter(formatter)
+        self.logger = logging.getLogger()
+        self.logger.addHandler(handler)
+        self.logger.setLevel(logging.INFO)
 
     def load_parsed_products(self):
         with open(constants.PARSED_PRODUCTS_FILE_PATH.format(shop_name=self._converter.shop_name), 'r') as f:
@@ -34,6 +47,9 @@ class DataIntegrator:
                     product_obj = self._converter.convert_product(product=product, shop=shop_obj)
                     product_obj.save()
 
+                    categories = self._converter.convert_categories(product)
+                    product_obj.categories.set(categories)
+
                     for attr in product.get('attributes'):
                         # Create or find Attribute object
                         attribute_obj = self._converter.convert_attribute(attribute_name=attr['name'])
@@ -49,25 +65,11 @@ class DataIntegrator:
                     for v in product.get('variants'):
                         variant_obj = self._converter.convert_variant(variant=v, product=product_obj)
                         variant_obj.save()
+                        sizing_objects = self._converter.convert_size_guide(product=product, variant=variant_obj)
+                        for sizing_obj in sizing_objects:
+                            sizing_obj.save()
 
         except (IntegrityError, DataError) as error:
             self.logger.exception(error)
         except Exception as error:
             self.logger.exception(error)
-
-
-if __name__ == '__main__':
-    # TODO create a log file if not exists (file and dir)
-    handler = logging.FileHandler(constants.LOGS_FILE_PATH.format(module_name='integrator'))
-    formatter = logging.Formatter(
-        fmt=f"%(asctime)s %(module)s %(levelname)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-    handler.setFormatter(formatter)
-    logging.getLogger().addHandler(handler)
-    logging.getLogger().setLevel(logging.INFO)
-
-    integrator = DataIntegrator(scraper=KitAndAceScraper(), converter=KitAndAceDataConverter())
-    # integrator.scrape()
-    integrator.load_parsed_products()
-    integrator.integrate()
