@@ -67,11 +67,11 @@ class DataConverter(ABC):
         return [self.convert_category(cat, gen) for cat in product['categories'] for gen in product['genders']]
 
     @utils.log_function_call
-    def get_size_guide(self, sizing_type: str) -> csv.DictReader:
+    def get_size_guide(self, sizing_type: str) -> tuple:
         file_path = constants.SHOP_SIZE_GUIDES_FILE_PATH.format(shop_name=self.shop_name, size_guide_type=sizing_type)
         with open(file_path, 'r') as csv_file:
             reader = csv.DictReader(csv_file)
-        return reader
+            return tuple(reader)
 
     @utils.log_function_call
     def _find_variant_size_value(self, product: dict, variant_id: int):
@@ -85,9 +85,51 @@ class DataConverter(ABC):
 
         return size_value
 
-    @abstractmethod
-    def convert_size_guide(self, product: dict, variant: Variant) -> list[Sizing]:
-        pass
+    def _product_size_option_position(self, product: dict):
+        position = next((opt['position'] for opt in product['attributes'] if opt['name'] == 'Size'), None)
+        if position is None:
+            raise KeyError("Product does not have 'Size' attribute.")
+        return position
+
+    @utils.log_function_call
+    def convert_sizings(self, product: dict, variant: Variant) -> list[Sizing]:
+        sizings = []
+
+        try:
+            size_attr_position = self._product_size_option_position(product)
+        except KeyError:
+            return []
+
+        if product['size_guide'] is None:
+            return sizings
+
+        size_guide_reader = self.get_size_guide(product['size_guide'])
+        selected_row = next(
+            (row for row in size_guide_reader if row['Size'] == variant.__dict__.get(f'option{size_attr_position}')),
+            None)
+
+        if selected_row is None:    # Variant size not found in size guide
+            return sizings
+
+        selected_row.pop('Size')
+        for k, v in selected_row.items():
+            try:
+                size_option = utils.find_proper_choice(Sizing.SizingOptionChoices.choices, k)
+
+                if v.find('-') != -1:
+                    values = list(map(lambda val: float(val), v.split('-')))
+                    size_value = sum(values)/len(values)
+                elif v.find('/') != -1:
+                    values = list(map(lambda val: float(val), v.split('/')))
+                    size_value = sum(values)/len(values)
+                else:
+                    size_value = float(v)
+            except:
+                continue
+
+            sizings.append(Sizing(variant=variant, option=size_option, value=round(size_value, 1)))
+
+        return sizings
 
     @utils.log_function_call
     def convert_category(self, category_title: str, category_gender: str) -> Category:
@@ -149,11 +191,6 @@ class KitAndAceDataConverter(DataConverter):
             color=self.__convert_color(variant['color']),
         )
 
-    @utils.log_function_call
-    def convert_size_guide(self, product: dict, variant: Variant) -> list[Sizing]:
-        # TODO implement
-        return []
-
 
 class FrankAndOakDataConverter(DataConverter):
     def __init__(self):
@@ -181,7 +218,13 @@ class FrankAndOakDataConverter(DataConverter):
             color=variant['color'],
         )
 
-    @utils.log_function_call
-    def convert_size_guide(self, product: dict, variant: Variant) -> list[Sizing]:
-        # TODO implement
-        return []
+    def convert_sizings(self, product: dict, variant: Variant) -> list[Sizing]:
+        if product['size_guide'] in ('Men-Footwear', 'Women-Footwear'):
+            try:
+                size_attr_position = self._product_size_option_position(product)
+            except KeyError:
+                return []
+            size_value = round(float(variant.__dict__.get(f'option{size_attr_position}')), 1)
+            return [Sizing(variant=variant, option=Sizing.SizingOptionChoices.SHOE_SIZE, value=size_value)]
+        else:
+            return super().convert_sizings(product, variant)

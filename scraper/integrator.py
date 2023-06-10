@@ -65,7 +65,7 @@ class DataIntegrator:
                     for v in product.get('variants'):
                         variant_obj = self._converter.convert_variant(variant=v, product=product_obj)
                         variant_obj.save()
-                        sizing_objects = self._converter.convert_size_guide(product=product, variant=variant_obj)
+                        sizing_objects = self._converter.convert_sizings(product=product, variant=variant_obj)
                         for sizing_obj in sizing_objects:
                             sizing_obj.save()
 
