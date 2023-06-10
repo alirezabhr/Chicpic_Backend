@@ -133,10 +133,12 @@ class Sizing(models.Model):
         SHOULDER = 'Shoulder', 'Shoulder'
         CHEST = 'Chest', 'Chest'
         HEIGHT = 'Height', 'Height'
+        NECK = 'Neck', 'Neck'
+        SHOE_SIZE = 'Shoe Size', 'Shoe Size'
 
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='sizings')
     option = models.CharField(max_length=20, choices=SizingOptionChoices.choices)
-    value = models.PositiveSmallIntegerField()
+    value = models.DecimalField(max_digits=4, decimal_places=1)
 
     class Meta:
         unique_together = ('variant', 'option')
