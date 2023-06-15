@@ -85,10 +85,10 @@ class DataConverter(ABC):
 
         return size_value
 
-    def _product_size_option_position(self, product: dict):
-        position = next((opt['position'] for opt in product['attributes'] if opt['name'] == 'Size'), None)
+    def _product_option_position(self, product: dict, option_name: str):
+        position = next((opt['position'] for opt in product['attributes'] if opt['name'] == option_name), None)
         if position is None:
-            raise KeyError("Product does not have 'Size' attribute.")
+            raise KeyError(f"Product does not have '{option_name}' attribute.")
         return position
 
     @utils.log_function_call
@@ -96,19 +96,19 @@ class DataConverter(ABC):
         sizings = []
 
         try:
-            size_attr_position = self._product_size_option_position(product)
+            size_attr_position = self._product_option_position(product, 'Size')
         except KeyError:
             return []
 
         if product['size_guide'] is None:
-            return sizings
+            return []
 
         size_guide_reader = self.get_size_guide(product['size_guide'])
         selected_row = next(
             (row for row in size_guide_reader if row['Size'] == variant.__dict__.get(f'option{size_attr_position}')),
             None)
 
-        if selected_row is None:    # Variant size not found in size guide
+        if selected_row is None:  # Variant size not found in size guide
             return sizings
 
         selected_row.pop('Size')
@@ -118,10 +118,10 @@ class DataConverter(ABC):
 
                 if v.find('-') != -1:
                     values = list(map(lambda val: float(val), v.split('-')))
-                    size_value = sum(values)/len(values)
+                    size_value = sum(values) / len(values)
                 elif v.find('/') != -1:
                     values = list(map(lambda val: float(val), v.split('/')))
-                    size_value = sum(values)/len(values)
+                    size_value = sum(values) / len(values)
                 else:
                     size_value = float(v)
             except:
@@ -191,6 +191,52 @@ class KitAndAceDataConverter(DataConverter):
             color=self.__convert_color(variant['color']),
         )
 
+    def convert_sizings(self, product: dict, variant: Variant) -> list[Sizing]:
+        if product['size_guide'] == 'Men-Bottoms':
+            try:
+                size_attr_position = self._product_option_position(product, 'Size')
+                variant_size = variant.__dict__.get(f'option{size_attr_position}')
+                length_attr_position = self._product_option_position(product, 'Length')
+                variant_length = variant.__dict__.get(f'option{length_attr_position}')[:2]
+            except KeyError:
+                return super().convert_sizings(product, variant)
+
+            size_guide_reader = self.get_size_guide(product['size_guide'])
+            selected_row = next((row for row in size_guide_reader if
+                                 row['Size'] == variant.__dict__.get(f'option{size_attr_position}')), None)
+
+            if selected_row is None:  # Variant size not found in size guide
+                return []
+
+            waist, inseam = list(map(lambda s: round(float(s) * 2.54, 1), (variant_size, variant_length)))
+            hips = selected_row.get('Hips')
+            return [Sizing(variant=variant, option=Sizing.SizingOptionChoices.WAIST, value=waist),
+                    Sizing(variant=variant, option=Sizing.SizingOptionChoices.HIPS, value=hips),
+                    Sizing(variant=variant, option=Sizing.SizingOptionChoices.INSEAM, value=inseam)]
+        elif product['size_guide'] == 'Women-Bottoms':
+            try:
+                size_attr_position = self._product_option_position(product, 'Size')
+                variant_size = variant.__dict__.get(f'option{size_attr_position}')
+            except KeyError:
+                return []
+
+            if 'T' in variant_size:
+                size_guide_reader = self.get_size_guide(product['size_guide'])
+                selected_row = next((row for row in size_guide_reader if row['Size'] == variant_size[:-1]), None)
+
+                if selected_row is None:  # Variant size not found in size guide
+                    return []
+
+                waist, hips, inseam = [selected_row.get('Waist'), selected_row.get('Hips'),
+                                       selected_row.get('Tall Inseam')]
+                return [Sizing(variant=variant, option=Sizing.SizingOptionChoices.WAIST, value=waist),
+                        Sizing(variant=variant, option=Sizing.SizingOptionChoices.HIPS, value=hips),
+                        Sizing(variant=variant, option=Sizing.SizingOptionChoices.INSEAM, value=inseam)]
+            else:
+                return super().convert_sizings(product, variant)
+        else:
+            return super().convert_sizings(product, variant)
+
 
 class FrankAndOakDataConverter(DataConverter):
     def __init__(self):
@@ -219,12 +265,21 @@ class FrankAndOakDataConverter(DataConverter):
         )
 
     def convert_sizings(self, product: dict, variant: Variant) -> list[Sizing]:
+        try:
+            size_attr_position = self._product_option_position(product, 'Size')
+            variant_size = variant.__dict__.get(f'option{size_attr_position}')
+        except KeyError:
+            return []
+
         if product['size_guide'] in ('Men-Footwear', 'Women-Footwear'):
-            try:
-                size_attr_position = self._product_size_option_position(product)
-            except KeyError:
-                return []
-            size_value = round(float(variant.__dict__.get(f'option{size_attr_position}')), 1)
+            size_value = round(float(variant_size), 1)
             return [Sizing(variant=variant, option=Sizing.SizingOptionChoices.SHOE_SIZE, value=size_value)]
+        elif product['size_guide'] == 'Men-Bottoms':
+            if len(variant_size) > 2 and variant_size[2] == 'X':
+                waist, inseam = list(map(lambda s: round(float(s) * 2.54, 1), variant_size.split('X')))
+                return [Sizing(variant=variant, option=Sizing.SizingOptionChoices.WAIST, value=waist),
+                        Sizing(variant=variant, option=Sizing.SizingOptionChoices.INSEAM, value=inseam)]
+            else:
+                return super().convert_sizings(product, variant)
         else:
             return super().convert_sizings(product, variant)
