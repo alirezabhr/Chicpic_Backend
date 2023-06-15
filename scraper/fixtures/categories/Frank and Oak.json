@@ -1,0 +1,57 @@
+[
+  {
+    "gender": "Women",
+    "title": "Blazers",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Women",
+    "title": "Bottoms",
+    "equivalent_chicpic_name": "Bottoms"
+  },
+  {
+    "gender": "Women",
+    "title": "Dresses",
+    "equivalent_chicpic_name": "Dresses"
+  },
+  {
+    "gender": "Women",
+    "title": "Outerwear",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Women",
+    "title": "Footwear",
+    "equivalent_chicpic_name": "Shoes"
+  },
+  {
+    "gender": "Women",
+    "title": "Tops",
+    "equivalent_chicpic_name": "Tops & Shirts"
+  },
+  {
+    "gender": "Men",
+    "title": "Blazers",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Men",
+    "title": "Bottoms",
+    "equivalent_chicpic_name": "Bottoms"
+  },
+  {
+    "gender": "Men",
+    "title": "Footwear",
+    "equivalent_chicpic_name": "Shoes"
+  },
+  {
+    "gender": "Men",
+    "title": "Outerwear",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Men",
+    "title": "Tops",
+    "equivalent_chicpic_name": "Shirts"
+  }
+]
