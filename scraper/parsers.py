@@ -314,3 +314,50 @@ class FrankAndOakParser(ShopifyParser):
             hex_color = '000000'
 
         return hex_color
+
+
+class TenTreeParser(ShopifyParser):
+    UNACCEPTABLE_PRODUCT_TYPES = ['Accessories', 'Climate+', 'Kids', '', 'Mystery Bags', 'Promo', 'Gift Cards']
+    UNACCEPTABLE_TAGS = ['underwear', ]
+
+    def __init__(self):
+        super().__init__(shop=constants.Shops.TEN_TREE.value)
+
+    def is_unacceptable_product(self, product: dict) -> bool:
+        if product['product_type'] in self.UNACCEPTABLE_PRODUCT_TYPES:
+            return True
+        for unacceptable_tag in self.UNACCEPTABLE_TAGS:
+            if unacceptable_tag in product['tags']:
+                return True
+        return False
+
+    def _product_categories(self, product: dict):
+        shop_categories = ['t-shirt', 'shirt', 'hoodie', 'skirt', 'short', 'shorts', 'jacket', 'dress', 'pant', 'pants',
+                      'jumpsuit', 'jogger', 'trouser', 'top', 'cardigan', 'coat', 'sweater', 'sweatpant', 'sweatpants',
+                      'sweatshirt', 'sweatshort', 'legging', 'leg', 'polo', 'blouse', 'tank', 'crew', 'bra', 'trench',
+                      'longsleeve', 'puffer', 'tunic', 'shacket', 'zip up']
+
+        categories = []
+        # TODO check and fix it
+        for word in product['title'].split():
+            if word.lower() in shop_categories:
+                categories.append(word.lower())
+
+        return categories
+
+    def _product_description(self, product: dict):
+        pass
+
+    def _parse_variants(self, product: dict):
+        pass
+
+    def _product_genders(self, product: dict) -> list:
+        if product['product_type'] == 'Womens':
+            return ['Women']
+        elif product['product_type'] == 'Mens':
+            return ['Men']
+        elif product['product_type'] == 'Unisex':
+            return ['Women', 'Men']
+
+    def _product_size_guide(self, product: dict):
+        pass

@@ -283,3 +283,8 @@ class FrankAndOakDataConverter(DataConverter):
                 return super().convert_sizings(product, variant)
         else:
             return super().convert_sizings(product, variant)
+
+
+class TenTreeDataConverter(DataConverter):
+    def __init__(self):
+        super().__init__(shop=constants.Shops.TEN_TREE.value)

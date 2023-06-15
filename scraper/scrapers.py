@@ -120,3 +120,10 @@ class FrankAndOakScraper(ShopifyScraper):
 
     def __init__(self):
         super().__init__(self.SHOP)
+
+
+class TenTreeScraper(ShopifyScraper):
+    SHOP = constants.Shops.TEN_TREE.value
+
+    def __init__(self):
+        super().__init__(self.SHOP)
