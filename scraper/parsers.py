@@ -49,9 +49,8 @@ class ShopifyParser(ABC):
         return attribute[0]['position'] if len(attribute) > 0 else None
 
     @staticmethod
-    def find_all_size_guide(parsed_products: list) -> Counter:
+    def get_size_guide_counts(parsed_products: list) -> Counter:
         return Counter(map(lambda product: product['size_guide'], parsed_products))
-
 
     @utils.log_function_call
     def _product_brand(self, product: dict) -> str:
