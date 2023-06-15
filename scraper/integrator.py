@@ -1,18 +1,16 @@
-import json
 import logging
 from django.db import transaction, IntegrityError, DataError
 
-from scraper import constants
-from scraper import scrapers
-from scraper import converters
+from scraper import constants, scrapers, parsers, converters
 
 
 class DataIntegrator:
-    def __init__(self, scraper: scrapers.ShopifyScraper, converter: converters.DataConverter,
-                 parsed_products: list = None):
+    def __init__(self, scraper: scrapers.ShopifyScraper, parser: parsers.ShopifyParser,
+                 converter: converters.DataConverter):
         self._scraper = scraper
+        self._parser = parser
         self._converter = converter
-        self._parsed_products = [] if parsed_products is None else parsed_products
+        self._parsed_product = []
         self.__config_logger()
 
     def __config_logger(self):
@@ -28,24 +26,26 @@ class DataIntegrator:
         self.logger.setLevel(logging.INFO)
 
     def load_parsed_products(self):
-        with open(constants.PARSED_PRODUCTS_FILE_PATH.format(shop_name=self._converter.shop_name), 'r') as f:
-            self._parsed_products = json.loads(f.read())
+        self._parsed_product = self._parser.read_parsed_file_data()
 
-    def scrape(self):
+    def scrape_and_parse(self):
         scraped_products = self._scraper.fetch_products()
-        self._scraper.save_products(scraped_products, False)
-        self._parsed_products = self._scraper.parse_products()
-        self._scraper.save_products(self._parsed_products, True)
+        self._scraper.save_products(scraped_products, is_parsed=False)
+        self._parsed_product = self._parser.parse_products(scraped_products)
+        self._scraper.save_products(self._parsed_product, is_parsed=True)
 
     def integrate(self):
+        objects_count = {'Products': 0, 'Variants': 0, 'Product Attributes': 0, 'Sizings': 0}
+
         try:
             with transaction.atomic():
                 shop_obj = self._converter.shop
                 shop_obj.save()
 
-                for product in self._parsed_products:
+                for product in self._parsed_product:
                     product_obj = self._converter.convert_product(product=product, shop=shop_obj)
                     product_obj.save()
+                    objects_count['Products'] += 1
 
                     categories = self._converter.convert_categories(product)
                     product_obj.categories.set(categories)
@@ -61,14 +61,19 @@ class DataIntegrator:
                             attribute=attribute_obj,
                             position=attr['position'],
                         ).save()
+                        objects_count['Product Attributes'] += 1
 
                     for v in product.get('variants'):
                         variant_obj = self._converter.convert_variant(variant=v, product=product_obj)
                         variant_obj.save()
+                        objects_count['Variants'] += 1
+
                         sizing_objects = self._converter.convert_sizings(product=product, variant=variant_obj)
                         for sizing_obj in sizing_objects:
                             sizing_obj.save()
+                            objects_count['Sizings'] += 1
 
+                print(objects_count)
         except (IntegrityError, DataError) as error:
             self.logger.exception(error)
         except Exception as error:
