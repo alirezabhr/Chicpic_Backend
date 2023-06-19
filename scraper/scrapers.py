@@ -38,6 +38,10 @@ class ShopifyScraper(ABC):
     def read_scraped_file_data(self):
         return utils.read_data_json_file(constants.SCRAPED_PRODUCTS_FILE_PATH.format(shop_name=self.shop.name))
 
+    def save_products(self, products: list):
+        file_path = constants.SCRAPED_PRODUCTS_FILE_PATH.format(shop_name=self.shop.name)
+        utils.save_data_file(file_full_path=file_path, data=products)
+
     @staticmethod
     def get_vendor_counts(products: list) -> Counter:
         return Counter(map(lambda product: product['vendor'], products))
@@ -98,14 +102,6 @@ class ShopifyScraper(ABC):
                 page += 1
 
         return products
-
-    def save_products(self, products: list, is_parsed: bool):
-        if is_parsed:
-            file_path = constants.PARSED_PRODUCTS_FILE_PATH.format(shop_name=self.shop.name)
-        else:
-            file_path = constants.SCRAPED_PRODUCTS_FILE_PATH.format(shop_name=self.shop.name)
-
-        utils.save_data_file(file_full_path=file_path, data=products)
 
 
 class KitAndAceScraper(ShopifyScraper):

@@ -30,9 +30,9 @@ class DataIntegrator:
 
     def scrape_and_parse(self):
         scraped_products = self._scraper.fetch_products()
-        self._scraper.save_products(scraped_products, is_parsed=False)
+        self._scraper.save_products(scraped_products)
         self._parsed_product = self._parser.parse_products(scraped_products)
-        self._scraper.save_products(self._parsed_product, is_parsed=True)
+        self._parser.save_products(self._parsed_product)
 
     def integrate(self):
         objects_count = {'Products': 0, 'Variants': 0, 'Product Attributes': 0, 'Sizings': 0}

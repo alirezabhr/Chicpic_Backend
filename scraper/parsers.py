@@ -43,6 +43,10 @@ class ShopifyParser(ABC):
     def read_parsed_file_data(self):
         return utils.read_data_json_file(constants.PARSED_PRODUCTS_FILE_PATH.format(shop_name=self.shop.name))
 
+    def save_products(self, products: list):
+        file_path = constants.PARSED_PRODUCTS_FILE_PATH.format(shop_name=self.shop.name)
+        utils.save_data_file(file_full_path=file_path, data=products)
+
     @staticmethod
     def parsed_product_attribute_position(product: dict, attribute_name: str):
         attribute = list(filter(lambda attr: attr['name'] == attribute_name, product['attributes']))
