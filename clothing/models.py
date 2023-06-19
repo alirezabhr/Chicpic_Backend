@@ -113,7 +113,9 @@ class Variant(models.Model):
     original_price = models.DecimalField(max_digits=5, decimal_places=2)
     final_price = models.DecimalField(max_digits=5, decimal_places=2)
     is_available = models.BooleanField(verbose_name='Available')
-    color = models.CharField(max_length=20, null=True, blank=True)
+    # color_hex size is 20 because it can be combination of up to 3 colors
+    color_hex = models.CharField(max_length=20, null=True, blank=True)
+    size = models.CharField(max_length=10, null=True, blank=True)
     option1 = models.CharField(max_length=40, null=True, blank=True)
     option2 = models.CharField(max_length=40, null=True, blank=True)
 
