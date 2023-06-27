@@ -50,17 +50,32 @@ class DataConverter(ABC):
             attribute_obj = Attribute(name=attribute_name.capitalize())
         return attribute_obj
 
-    @abstractmethod
-    def convert_product(self, product: dict, shop: Shop) -> Product:
-        pass
-
     def convert_product_attribute(self, product: Product, attribute: Attribute, position: int) -> ProductAttribute:
         return ProductAttribute(product=product, attribute=attribute, position=position)
 
     @utils.log_function_call
-    @abstractmethod
+    def convert_product(self, product: dict, shop: Shop) -> Product:
+        return Product(
+            shop=shop,
+            brand=product['brand'],
+            title=product['title'],
+            description=product['description']
+        )
+
+    @utils.log_function_call
     def convert_variant(self, variant: dict, product: Product) -> Variant:
-        pass
+        return Variant(
+            product=product,
+            image_src=variant['image']['src'],
+            link=variant['link'],
+            original_price=variant['original_price'],
+            final_price=variant['final_price'],
+            is_available=variant['available'],
+            option1=variant['option1'],
+            option2=variant['option2'],
+            color_hex=variant['color_hex'],
+            size=variant['size'],
+        )
 
     @utils.log_function_call
     def convert_categories(self, product: dict) -> list[Category]:
@@ -144,15 +159,6 @@ class KitAndAceDataConverter(DataConverter):
     def __init__(self):
         super().__init__(shop=constants.Shops.KIT_AND_ACE.value)
 
-    @utils.log_function_call
-    def convert_product(self, product: dict, shop: Shop) -> Product:
-        return Product(
-            shop=shop,
-            brand=product['brand'],
-            title=product['title'],
-            description=product['description']
-        )
-
     def __convert_color(self, color_name: str) -> str:
         file_path = constants.COLORS_CONVERTER_FILE_PATH.format(shop_name=self.shop_name)
         with open(file_path, 'r') as f:
@@ -219,29 +225,6 @@ class FrankAndOakDataConverter(DataConverter):
     def __init__(self):
         super().__init__(shop=constants.Shops.FRANK_AND_OAK.value)
 
-    @utils.log_function_call
-    def convert_product(self, product: dict, shop: Shop) -> Product:
-        return Product(
-            shop=shop,
-            brand=product['brand'],
-            title=product['title'],
-            description=product['description']
-        )
-
-    def convert_variant(self, variant: dict, product: Product) -> Variant:
-        return Variant(
-            product=product,
-            image_src=variant['image']['src'],
-            link=variant['link'],
-            original_price=variant['original_price'],
-            final_price=variant['final_price'],
-            is_available=variant['available'],
-            option1=variant['option1'],
-            option2=variant['option2'],
-            color_hex=variant['color_hex'],
-            size=variant['size'],
-        )
-
     def convert_sizings(self, product: dict, variant: Variant) -> list[Sizing]:
         variant_size = variant.size
 
@@ -257,4 +240,9 @@ class FrankAndOakDataConverter(DataConverter):
                 return super().convert_sizings(product, variant)
         else:
             return super().convert_sizings(product, variant)
+
+
+class TristanDataConverter(DataConverter):
+    def __init__(self):
+        super().__init__(shop=constants.Shops.TRISTAN.value)
 

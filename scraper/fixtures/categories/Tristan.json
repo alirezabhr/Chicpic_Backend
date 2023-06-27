@@ -1,0 +1,112 @@
+[
+  {
+    "gender": "Women",
+    "title": "Shoes",
+    "equivalent_chicpic_name": "Shoes"
+  },
+  {
+    "gender": "Women",
+    "title": "Dresses",
+    "equivalent_chicpic_name": "Dresses"
+  },
+  {
+    "gender": "Women",
+    "title": "Shirts-Blouses",
+    "equivalent_chicpic_name": "Tops & Shirts"
+  },
+  {
+    "gender": "Women",
+    "title": "Blazers",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Women",
+    "title": "T-shirts",
+    "equivalent_chicpic_name": "Tops & Shirts"
+  },
+  {
+    "gender": "Women",
+    "title": "Sweaters-Cardigans",
+    "equivalent_chicpic_name": "Sweaters & Cardigans"
+  },
+  {
+    "gender": "Women",
+    "title": "Vests",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Women",
+    "title": "Outerwear",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Women",
+    "title": "Jeans",
+    "equivalent_chicpic_name": "Bottoms"
+  },
+  {
+    "gender": "Women",
+    "title": "Pants",
+    "equivalent_chicpic_name": "Bottoms"
+  },
+  {
+    "gender": "Women",
+    "title": "Skirts",
+    "equivalent_chicpic_name": "Bottoms"
+  },
+  {
+    "gender": "Women",
+    "title": "Leggings-Tights",
+    "equivalent_chicpic_name": "Bottoms"
+  },
+  {
+    "gender": "Women",
+    "title": "Shorts",
+    "equivalent_chicpic_name": "Shorts"
+  },
+  {
+    "gender": "Men",
+    "title": "Blazers",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Men",
+    "title": "T-shirts",
+    "equivalent_chicpic_name": "T-Shirts"
+  },
+  {
+    "gender": "Men",
+    "title": "Shirts",
+    "equivalent_chicpic_name": "Shirts"
+  },
+  {
+    "gender": "Men",
+    "title": "Vests",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Men",
+    "title": "Sweaters-Cardigans",
+    "equivalent_chicpic_name": "Sweaters"
+  },
+  {
+    "gender": "Men",
+    "title": "Outerwear",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Men",
+    "title": "Pants",
+    "equivalent_chicpic_name": "Bottoms"
+  },
+  {
+    "gender": "Men",
+    "title": "Jeans",
+    "equivalent_chicpic_name": "Bottoms"
+  },
+  {
+    "gender": "Men",
+    "title": "Shorts",
+    "equivalent_chicpic_name": "Shorts"
+  }
+]

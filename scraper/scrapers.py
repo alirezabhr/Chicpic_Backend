@@ -116,3 +116,11 @@ class FrankAndOakScraper(ShopifyScraper):
 
     def __init__(self):
         super().__init__(self.SHOP)
+
+
+class TristanScraper(ShopifyScraper):
+    SHOP = constants.Shops.TRISTAN.value
+
+    def __init__(self):
+        super().__init__(self.SHOP)
+

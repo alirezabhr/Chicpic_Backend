@@ -1,0 +1,77 @@
+[
+  {
+    "color": "GREY",
+    "code": "GR",
+    "hex": "808080"
+  },
+  {
+    "color": "WHITE",
+    "code": "BC",
+    "hex": "FFFFFF"
+  },
+  {
+    "color": "BEIGE",
+    "code": "BE",
+    "hex": "F5F5DC"
+  },
+  {
+    "color": "BLUE",
+    "code": "BL",
+    "hex": "0000FF"
+  },
+  {
+    "color": "BROWN",
+    "code": "BR",
+    "hex": "A52A2A"
+  },
+  {
+    "color": "MISCELLANOUS",
+    "code": "DI",
+    "hex": "000000"
+  },
+  {
+    "color": "YELLOW",
+    "code": "JA",
+    "hex": "FFFF00"
+  },
+  {
+    "color": "PURPLE",
+    "code": "MA",
+    "hex": "800080"
+  },
+  {
+    "color": "METALLIC",
+    "code": "ME",
+    "hex": "C0C0C0"
+  },
+  {
+    "color": "NEON",
+    "code": "NE",
+    "hex": "FF00FF"
+  },
+  {
+    "color": "BLACK",
+    "code": "NO",
+    "hex": "000000"
+  },
+  {
+    "color": "ORANGE",
+    "code": "OR",
+    "hex": "FFA500"
+  },
+  {
+    "color": "RED",
+    "code": "RG",
+    "hex": "FF0000"
+  },
+  {
+    "color": "PINK",
+    "code": "RS",
+    "hex": "FFC0CB"
+  },
+  {
+    "color": "GREEN",
+    "code": "VE",
+    "hex": "008000"
+  }
+]

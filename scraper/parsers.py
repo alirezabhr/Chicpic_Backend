@@ -201,7 +201,6 @@ class KitAndAceParser(ShopifyParser):
         if size_opt_position is not None:
             available_positions.remove(size_opt_position)
 
-
         variants = []
         for variant in product_variants:
             color_hex = None if color_opt_position is None else variant[f'option{color_opt_position}']
@@ -340,3 +339,102 @@ class FrankAndOakParser(ShopifyParser):
             hex_color = '000000'
 
         return hex_color
+
+
+class TristanParser(ShopifyParser):
+    UNACCEPTABLE_PRODUCT_TYPES = None
+    UNACCEPTABLE_TAGS = []
+    PRODUCT_TYPES = None
+
+    def __init__(self):
+        shop = constants.Shops.TRISTAN.value
+        # initialize product types
+        file_path = constants.SHOP_PRODUCT_TYPES_FILE_PATH.format(shop_name=shop.name)
+        self.PRODUCT_TYPES = utils.read_data_json_file(file_path=file_path)
+        assert self.PRODUCT_TYPES is not None, "PRODUCT_TYPES is None"
+        assert len(self.PRODUCT_TYPES) > 0, "PRODUCT_TYPES is empty"
+
+        self.UNACCEPTABLE_PRODUCT_TYPES = list(filter(lambda key: not self.PRODUCT_TYPES[key]['is_acceptable'],
+                                                      self.PRODUCT_TYPES.keys()))
+        super().__init__(shop=shop)
+
+    def is_unacceptable_product(self, product: dict) -> bool:
+        if product['product_type'] in self.UNACCEPTABLE_PRODUCT_TYPES:
+            return True
+
+    def _product_description(self, product: dict):
+        return ''
+
+    def _product_genders(self, product: dict) -> list:
+        return [self.PRODUCT_TYPES[product['product_type']]['gender']]
+
+    def _product_categories(self, product: dict) -> tuple:
+        return (self.PRODUCT_TYPES[product['product_type']]['category'],)
+
+    def _product_size_guide(self, product: dict):
+        return self.PRODUCT_TYPES[product['product_type']]['size_guide']
+
+    def _parse_variants(self, product: dict):
+        product_variants = product['variants']
+        available_positions = [1, 2, 3]
+
+        color_opt_position = self._get_color_option_position(product)
+        size_opt_position = self._get_size_option_position(product)
+
+        if color_opt_position is not None:
+            available_positions.remove(color_opt_position)
+        if size_opt_position is not None:
+            available_positions.remove(size_opt_position)
+
+        variants = []
+        for variant in product_variants:
+            color_code = None if color_opt_position is None else variant[f'option{color_opt_position}']
+            size = None if size_opt_position is None else variant[f'option{size_opt_position}']
+            option1 = variant[f'option{available_positions[0]}']
+
+            color_hex = None
+            if color_code is not None:
+                data = utils.read_data_json_file(constants.COLORS_CONVERTER_FILE_PATH.format(shop_name=self.shop.name))
+                color_hex = next((color['hex'] for color in data if color['code'] == color_code[:2]), None)
+
+            v = {
+                'variant_id': variant['id'],
+                'product_id': variant['product_id'],
+                'available': variant['available'],
+                'original_price': variant['compare_at_price'],
+                'final_price': variant['price'],
+                'option1': option1,
+                'option2': None,
+                'color_hex': color_hex,
+                'size': size,
+                'link': f'{self.shop.website}products/{product["handle"]}?variant={variant["id"]}',
+            }
+
+            image = product['images'][0]
+            v['image'] = {
+                'width': image['width'],
+                'height': image['height'],
+                'src': image['src'],
+            }
+
+            variants.append(v)
+
+        return variants
+
+    def parse_products(self, scraped_products: list):
+        scraped_product_types = set(map(lambda p: p['product_type'], scraped_products))
+        current_product_types = set(self.PRODUCT_TYPES.keys())
+        assert current_product_types == scraped_product_types, scraped_product_types.difference(current_product_types)
+        return super().parse_products(scraped_products)
+
+    def _get_color_option_position(self, product: dict):
+        for opt in product['options']:
+            if opt['name'] == 'Color' or opt['name'] == 'Colour':
+                return opt['position']
+        return None
+
+    def _get_size_option_position(self, product: dict):
+        for opt in product['options']:
+            if opt['name'] == 'Size':
+                return opt['position']
+        return None

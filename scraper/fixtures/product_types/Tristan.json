@@ -1,0 +1,344 @@
+{
+  "FA08001": {
+    "gender": "Women",
+    "category": "Shoes",
+    "is_acceptable": true,
+    "size_guide": "Women-Shoes"
+  },
+  "FV09001": {
+    "gender": "Women",
+    "category": "Dresses",
+    "is_acceptable": true,
+    "size_guide": "Women-Tops"
+  },
+  "FV01001": {
+    "gender": "Women",
+    "category": "Shirts-Blouses",
+    "is_acceptable": true,
+    "size_guide": "Women-Tops"
+  },
+  "FV01002": {
+    "gender": "Women",
+    "category": "Shirts-Blouses",
+    "is_acceptable": true,
+    "size_guide": "Women-Tops"
+  },
+  "FV01003": {
+    "gender": "Women",
+    "category": "Shirts-Blouses",
+    "is_acceptable": true,
+    "size_guide": "Women-Tops"
+  },
+  "FV11001": {
+    "gender": "Women",
+    "category": "Blazers",
+    "is_acceptable": true,
+    "size_guide": "Women-Tops"
+  },
+  "FV02001": {
+    "gender": "Women",
+    "category": "T-shirts",
+    "is_acceptable": true,
+    "size_guide": "Women-Tops"
+  },
+  "FV02002": {
+    "gender": "Women",
+    "category": "T-shirts",
+    "is_acceptable": true,
+    "size_guide": "Women-Tops"
+  },
+  "FV02003": {
+    "gender": "Women",
+    "category": "T-shirts",
+    "is_acceptable": true,
+    "size_guide": "Women-Tops"
+  },
+  "FV02004": {
+    "gender": "Women",
+    "category": "T-shirts",
+    "is_acceptable": true,
+    "size_guide": "Women-Tops"
+  },
+  "FV04001": {
+    "gender": "Women",
+    "category": "Sweaters-Cardigans",
+    "is_acceptable": true,
+    "size_guide": "Women-Tops"
+  },
+  "FV04003": {
+    "gender": "Women",
+    "category": "Sweaters-Cardigans",
+    "is_acceptable": true,
+    "size_guide": "Women-Tops"
+  },
+  "FV04004": {
+    "gender": "Women",
+    "category": "Sweaters-Cardigans",
+    "is_acceptable": true,
+    "size_guide": "Women-Tops"
+  },
+  "FV10001": {
+    "gender": "Women",
+    "category": "Vests",
+    "is_acceptable": true,
+    "size_guide": "Women-Tops"
+  },
+  "FV12001": {
+    "gender": "Women",
+    "category": "Outerwear",
+    "is_acceptable": true,
+    "size_guide": "Women-Tops"
+  },
+  "FV12002": {
+    "gender": "Women",
+    "category": "Outerwear",
+    "is_acceptable": true,
+    "size_guide": "Women-Tops"
+  },
+  "FV06001": {
+    "gender": "Women",
+    "category": "Jeans",
+    "is_acceptable": true,
+    "size_guide": "Women-Bottoms"
+  },
+  "FV07001": {
+    "gender": "Women",
+    "category": "Pants",
+    "is_acceptable": true,
+    "size_guide": "Women-Bottoms"
+  },
+  "FV08001": {
+    "gender": "Women",
+    "category": "Skirts",
+    "is_acceptable": true,
+    "size_guide": "Women-Bottoms"
+  },
+  "FV05001": {
+    "gender": "Women",
+    "category": "Shorts",
+    "is_acceptable": true,
+    "size_guide": "Women-Bottoms"
+  },
+  "FV05002": {
+    "gender": "Women",
+    "category": "Shorts",
+    "is_acceptable": true,
+    "size_guide": "Women-Bottoms"
+  },
+  "FA06001": {
+    "gender": "Women",
+    "category": "Leggings-Tights",
+    "is_acceptable": true,
+    "size_guide": "Women-Bottoms"
+  },
+  "FV05003": {
+    "gender": "Women",
+    "category": "Shorts",
+    "is_acceptable": true,
+    "size_guide": "Women-Bottoms"
+  },
+  "HV11001": {
+    "gender": "Men",
+    "category": "Blazers",
+    "is_acceptable": true,
+    "size_guide": "Men-Blazers"
+  },
+  "HV02001": {
+    "gender": "Men",
+    "category": "T-shirts",
+    "is_acceptable": true,
+    "size_guide": "Men-Tops"
+  },
+  "HV02002": {
+    "gender": "Men",
+    "category": "T-shirts",
+    "is_acceptable": true,
+    "size_guide": "Men-Tops"
+  },
+  "HV02003": {
+    "gender": "Men",
+    "category": "T-shirts",
+    "is_acceptable": true,
+    "size_guide": "Men-Tops"
+  },
+  "HV01001": {
+    "gender": "Men",
+    "category": "Shirts",
+    "is_acceptable": true,
+    "size_guide": "Men-Tops"
+  },
+  "HV01002": {
+    "gender": "Men",
+    "category": "Shirts",
+    "is_acceptable": true,
+    "size_guide": "Men-Tops"
+  },
+  "HV10001": {
+    "gender": "Men",
+    "category": "Vests",
+    "is_acceptable": true,
+    "size_guide": "Men-Tops"
+  },
+  "HV04001": {
+    "gender": "Men",
+    "category": "Sweaters-Cardigans",
+    "is_acceptable": true,
+    "size_guide": "Men-Tops"
+  },
+  "HV04004": {
+    "gender": "Men",
+    "category": "Sweaters-Cardigans",
+    "is_acceptable": true,
+    "size_guide": "Men-Tops"
+  },
+  "HV04005": {
+    "gender": "Men",
+    "category": "Sweaters-Cardigans",
+    "is_acceptable": true,
+    "size_guide": "Men-Tops"
+  },
+  "HV12001": {
+    "gender": "Men",
+    "category": "Outerwear",
+    "is_acceptable": true,
+    "size_guide": "Men-Tops"
+  },
+  "HV12002": {
+    "gender": "Men",
+    "category": "Outerwear",
+    "is_acceptable": true,
+    "size_guide": "Men-Tops"
+  },
+  "HV12003": {
+    "gender": "Men",
+    "category": "Outerwear",
+    "is_acceptable": true,
+    "size_guide": "Men-Tops"
+  },
+  "HV07001": {
+    "gender": "Men",
+    "category": "Pants",
+    "is_acceptable": true,
+    "size_guide": "Men-Bottoms"
+  },
+  "HV06001": {
+    "gender": "Men",
+    "category": "Jeans",
+    "is_acceptable": true,
+    "size_guide": "Men-Bottoms"
+  },
+  "HV05001": {
+    "gender": "Men",
+    "category": "Shorts",
+    "is_acceptable": true,
+    "size_guide": "Men-Bottoms"
+  },
+  "FA07001": {
+    "gender": "Women",
+    "category": "Bags",
+    "is_acceptable": false,
+    "size_guide": null
+  },
+  "HA09001": {
+    "gender": "Men",
+    "category": "Ties",
+    "is_acceptable": false,
+    "size_guide": null
+  },
+  "HA01001": {
+    "gender": "Men",
+    "category": "Belts",
+    "is_acceptable": false,
+    "size_guide": null
+  },
+  "HL01002": {
+    "gender": "Men",
+    "category": "Underwear",
+    "is_acceptable": false,
+    "size_guide": null
+  },
+  "FA01001": {
+    "gender": "Women",
+    "category": "Belts",
+    "is_acceptable": false,
+    "size_guide": null
+  },
+  "HA03001": {
+    "gender": "Men",
+    "category": "Hats",
+    "is_acceptable": false,
+    "size_guide": null
+  },
+  "FA03001": {
+    "gender": "Women",
+    "category": "Hats",
+    "is_acceptable": false,
+    "size_guide": null
+  },
+  "HA04001": {
+    "gender": "Men",
+    "category": "Jewelry",
+    "is_acceptable": false,
+    "size_guide": null
+  },
+  "HA05001": {
+    "gender": "Men",
+    "category": "Scarves",
+    "is_acceptable": false,
+    "size_guide": null
+  },
+  "HA06001": {
+    "gender": "Men",
+    "category": "Socks",
+    "is_acceptable": false,
+    "size_guide": null
+  },
+  "HA07001": {
+    "gender": "Men",
+    "category": "Bags",
+    "is_acceptable": false,
+    "size_guide": null
+  },
+  "HA10001": {
+    "gender": "Men",
+    "category": "Miscellaneous-Accessories",
+    "is_acceptable": false,
+    "size_guide": null
+  },
+  "FA04001": {
+    "gender": "Women",
+    "category": "Jewelry",
+    "is_acceptable": false,
+    "size_guide": null
+  },
+  "FA10001": {
+    "gender": "Women",
+    "category": "Miscellaneous-Accessories",
+    "is_acceptable": false,
+    "size_guide": null
+  },
+  "FA05001": {
+    "gender": "Women",
+    "category": "Scarves",
+    "is_acceptable": false,
+    "size_guide": null
+  },
+  "FA09001": {
+    "gender": "Women",
+    "category": "Hair-Accessories",
+    "is_acceptable": false,
+    "size_guide": null
+  },
+  "Gift Cards": {
+    "gender": "",
+    "category": "",
+    "is_acceptable": false,
+    "size_guide": null
+  },
+  "": {
+    "gender": "",
+    "category": "",
+    "is_acceptable": false,
+    "size_guide": null
+  }
+}
