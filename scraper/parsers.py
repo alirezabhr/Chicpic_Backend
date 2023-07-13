@@ -83,9 +83,15 @@ class ShopifyParser(ABC):
         return attributes
 
     @utils.log_function_call
-    @abstractmethod
     def is_unacceptable_product(self, product: dict) -> bool:
-        pass
+        if product['product_type'] in self.UNACCEPTABLE_PRODUCT_TYPES:
+            return True
+        if any(unacceptable_tag in product['tags'] for unacceptable_tag in self.UNACCEPTABLE_TAGS):
+            return True
+        return False
+
+    def _product_title(self, product: dict) -> str:
+        return product['title']
 
     @utils.log_function_call
     @abstractmethod
@@ -106,7 +112,7 @@ class ShopifyParser(ABC):
     def _parse_product(self, product: dict):
         return {
             'product_id': product['id'],
-            'title': product['title'],
+            'title': self._product_title(product),
             'categories': self._product_categories(product),
             'description': self._product_description(product),
             'tags': product['tags'],
@@ -142,14 +148,6 @@ class KitAndAceParser(ShopifyParser):
 
     def __init__(self):
         super().__init__(shop=constants.Shops.KIT_AND_ACE.value)
-
-    def is_unacceptable_product(self, product: dict) -> bool:
-        if product['product_type'] in self.UNACCEPTABLE_PRODUCT_TYPES:
-            return True
-        for unacceptable_tag in self.UNACCEPTABLE_TAGS:
-            if unacceptable_tag in product['tags']:
-                return True
-        return False
 
     def _get_color_option_position(self, product: dict):
         for opt in product['options']:
@@ -245,11 +243,9 @@ class FrankAndOakParser(ShopifyParser):
         super().__init__(shop=constants.Shops.FRANK_AND_OAK.value)
 
     def is_unacceptable_product(self, product: dict) -> bool:
-        if product['product_type'] in self.UNACCEPTABLE_PRODUCT_TYPES:
-            return True
         if len(self._product_genders(product)) > 1:
             return True  # Remove products with more than 1 gender because of confusion in frank & oak size guide
-        return False
+        return super().is_unacceptable_product(product)
 
     def _product_categories(self, product: dict):
         return (product['product_type'],)
@@ -357,10 +353,6 @@ class TristanParser(ShopifyParser):
         self.UNACCEPTABLE_PRODUCT_TYPES = list(filter(lambda key: not self.PRODUCT_TYPES[key]['is_acceptable'],
                                                       self.PRODUCT_TYPES.keys()))
         super().__init__(shop=shop)
-
-    def is_unacceptable_product(self, product: dict) -> bool:
-        if product['product_type'] in self.UNACCEPTABLE_PRODUCT_TYPES:
-            return True
 
     def _product_description(self, product: dict):
         return ''
