@@ -71,8 +71,8 @@ class ShopifyScraper(ABC):
         return product_attributes
 
     @staticmethod
-    def find_all_option_value(products: list, option_name: str) -> Counter:
-        sizes = Counter()
+    def get_all_option_value(products: list, option_name: str) -> Counter:
+        values = Counter()
 
         for product in products:
             position = next((opt['position'] for opt in product['options'] if opt['name'] == option_name), None)
@@ -80,9 +80,9 @@ class ShopifyScraper(ABC):
                 continue
 
             for variant in product['variants']:
-                sizes[variant[f'option{position}']] += 1
+                values[variant[f'option{position}']] += 1
 
-        return sizes
+        return values
 
     @utils.log_function_call
     def fetch_products(self):
