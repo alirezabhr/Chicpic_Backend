@@ -14,6 +14,10 @@ class ShopifyParser(ABC):
         assert self.UNACCEPTABLE_PRODUCT_TYPES is not None, 'UNACCEPTABLE_PRODUCT_TYPES is None'
         assert self.UNACCEPTABLE_TAGS is not None, 'UNACCEPTABLE_TAGS is None'
 
+        # Make unaccepted tags and unacceptable product types lowercase
+        self.UNACCEPTABLE_TAGS = [tag.lower() for tag in self.UNACCEPTABLE_TAGS]
+        self.UNACCEPTABLE_PRODUCT_TYPES = [product_type.lower() for product_type in self.UNACCEPTABLE_PRODUCT_TYPES]
+
         self.shop = shop
         self.__config_logger()
 
@@ -62,7 +66,7 @@ class ShopifyParser(ABC):
 
     @abstractmethod
     def _product_description(self, product: dict):
-        pass
+        return utils.remove_html_tags(product['body_html'])
 
     @utils.log_function_call
     @abstractmethod
@@ -84,9 +88,9 @@ class ShopifyParser(ABC):
 
     @utils.log_function_call
     def is_unacceptable_product(self, product: dict) -> bool:
-        if product['product_type'] in self.UNACCEPTABLE_PRODUCT_TYPES:
+        if product['product_type'].lower() in self.UNACCEPTABLE_PRODUCT_TYPES:
             return True
-        if any(unacceptable_tag in product['tags'] for unacceptable_tag in self.UNACCEPTABLE_TAGS):
+        if any(tag.lower() in self.UNACCEPTABLE_TAGS for tag in product['tags']):
             return True
         return False
 
@@ -163,9 +167,6 @@ class KitAndAceParser(ShopifyParser):
 
     def _product_categories(self, product: dict) -> tuple:
         return (product['product_type'],)
-
-    def _product_description(self, product: dict):
-        return utils.remove_html_tags(product['body_html'])
 
     def _product_genders(self, product: dict) -> list:
         genders = set()
@@ -249,9 +250,6 @@ class FrankAndOakParser(ShopifyParser):
 
     def _product_categories(self, product: dict):
         return (product['product_type'],)
-
-    def _product_description(self, product: dict):
-        return utils.remove_html_tags(product['body_html'])
 
     def _product_genders(self, product: dict) -> list:
         division_key = 'division:'
@@ -424,6 +422,143 @@ class TristanParser(ShopifyParser):
             if opt['name'] == 'Color' or opt['name'] == 'Colour':
                 return opt['position']
         return None
+
+    def _get_size_option_position(self, product: dict):
+        for opt in product['options']:
+            if opt['name'] == 'Size':
+                return opt['position']
+        return None
+
+
+class ReebokParser(ShopifyParser):
+    UNACCEPTABLE_PRODUCT_TYPES = ['BOYS', 'GIRLS', 'Gift Cards']
+    UNACCEPTABLE_TAGS = ['accessories', 'CAP', 'HEADWEAR', 'HAT', 'socks', 'SOCKS', 'CREW SOCKS', 'ANKLE SOCKS', 'BAG',
+                         'GLOVES', 'BRA', 'BOTTLE', 'UNDERWEAR']
+    ACCEPTABLE_CATEGORIES = {
+        'Shoes': ('shoes', 'shoe', 'sandal', 'sandals-shoes'),
+        'Tops': ('t-shirt', 't-shirts', 'tops-t-shirts', 'shirt', 'tank', 'dress', 'leotard'),
+        'Outerwear': ('sweatshirt', 'sweatshirts', 'jacket', 'outdoor', 'windbreaker', 'hoodie', 'track top'),
+        'Bottoms': ('pant', 'pants', 'short', 'shorts', 'tights', 'leggings', 'skirt'),
+    }
+
+    def __init__(self):
+        super().__init__(shop=constants.Shops.REEBOK.value)
+
+    def _product_title(self, product: dict) -> str:
+        title = product['title']
+
+        # Remove vendor name from title
+        vendor = product['vendor']
+        if title.lower().startswith(vendor.lower()):
+            title = title[len(vendor):]
+
+        # Remove color from title
+        colors = [tag[8:] for tag in product['tags'] if tag.startswith('Colour: ')]
+        colors.sort(key=lambda c: len(c), reverse=True)
+        for color in colors:
+            if title.lower().endswith(color.lower()):
+                title = title[:-len(color)]
+                break
+
+        # Remove trailing spaces
+        return title.strip()
+
+    def _product_genders(self, product: dict) -> list:
+        pass
+
+        genders = set()
+
+        gender_tags = [tag[8:] for tag in product['tags'] if tag.startswith('Gender: ')]
+
+        if 'Women' in gender_tags:
+            genders.add('Women')
+        if 'Men' in gender_tags:
+            genders.add('Men')
+        if 'UNISEX' in gender_tags:
+            genders.add('Women')
+            genders.add('Men')
+
+        return list(genders)
+
+    def _product_description(self, product: dict):
+        description = super()._product_description(product)
+        features = [tag[9:] for tag in product['tags'] if tag.startswith('Feature: ')]
+
+        for feature in features:
+            description += f'\n{feature}'
+
+        return description
+
+    def is_unacceptable_product(self, product: dict) -> bool:
+        if super().is_unacceptable_product(product):
+            return True
+
+        if any(word.lower() in self.UNACCEPTABLE_TAGS for word in product['title'].split()):
+            return True
+
+        return False
+
+    def _parse_variants(self, product: dict):
+        product_variants = product['variants']
+        available_positions = [1, 2, 3]
+
+        size_opt_position = self._get_size_option_position(product)
+        if size_opt_position is not None:
+            available_positions.remove(size_opt_position)
+
+        color_hex = self._get_color_hex(product)
+
+        variants = []
+        for variant in product_variants:
+            size = None if size_opt_position is None else variant[f'option{size_opt_position}']
+            option1 = variant[f'option{available_positions[0]}']
+
+            v = {
+                'variant_id': variant['id'],
+                'product_id': variant['product_id'],
+                'available': variant['available'],
+                'original_price': variant['compare_at_price'],
+                'final_price': variant['price'],
+                'option1': option1,
+                'option2': None,
+                'color_hex': color_hex,
+                'size': size,
+                'link': f'{self.shop.website}products/{product["handle"]}?variant={variant["id"]}',
+            }
+
+            image = product['images'][0]
+            v['image'] = {
+                'width': image['width'],
+                'height': image['height'],
+                'src': image['src'],
+            }
+
+            variants.append(v)
+
+        return variants
+
+    def _product_categories(self, product: dict) -> tuple:
+        categories = set()
+        acceptable_cats = {category for categories in self.ACCEPTABLE_CATEGORIES.values() for category in categories}
+
+        for tag in product['tags']:
+            if tag.lower() in acceptable_cats:
+                categories.add(tag)
+
+        if len(categories) == 0:
+            for word in product['title'].split():
+                if word.lower() in acceptable_cats:
+                    categories.add(word)
+
+        return tuple(categories)
+
+    def _product_size_guide(self, product: dict):
+        pass
+
+    def _get_color_hex(self, product: dict):
+        color_tags = [tag[-6:] for tag in product['tags'] if tag.startswith('#')]
+        if len(color_tags) > 0:
+            return color_tags[0]
 
     def _get_size_option_position(self, product: dict):
         for opt in product['options']:
