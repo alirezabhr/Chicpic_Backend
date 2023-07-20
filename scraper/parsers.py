@@ -64,7 +64,7 @@ class ShopifyParser(ABC):
     def _product_brand(self, product: dict) -> str:
         return product['vendor']
 
-    @abstractmethod
+    @utils.log_function_call
     def _product_description(self, product: dict):
         return utils.remove_html_tags(product['body_html'])
 
@@ -147,7 +147,7 @@ class ShopifyParser(ABC):
 
 
 class KitAndAceParser(ShopifyParser):
-    UNACCEPTABLE_PRODUCT_TYPES = ['Scarves', 'Underwear & Socks', 'Gift Cards', 'Hats']
+    UNACCEPTABLE_PRODUCT_TYPES = ['', 'Scarves', 'Underwear & Socks', 'Gift Cards', 'Hats']
     UNACCEPTABLE_TAGS = ['Accessories']
 
     def __init__(self):
