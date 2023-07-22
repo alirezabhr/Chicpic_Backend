@@ -79,7 +79,7 @@ class ShopifyParser(ABC):
         position = 1
 
         for opt in product['options']:
-            if opt['name'] == 'Color':
+            if opt['name'] in ['Color', 'Colour', 'Size']:
                 continue
             attributes.append({'name': opt['name'], 'position': position})
             position += 1
