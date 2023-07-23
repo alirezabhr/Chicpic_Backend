@@ -89,7 +89,7 @@ class TrouserFitSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'user_additional')
 
 
-class UserAdditionalWriteSerializer(serializers.ModelSerializer):
+class UserAdditionalSerializer(serializers.ModelSerializer):
     shirt_fits = ShirtFitSerializer(many=True, required=False)
     trouser_fits = TrouserFitSerializer(many=True, required=False)
 
@@ -113,10 +113,12 @@ class UserAdditionalWriteSerializer(serializers.ModelSerializer):
 
 
 class UserReadonlySerializer(serializers.ModelSerializer):
+    additional = UserAdditionalSerializer()
+
     class Meta:
         model = User
-        fields = ('id', 'email', 'username', 'is_verified', 'tokens', 'user_additional')
-        read_only_fields = ('id', 'email', 'username', 'is_verified', 'tokens', 'user_additional')
+        fields = ('id', 'email', 'username', 'is_verified', 'tokens', 'additional')
+        read_only_fields = ('id', 'email', 'username', 'is_verified', 'tokens', 'additional')
 
 
 class OTPRequestSerializer(serializers.Serializer):
