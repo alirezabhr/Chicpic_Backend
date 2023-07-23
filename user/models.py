@@ -37,10 +37,6 @@ class User(AbstractBaseUser, PermissionsMixin):
             'refresh': str(tokens),
         }
 
-    @property
-    def user_additional(self):
-        return self.additional
-
     def __str__(self):
         return self.username
 
@@ -55,10 +51,12 @@ class UserAdditional(models.Model):
     weight = models.PositiveSmallIntegerField()
     height = models.PositiveSmallIntegerField()
     birth_date = models.DateField()
+    shoulder_size = models.PositiveSmallIntegerField()   # cm
+    chest_size = models.PositiveSmallIntegerField()   # cm
     bust_size = models.PositiveSmallIntegerField()  # cm
     waist_size = models.PositiveSmallIntegerField()  # cm
-    hip_size = models.PositiveSmallIntegerField()  # cm
-    leg_length = models.PositiveSmallIntegerField()  # cm
+    hips_size = models.PositiveSmallIntegerField()  # cm
+    inseam = models.PositiveSmallIntegerField()  # cm
     shoe_size = models.DecimalField(max_digits=3, decimal_places=1)  # standard US/CA shoe size
 
     @property
