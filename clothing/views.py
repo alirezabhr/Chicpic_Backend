@@ -1,8 +1,10 @@
-from django.db.models import Q
-from rest_framework.generics import ListAPIView, RetrieveAPIView
+from django.db.models import Q, F, Case, When, DecimalField, Sum, Window, IntegerField, Count
+from django.db.models.functions import Abs, RowNumber, Ceil
+from rest_framework.generics import ListAPIView, RetrieveAPIView, get_object_or_404
 
+from user.models import UserAdditional
 from .models import Category, Product, Shop, Variant
-from .serializers import CategorySerializer, ShopSerializer, ProductPreviewSerializer,\
+from .serializers import CategorySerializer, ShopSerializer, ProductPreviewSerializer, \
     VariantPreviewSerializer, ProductDetailSerializer
 
 
@@ -21,7 +23,8 @@ class CategoryProductsView(ListAPIView):
     serializer_class = ProductPreviewSerializer
 
     def get_queryset(self):
-        return Product.objects.filter(category_id=self.kwargs.get('category_id'))
+        category = get_object_or_404(Category, id=self.kwargs.get('category_id'))
+        return category.products.all()
 
 
 class ShopsView(ListAPIView):
@@ -39,6 +42,76 @@ class ShopProductsView(ListAPIView):
 class VariantsView(ListAPIView):
     serializer_class = VariantPreviewSerializer
     queryset = Variant.objects.all()
+
+
+class ExploreVariantsView(ListAPIView):
+    serializer_class = VariantPreviewSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+
+        try:
+            user_additional = user.additional
+        except UserAdditional.DoesNotExist:
+            user_additional = None
+
+        if user_additional is not None:  # find the best fit clothes if user additional exists
+            gender_interested = user_additional.gender_interested
+            shoulder_size = user_additional.shoulder_size
+            bust_size = user_additional.bust_size
+            chest_size = user_additional.chest_size
+            waist_size = user_additional.waist_size
+            hips_size = user_additional.hips_size
+            inseam = user_additional.inseam
+            shoe_size = user_additional.shoe_size
+
+            # Filter variants based on gender and categories
+            queryset = Variant.objects.filter(
+                product__categories__gender=gender_interested
+            ).annotate(
+                diff_sum=Sum(
+                    Case(
+                        When(sizings__option='Shoulder', then=Abs(F('sizings__value') - shoulder_size)),
+                        When(sizings__option='Bust', then=Abs(F('sizings__value') - bust_size)),
+                        When(sizings__option='Chest', then=Abs(F('sizings__value') - chest_size)),
+                        When(sizings__option='Waist', then=Abs(F('sizings__value') - waist_size)),
+                        When(sizings__option='Hips', then=Abs(F('sizings__value') - hips_size)),
+                        When(sizings__option='Inseam', then=Abs(F('sizings__value') - inseam)),
+                        When(sizings__option='Shoe Size', then=Abs(F('sizings__value') - shoe_size)),
+                        output_field=DecimalField(max_digits=4, decimal_places=1)
+                    )
+                )
+            ).annotate(
+                rn=Window(
+                    expression=RowNumber(),
+                    partition_by=[F('product_id')],
+                    order_by=(F('diff_sum'),)
+                )
+            ).filter(rn=1, is_available=True).order_by('-product_id', 'id').values(
+                'id', 'image_src', 'link', 'original_price', 'final_price', 'is_available', 'color', 'option1',
+                'option2', 'product_id',
+            )
+        else:
+            queryset = Variant.objects.filter(
+                is_available=True
+            ).annotate(
+                row_number=Window(
+                    expression=RowNumber(),
+                    partition_by=[F('product_id')],
+                    order_by=(F('id'),)
+                ),
+                num_variants=Count('product__variants', distinct=True, output_field=IntegerField())
+            ).annotate(
+                middle_variant_id=Case(
+                    When(row_number=Ceil(F('num_variants') / 2), then=F('id')),
+                    default=None,
+                    output_field=IntegerField()
+                )
+            ).filter(
+                middle_variant_id=F('id')
+            ).order_by('-product_id')
+
+        return queryset
 
 
 class ProductDetailView(RetrieveAPIView):
