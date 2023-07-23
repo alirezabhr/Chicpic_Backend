@@ -11,5 +11,5 @@ urlpatterns = [
     path('variants/', views.VariantsView.as_view(), name='variants'),
     path('explore/variants/', views.ExploreVariantsView.as_view(), name='explore_variants'),
     path('products/<int:product_id>/', views.ProductDetailView.as_view(), name='product_detail'),
-    path('products/search/', views.ProductSearch.as_view(), name='products_search'),
+    path('search/products/', views.ProductSearch.as_view(), name='search_products'),
 ]
