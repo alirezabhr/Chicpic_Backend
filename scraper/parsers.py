@@ -438,7 +438,7 @@ class ReebokParser(ShopifyParser):
         'Shoes': ('shoes', 'shoe', 'sandal', 'sandals-shoes'),
         'Tops': ('t-shirt', 't-shirts', 'tops-t-shirts', 'shirt', 'tank', 'dress', 'leotard'),
         'Outerwear': ('sweatshirt', 'sweatshirts', 'jacket', 'outdoor', 'windbreaker', 'hoodie', 'track top'),
-        'Bottoms': ('pant', 'pants', 'short', 'shorts', 'tights', 'leggings', 'skirt'),
+        'Bottoms': ('pant', 'pants', 'short', 'shorts', 'leggings', 'tights', 'skirt'),
     }
 
     def __init__(self):
@@ -543,12 +543,12 @@ class ReebokParser(ShopifyParser):
 
         for tag in product['tags']:
             if tag.lower() in acceptable_cats:
-                categories.add(tag)
+                categories.add(tag.lower())
 
         if len(categories) == 0:
             for word in product['title'].split():
                 if word.lower() in acceptable_cats:
-                    categories.add(word)
+                    categories.add(word.lower())
 
         return tuple(categories)
 
