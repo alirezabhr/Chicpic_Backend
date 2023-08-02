@@ -3,7 +3,7 @@ import logging
 import os
 import csv
 import django
-from abc import ABC, abstractmethod
+from abc import ABC
 
 from scraper import utils, constants
 
@@ -230,7 +230,10 @@ class FrankAndOakDataConverter(DataConverter):
 
         if product['size_guide'] in ('Men-Footwear', 'Women-Footwear'):
             size_value = round(float(variant_size), 1)
-            return [Sizing(variant=variant, option=Sizing.SizingOptionChoices.SHOE_SIZE, value=size_value)]
+            if size_value > 30: # Convert from EU to US
+                return super().convert_sizings(product, variant)
+            else:   # Use US size
+                return [Sizing(variant=variant, option=Sizing.SizingOptionChoices.SHOE_SIZE, value=size_value)]
         elif product['size_guide'] == 'Men-Bottoms':
             if len(variant_size) > 2 and variant_size[2] == 'X':
                 waist, inseam = list(map(lambda s: round(float(s) * 2.54, 1), variant_size.split('X')))
