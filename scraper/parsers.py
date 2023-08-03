@@ -545,7 +545,7 @@ class ReebokParser(ShopifyParser):
             if tag.lower() in acceptable_cats:
                 categories.add(tag.lower())
 
-        if len(categories) == 0:
+        if not categories:
             for word in product['title'].split():
                 if word.lower() in acceptable_cats:
                     categories.add(word.lower())
@@ -553,7 +553,19 @@ class ReebokParser(ShopifyParser):
         return tuple(categories)
 
     def _product_size_guide(self, product: dict):
-        pass
+        genders = self._product_genders(product)
+        if not genders:
+            return None
+
+        categories = self._product_categories(product)
+        category = categories[0] if categories else None
+
+        if category:
+            for key, value in self.ACCEPTABLE_CATEGORIES.items():
+                if category in value:
+                    return f'{genders[0]}-{key}'
+
+        return None
 
     def _get_color_hex(self, product: dict):
         color_tags = [tag[-6:] for tag in product['tags'] if tag.startswith('#')]
