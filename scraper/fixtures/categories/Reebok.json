@@ -1,0 +1,239 @@
+[
+
+  {
+    "gender": "Women",
+    "title": "shoes",
+    "equivalent_chicpic_name": "Shoes"
+  },
+  {
+    "gender": "Men",
+    "title": "shoes",
+    "equivalent_chicpic_name": "Shoes"
+  },
+  {
+    "gender": "Women",
+    "title": "shoe",
+    "equivalent_chicpic_name": "Shoes"
+  },
+  {
+    "gender": "Men",
+    "title": "shoe",
+    "equivalent_chicpic_name": "Shoes"
+  },
+  {
+    "gender": "Women",
+    "title": "sandal",
+    "equivalent_chicpic_name": "Shoes"
+  },
+  {
+    "gender": "Men",
+    "title": "sandal",
+    "equivalent_chicpic_name": "Shoes"
+  },
+  {
+    "gender": "Women",
+    "title": "sandals-shoes",
+    "equivalent_chicpic_name": "Shoes"
+  },
+  {
+    "gender": "Men",
+    "title": "sandals-shoes",
+    "equivalent_chicpic_name": "Shoes"
+  },
+
+
+  {
+    "gender": "Women",
+    "title": "t-shirt",
+    "equivalent_chicpic_name": "Tops & Shirts"
+  },
+  {
+    "gender": "Men",
+    "title": "t-shirt",
+    "equivalent_chicpic_name": "T-Shirts"
+  },
+  {
+    "gender": "Women",
+    "title": "t-shirts",
+    "equivalent_chicpic_name": "Tops & Shirts"
+  },
+  {
+    "gender": "Men",
+    "title": "t-shirts",
+    "equivalent_chicpic_name": "T-Shirts"
+  },
+  {
+    "gender": "Women",
+    "title": "tops-t-shirts",
+    "equivalent_chicpic_name": "Tops & Shirts"
+  },
+  {
+    "gender": "Men",
+    "title": "tops-t-shirts",
+    "equivalent_chicpic_name": "T-Shirts"
+  },
+  {
+    "gender": "Women",
+    "title": "shirt",
+    "equivalent_chicpic_name": "Tops & Shirts"
+  },
+  {
+    "gender": "Men",
+    "title": "shirt",
+    "equivalent_chicpic_name": "Shirts"
+  },
+  {
+    "gender": "Women",
+    "title": "tank",
+    "equivalent_chicpic_name": "Activewear"
+  },
+  {
+    "gender": "Men",
+    "title": "tank",
+    "equivalent_chicpic_name": "Activewear"
+  },
+  {
+    "gender": "Women",
+    "title": "dress",
+    "equivalent_chicpic_name": "Dresses"
+  },
+  {
+    "gender": "Women",
+    "title": "dress",
+    "equivalent_chicpic_name": "Activewear"
+  },
+
+
+  {
+    "gender": "Women",
+    "title": "sweatshirt",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Men",
+    "title": "sweatshirt",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Women",
+    "title": "sweatshirts",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Men",
+    "title": "sweatshirts",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Women",
+    "title": "jacket",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Men",
+    "title": "jacket",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Women",
+    "title": "outdoor",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Men",
+    "title": "outdoor",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Women",
+    "title": "windbreaker",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Men",
+    "title": "windbreaker",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Women",
+    "title": "hoodie",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Men",
+    "title": "hoodie",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Women",
+    "title": "track top",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Women",
+    "title": "leotard",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+
+
+  {
+    "gender": "Women",
+    "title": "pant",
+    "equivalent_chicpic_name": "Bottoms"
+  },
+  {
+    "gender": "Men",
+    "title": "pant",
+    "equivalent_chicpic_name": "Bottoms"
+  },
+  {
+    "gender": "Women",
+    "title": "pants",
+    "equivalent_chicpic_name": "Bottoms"
+  },
+  {
+    "gender": "Men",
+    "title": "pants",
+    "equivalent_chicpic_name": "Bottoms"
+  },
+  {
+    "gender": "Women",
+    "title": "short",
+    "equivalent_chicpic_name": "Bottoms"
+  },
+  {
+    "gender": "Men",
+    "title": "short",
+    "equivalent_chicpic_name": "Bottoms"
+  },
+  {
+    "gender": "Women",
+    "title": "shorts",
+    "equivalent_chicpic_name": "Shorts"
+  },
+  {
+    "gender": "Men",
+    "title": "shorts",
+    "equivalent_chicpic_name": "Shorts"
+  },
+  {
+    "gender": "Women",
+    "title": "leggings",
+    "equivalent_chicpic_name": "Activewear"
+  },
+  {
+    "gender": "Men",
+    "title": "leggings",
+    "equivalent_chicpic_name": "Activewear"
+  },
+  {
+    "gender": "Women",
+    "title": "tights",
+    "equivalent_chicpic_name": "Activewear"
+  },
+  {
+    "gender": "Women",
+    "title": "skirt",
+    "equivalent_chicpic_name": "Bottoms"
+  }
+]
