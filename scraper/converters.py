@@ -79,7 +79,15 @@ class DataConverter(ABC):
 
     @utils.log_function_call
     def convert_categories(self, product: dict) -> list[Category]:
-        return [self.convert_category(cat, gen) for cat in product['categories'] for gen in product['genders']]
+        categories = []
+
+        for cat in product['categories']:
+            for gen in product['genders']:
+                category = self.convert_category(cat, gen)
+                if category:
+                    categories.append(category)
+
+        return categories
 
     @utils.log_function_call
     def get_size_guide(self, sizing_type: str) -> tuple:
@@ -249,3 +257,15 @@ class TristanDataConverter(DataConverter):
     def __init__(self):
         super().__init__(shop=constants.Shops.TRISTAN.value)
 
+
+class ReebokDataConverter(DataConverter):
+    def __init__(self):
+        super().__init__(shop=constants.Shops.REEBOK.value)
+
+    def convert_sizings(self, product: dict, variant: Variant) -> list[Sizing]:
+        if product['size_guide'] in ('Men-Shoes', 'Women-Shoes'):
+            variant_size = variant.size
+            size_value = round(float(variant_size), 1)
+            return [Sizing(variant=variant, option=Sizing.SizingOptionChoices.SHOE_SIZE, value=size_value)]
+        else:
+            return super().convert_sizings(product, variant)
