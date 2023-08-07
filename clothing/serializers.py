@@ -34,6 +34,8 @@ class ProductPreviewSerializer(serializers.ModelSerializer):
 
 
 class VariantPreviewSerializer(serializers.ModelSerializer):
+    product = serializers.IntegerField(source='product_id')
+
     class Meta:
         model = Variant
         fields = '__all__'
@@ -68,4 +70,10 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
+        fields = '__all__'
+
+
+class TrackedVariantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TrackedVariant
         fields = '__all__'

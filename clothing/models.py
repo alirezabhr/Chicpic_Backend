@@ -35,7 +35,7 @@ class Shop(models.Model):
         ordering = ('name',)
 
     def __str__(self):
-        return self.name
+        return f'{self.id}: {self.name}'
 
 
 class Attribute(models.Model):
@@ -161,7 +161,10 @@ class SavedVariant(models.Model):
 class TrackedVariant(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
-    tracked_at = models.DateTimeField(auto_now_add=True)
+    tracked_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ('user', 'variant')
+
+    def __str__(self):
+        return f'({self.id}) user: {self.user.username} variant: {self.variant.id}'

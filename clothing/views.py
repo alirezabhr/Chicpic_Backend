@@ -1,11 +1,14 @@
 from django.db.models import Q, F, Case, When, DecimalField, Sum, Window, IntegerField, Count
 from django.db.models.functions import Abs, RowNumber, Ceil
+from rest_framework import status
 from rest_framework.generics import ListAPIView, RetrieveAPIView, get_object_or_404
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from user.models import UserAdditional
-from .models import Category, Product, Shop, Variant
+from .models import Category, Product, Shop, Variant, TrackedVariant
 from .serializers import CategorySerializer, ShopSerializer, ProductPreviewSerializer, \
-    VariantPreviewSerializer, ProductDetailSerializer
+    VariantPreviewSerializer, ProductDetailSerializer, TrackedVariantSerializer
 
 
 class CategoriesView(ListAPIView):
@@ -56,6 +59,7 @@ class ExploreVariantsView(ListAPIView):
             user_additional = None
 
         if user_additional is not None:  # find the best fit clothes if user additional exists
+            # TODO: handle One Size Fit All (OSFA) products
             gender_interested = user_additional.gender_interested
             shoulder_size = user_additional.shoulder_size
             bust_size = user_additional.bust_size
@@ -88,7 +92,7 @@ class ExploreVariantsView(ListAPIView):
                     order_by=(F('diff_sum'),)
                 )
             ).filter(rn=1, is_available=True).order_by('-product_id', 'id').values(
-                'id', 'image_src', 'link', 'original_price', 'final_price', 'is_available', 'color', 'option1',
+                'id', 'image_src', 'link', 'original_price', 'final_price', 'is_available', 'color_hex', 'option1',
                 'option2', 'product_id',
             )
         else:
@@ -132,3 +136,23 @@ class ProductSearch(ListAPIView):
             Q(brand__icontains=query) |
             Q(description__icontains=query)
         )
+
+
+class TrackVariantView(APIView):
+    def post(self, request, *args, **kwargs):
+        data = request.data
+        user = data.get('user')
+        variant = data.get('variant')
+
+        tracked_variant = TrackedVariant.objects.filter(user=user, variant=variant).first()
+
+        if tracked_variant:
+            serializer = TrackedVariantSerializer(tracked_variant, data=data)
+        else:
+            serializer = TrackedVariantSerializer(data=data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
