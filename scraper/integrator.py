@@ -28,14 +28,17 @@ class DataIntegrator:
     def load_parsed_products(self):
         self._parsed_product = self._parser.read_parsed_file_data()
 
-    def scrape_and_parse(self):
+    def scrape_save(self):
         scraped_products = self._scraper.fetch_products()
         self._scraper.save_products(scraped_products)
+
+    def parse_save(self):
+        scraped_products = self._scraper.read_scraped_file_data()
         self._parsed_product = self._parser.parse_products(scraped_products)
         self._parser.save_products(self._parsed_product)
 
     def integrate(self):
-        objects_count = {'Products': 0, 'Variants': 0, 'Product Attributes': 0, 'Sizings': 0}
+        objects_count = {'Products': 0, 'Product Categories': 0, 'Variants': 0, 'Product Attributes': 0, 'Sizings': 0}
 
         try:
             with transaction.atomic():
@@ -49,6 +52,7 @@ class DataIntegrator:
 
                     categories = self._converter.convert_categories(product)
                     product_obj.categories.set(categories)
+                    objects_count['Product Categories'] += len(categories)
 
                     for attr in product.get('attributes'):
                         # Create or find Attribute object
