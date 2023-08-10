@@ -73,6 +73,12 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class SavedVariantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SavedVariant
+        fields = '__all__'
+
+
 class TrackedVariantSerializer(serializers.ModelSerializer):
     class Meta:
         model = TrackedVariant
