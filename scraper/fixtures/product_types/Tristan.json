@@ -77,6 +77,12 @@
     "is_acceptable": true,
     "size_guide": "Women-Tops"
   },
+  "FV04005": {
+    "gender": "Women",
+    "category": "Sweaters-Cardigans",
+    "is_acceptable": true,
+    "size_guide": "Women-Tops"
+  },
   "FV10001": {
     "gender": "Women",
     "category": "Vests",
@@ -158,6 +164,12 @@
   "HV02003": {
     "gender": "Men",
     "category": "T-shirts",
+    "is_acceptable": true,
+    "size_guide": "Men-Tops"
+  },
+  "HV02004": {
+    "gender": "Men",
+    "category": "Sweaters-Cardigans",
     "is_acceptable": true,
     "size_guide": "Men-Tops"
   },
