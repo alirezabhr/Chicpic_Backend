@@ -148,20 +148,23 @@ class Sizing(models.Model):
     def __str__(self):
         return f'{self.option} - {self.value}'
 
-
+# TODO: refactor this model
 class SavedVariant(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
     saved_at = models.DateTimeField(auto_now_add=True)
+    is_deleted = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('user', 'variant')
 
 
+# TODO: refactor this model
 class TrackedVariant(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
     tracked_at = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('user', 'variant')
