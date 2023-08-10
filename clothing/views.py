@@ -6,9 +6,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from user.models import UserAdditional
-from .models import Category, Product, Shop, Variant, TrackedVariant
+from .models import Category, Product, Shop, Variant, TrackedVariant, SavedVariant
 from .serializers import CategorySerializer, ShopSerializer, ProductPreviewSerializer, \
-    VariantPreviewSerializer, ProductDetailSerializer, TrackedVariantSerializer
+    VariantPreviewSerializer, ProductDetailSerializer, SavedVariantSerializer, TrackedVariantSerializer
 
 
 class CategoriesView(ListAPIView):
@@ -137,22 +137,57 @@ class ProductSearch(ListAPIView):
             Q(description__icontains=query)
         )
 
+# TODO: refactor this view
+class SaveVariantView(APIView):
+    serializer = SavedVariantSerializer
 
-class TrackVariantView(APIView):
+    def get_queryset(self):
+        return SavedVariant.objects.filter(user_id=self.kwargs.get('user'), variant_id=self.kwargs.get('variant'))
+
     def post(self, request, *args, **kwargs):
-        data = request.data
-        user = data.get('user')
-        variant = data.get('variant')
+        saved_variant = self.get_queryset().first()
 
-        tracked_variant = TrackedVariant.objects.filter(user=user, variant=variant).first()
-
-        if tracked_variant:
-            serializer = TrackedVariantSerializer(tracked_variant, data=data)
-        else:
-            serializer = TrackedVariantSerializer(data=data)
-
-        if serializer.is_valid():
+        if saved_variant is None:
+            serializer = self.serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_201_CREATED)
+        else:
+            saved_variant.is_deleted = False
+            saved_variant.save()
+            return Response(status=status.HTTP_201_CREATED)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def delete(self, request, *args, **kwargs):
+        saved_variant = self.get_queryset().first()
+        saved_variant.is_deleted = True
+        saved_variant.save()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# TODO: refactor this view
+class TrackVariantView(APIView):
+    serializer = TrackedVariantSerializer
+
+    def get_queryset(self):
+        return TrackedVariant.objects.filter(user_id=self.kwargs.get('user'), variant_id=self.kwargs.get('variant'))
+
+    def post(self, request, *args, **kwargs):
+        tracked_variant = self.get_queryset().first()
+
+        if tracked_variant is None:
+            serializer = self.serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(status=status.HTTP_201_CREATED)
+        else:
+            tracked_variant.is_deleted = False
+            tracked_variant.save()
+            return Response(status=status.HTTP_201_CREATED)
+
+    def delete(self, request, *args, **kwargs):
+        tracked_variant = self.get_queryset().first()
+        tracked_variant.is_deleted = True
+        tracked_variant.save()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
