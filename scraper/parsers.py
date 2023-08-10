@@ -378,6 +378,11 @@ class TristanParser(ShopifyParser):
 
         variants = []
         for variant in product_variants:
+            final_price = float(variant['price'])
+            original_price = float(variant['compare_at_price'])
+            if original_price < final_price:
+                original_price = final_price
+
             color_code = None if color_opt_position is None else variant[f'option{color_opt_position}']
             size = None if size_opt_position is None else variant[f'option{size_opt_position}']
             option1 = variant[f'option{available_positions[0]}']
@@ -391,8 +396,8 @@ class TristanParser(ShopifyParser):
                 'variant_id': variant['id'],
                 'product_id': variant['product_id'],
                 'available': variant['available'],
-                'original_price': variant['compare_at_price'],
-                'final_price': variant['price'],
+                'original_price': original_price,
+                'final_price': final_price,
                 'option1': option1,
                 'option2': None,
                 'color_hex': color_hex,
@@ -510,6 +515,11 @@ class ReebokParser(ShopifyParser):
 
         variants = []
         for variant in product_variants:
+            final_price = float(variant['price'])
+            original_price = float(variant['compare_at_price'])
+            if original_price < final_price:
+                original_price = final_price
+
             size = None if size_opt_position is None else variant[f'option{size_opt_position}']
             option1 = variant[f'option{available_positions[0]}']
 
@@ -517,8 +527,8 @@ class ReebokParser(ShopifyParser):
                 'variant_id': variant['id'],
                 'product_id': variant['product_id'],
                 'available': variant['available'],
-                'original_price': variant['compare_at_price'],
-                'final_price': variant['price'],
+                'original_price': original_price,
+                'final_price': final_price,
                 'option1': option1,
                 'option2': None,
                 'color_hex': color_hex,
