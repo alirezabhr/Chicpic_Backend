@@ -118,6 +118,17 @@ class ExploreVariantsView(ListAPIView):
         return queryset
 
 
+class ProductsView(ListAPIView):
+    serializer_class = ProductPreviewSerializer
+
+    def get_queryset(self):
+        discount = self.request.query_params.get('discount')
+        if discount is not None:
+            return Product.objects.annotate(discount=(F('variants__original_price') - F('variants__final_price')) / F(
+                'variants__original_price') * 100).filter(discount__gte=discount).distinct()
+        return Product.objects.all()
+
+
 class ProductDetailView(RetrieveAPIView):
     serializer_class = ProductDetailSerializer
 
@@ -136,6 +147,7 @@ class ProductSearch(ListAPIView):
             Q(brand__icontains=query) |
             Q(description__icontains=query)
         )
+
 
 # TODO: refactor this view
 class SaveVariantView(APIView):
