@@ -1,4 +1,4 @@
-from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveAPIView
+from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveAPIView, UpdateAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
@@ -7,8 +7,9 @@ from rest_framework.throttling import UserRateThrottle
 
 from django.contrib.auth import get_user_model
 
+from .models import UserAdditional
 from .serializers import UserRegistrationSerializer, UserLoginSerializer, UserReadonlySerializer, \
-    OTPRequestSerializer, OTPVerificationSerializer, UserAdditionalWriteSerializer
+    OTPRequestSerializer, OTPVerificationSerializer, UserAdditionalSerializer
 
 
 class OncePerMinuteThrottle(UserRateThrottle):
@@ -67,5 +68,8 @@ class VerifyOTPView(APIView):
             return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserAdditionalView(CreateAPIView):
-    serializer_class = UserAdditionalWriteSerializer
+class UserAdditionalView(CreateAPIView, UpdateAPIView):
+    serializer_class = UserAdditionalSerializer
+    lookup_field = 'user__id'
+    lookup_url_kwarg = 'id'
+    queryset = UserAdditional.objects.all()
