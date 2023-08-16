@@ -1,6 +1,7 @@
 import string
 from random import choices
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils import timezone
@@ -51,9 +52,9 @@ class UserAdditional(models.Model):
     weight = models.PositiveSmallIntegerField()
     height = models.PositiveSmallIntegerField()
     birth_date = models.DateField()
-    shoulder_size = models.PositiveSmallIntegerField()   # cm
-    chest_size = models.PositiveSmallIntegerField()   # cm
-    bust_size = models.PositiveSmallIntegerField()  # cm
+    shoulder_size = models.PositiveSmallIntegerField()  # cm
+    chest_size = models.PositiveSmallIntegerField(null=True, blank=True)  # cm
+    bust_size = models.PositiveSmallIntegerField(null=True, blank=True)  # cm
     waist_size = models.PositiveSmallIntegerField()  # cm
     hips_size = models.PositiveSmallIntegerField()  # cm
     inseam = models.PositiveSmallIntegerField()  # cm
@@ -66,6 +67,19 @@ class UserAdditional(models.Model):
     @property
     def trouser_fits(self):
         return TrouserFit.objects.filter(user_additional=self)
+
+    def clean(self):
+        if self.gender_interested == self.GenderChoices.MALE and not self.chest_size:
+            raise ValidationError("Chest size should not be empty for men's clothing.")
+        elif self.gender_interested == self.GenderChoices.FEMALE and not self.bust_size:
+            raise ValidationError("Bust size should not be empty for women's clothing.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'id: {self.id}, user: {self.user.username}'
 
 
 class ShirtFit(models.Model):
