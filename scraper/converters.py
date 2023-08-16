@@ -7,6 +7,8 @@ from abc import ABC
 
 from scraper import utils, constants
 
+from user.models import GenderChoices
+
 # Set up the Django settings module
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "chicpic.settings")
 django.setup()
@@ -151,7 +153,7 @@ class DataConverter(ABC):
         if selected_category is None:
             self.logger.error(f'Proper category not found. title: {category_title}, gender: {category_gender}.')
         else:
-            gender = utils.find_proper_choice(Category.GenderChoices.choices, selected_category['gender'])
+            gender = utils.find_proper_choice(GenderChoices.choices, selected_category['gender'])
             return Category.objects.get(title=selected_category['equivalent_chicpic_name'], gender=gender)
 
     @property

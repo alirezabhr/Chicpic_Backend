@@ -5,6 +5,7 @@ from rest_framework import status
 
 from django.contrib.auth import get_user_model
 
+from user.models import GenderChoices
 from .models import Category, Shop, Product, SavedProduct, TrackedProduct
 
 User = get_user_model()
@@ -18,12 +19,12 @@ def create_categories():
         )
 
     Category.objects.bulk_create([
-        Category(title='New In', gender=Category.GenderChoices.WOMEN, image=category_image),
-        Category(title='Clothing', gender=Category.GenderChoices.WOMEN, image=category_image),
-        Category(title='Dresses', gender=Category.GenderChoices.WOMEN, image=category_image),
-        Category(title='Shoes', gender=Category.GenderChoices.WOMEN, image=category_image),
-        Category(title='Pants', gender=Category.GenderChoices.MEN, image=category_image),
-        Category(title='Shoes', gender=Category.GenderChoices.MEN, image=category_image),
+        Category(title='New In', gender=GenderChoices.WOMEN, image=category_image),
+        Category(title='Clothing', gender=GenderChoices.WOMEN, image=category_image),
+        Category(title='Dresses', gender=GenderChoices.WOMEN, image=category_image),
+        Category(title='Shoes', gender=GenderChoices.WOMEN, image=category_image),
+        Category(title='Pants', gender=GenderChoices.MEN, image=category_image),
+        Category(title='Shoes', gender=GenderChoices.MEN, image=category_image),
     ])
     return Category.objects.all()
 
@@ -97,13 +98,13 @@ class CategoryTest(APITestCase):
         url = reverse('categories') + '?gender=M'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()), Category.objects.filter(gender=Category.GenderChoices.MEN).count())
+        self.assertEqual(len(response.json()), Category.objects.filter(gender=GenderChoices.MEN).count())
 
         # Women's Categories
         url = reverse('categories') + '?gender=W'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()), Category.objects.filter(gender=Category.GenderChoices.WOMEN).count())
+        self.assertEqual(len(response.json()), Category.objects.filter(gender=GenderChoices.WOMEN).count())
 
 
 class ShopTest(APITestCase):

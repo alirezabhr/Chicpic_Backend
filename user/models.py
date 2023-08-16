@@ -42,11 +42,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.username
 
 
-class UserAdditional(models.Model):
-    class GenderChoices(models.TextChoices):
-        FEMALE = 'F', 'Female'
-        MALE = 'M', 'Male'
+class GenderChoices(models.TextChoices):
+    WOMEN = 'W', 'Women'
+    MEN = 'M', 'Men'
 
+
+class UserAdditional(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='additional')
     gender_interested = models.CharField(max_length=10, choices=GenderChoices.choices)
     weight = models.PositiveSmallIntegerField()
@@ -69,9 +70,9 @@ class UserAdditional(models.Model):
         return TrouserFit.objects.filter(user_additional=self)
 
     def clean(self):
-        if self.gender_interested == self.GenderChoices.MALE and not self.chest_size:
+        if self.gender_interested == GenderChoices.MEN and not self.chest_size:
             raise ValidationError("Chest size should not be empty for men's clothing.")
-        elif self.gender_interested == self.GenderChoices.FEMALE and not self.bust_size:
+        elif self.gender_interested == GenderChoices.WOMEN and not self.bust_size:
             raise ValidationError("Bust size should not be empty for women's clothing.")
 
     def save(self, *args, **kwargs):

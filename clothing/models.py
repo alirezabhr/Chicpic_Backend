@@ -1,19 +1,15 @@
 from django.db import models
 
-from user.models import User
+from user.models import User, GenderChoices
 
 
 class Category(models.Model):
-    class Meta:
-        verbose_name_plural = 'Categories'
-
-    class GenderChoices(models.TextChoices):
-        WOMEN = 'W', 'Women'
-        MEN = 'M', 'Men'
-
     title = models.CharField(max_length=40)
     gender = models.CharField(max_length=1, choices=GenderChoices.choices)
     image = models.ImageField(upload_to='category_images/')
+
+    class Meta:
+        verbose_name_plural = 'Categories'
 
     def __str__(self):
         return f'{self.title} / {self.get_gender_display()}'
