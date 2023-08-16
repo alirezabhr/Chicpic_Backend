@@ -111,6 +111,23 @@ class UserAdditionalSerializer(serializers.ModelSerializer):
 
         return user_additional
 
+    def update(self, instance, validated_data):
+        shirt_fits_data = validated_data.pop('shirt_fits', [])
+        trouser_fits_data = validated_data.pop('trouser_fits', [])
+
+        user_additional = super().update(instance, validated_data)
+
+        # TODO: refactor the code below
+        ShirtFit.objects.filter(user_additional=user_additional).delete()
+        for shirt_fit_data in shirt_fits_data:
+            ShirtFit.objects.create(user_additional=user_additional, **shirt_fit_data)
+
+        TrouserFit.objects.filter(user_additional=user_additional).delete()
+        for trouser_fit_data in trouser_fits_data:
+            TrouserFit.objects.create(user_additional=user_additional, **trouser_fit_data)
+
+        return user_additional
+
 
 class UserReadonlySerializer(serializers.ModelSerializer):
     additional = UserAdditionalSerializer()
