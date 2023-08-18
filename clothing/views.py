@@ -91,10 +91,7 @@ class ExploreVariantsView(ListAPIView):
                     partition_by=[F('product_id')],
                     order_by=(F('diff_sum'),)
                 )
-            ).filter(rn=1, is_available=True).order_by('-product_id', 'id').values(
-                'id', 'image_src', 'link', 'original_price', 'final_price', 'is_available', 'color_hex', 'option1',
-                'option2', 'product_id',
-            )
+            ).filter(rn=1, is_available=True).order_by('-product_id', 'id')
         else:
             queryset = Variant.objects.filter(
                 is_available=True

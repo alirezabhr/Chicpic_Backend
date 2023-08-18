@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import F
 
 from user.models import User, GenderChoices
 
@@ -65,6 +66,10 @@ class Product(models.Model):
     def attributes(self):
         return ProductAttribute.objects.filter(product=self)
 
+    @property
+    def has_discount(self):
+        return Variant.objects.filter(product=self, final_price__lt=F('original_price')).exists()
+
     def __str__(self):
         return self.title
 
@@ -115,11 +120,15 @@ class Variant(models.Model):
     option1 = models.CharField(max_length=40, null=True, blank=True)
     option2 = models.CharField(max_length=40, null=True, blank=True)
 
-    def __str__(self):
-        return f'{self.id}: {self.product.shop.name} - {self.product.title}'
-
     class Meta:
         ordering = ('-id',)
+
+    @property
+    def has_discount(self):
+        return self.final_price < self.original_price
+
+    def __str__(self):
+        return f'{self.id}: {self.product.shop.name} - {self.product.title}'
 
 
 class Sizing(models.Model):

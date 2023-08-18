@@ -28,13 +28,16 @@ class ProductAttributeSerializer(serializers.ModelSerializer):
 
 
 class ProductPreviewSerializer(serializers.ModelSerializer):
+    has_discount = serializers.BooleanField(read_only=True)
+
     class Meta:
         model = Product
-        fields = ('id', 'title', 'preview_image', 'brand')
+        fields = ('id', 'title', 'preview_image', 'brand', 'has_discount')
 
 
 class VariantPreviewSerializer(serializers.ModelSerializer):
     product = serializers.IntegerField(source='product_id')
+    has_discount = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Variant
