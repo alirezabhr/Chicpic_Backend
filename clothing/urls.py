@@ -15,4 +15,5 @@ urlpatterns = [
     path('search/products/', views.ProductSearch.as_view(), name='search_products'),
     path('save/', views.SaveVariantView.as_view(), name='save_variant'),
     path('track/', views.TrackVariantView.as_view(), name='track_variant'),
+    path('saved/<int:user_id>/', views.SavedVariantsView.as_view(), name='saved_variants'),
 ]

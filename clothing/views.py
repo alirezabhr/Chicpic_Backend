@@ -200,3 +200,10 @@ class TrackVariantView(APIView):
         tracked_variant.save()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SavedVariantsView(ListAPIView):
+    serializer_class = VariantPreviewSerializer
+
+    def get_queryset(self):
+        return Variant.objects.filter(savedvariant__user_id=self.kwargs.get('user_id'), savedvariant__is_deleted=False)
