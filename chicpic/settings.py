@@ -50,7 +50,7 @@ INSTALLED_APPS = [
 
     # Local Apps
     'user.apps.UserConfig',
-    'clothing.apps.ProductConfig',
+    'clothing.apps.ClothingConfig',
 ]
 
 MIDDLEWARE = [
