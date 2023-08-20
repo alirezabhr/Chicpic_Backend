@@ -150,11 +150,12 @@ class ProductSearch(ListAPIView):
 class SaveVariantView(APIView):
     serializer = SavedVariantSerializer
 
-    def get_queryset(self):
-        return SavedVariant.objects.filter(user_id=self.kwargs.get('user'), variant_id=self.kwargs.get('variant'))
+    def get_object(self):
+        return SavedVariant.objects.filter(user_id=self.request.data.get('user'),
+                                             variant_id=self.request.data.get('variant')).first()
 
     def post(self, request, *args, **kwargs):
-        saved_variant = self.get_queryset().first()
+        saved_variant = self.get_object()
 
         if saved_variant is None:
             serializer = self.serializer(data=request.data)
@@ -167,7 +168,7 @@ class SaveVariantView(APIView):
             return Response(status=status.HTTP_201_CREATED)
 
     def delete(self, request, *args, **kwargs):
-        saved_variant = self.get_queryset().first()
+        saved_variant = self.get_object()
         saved_variant.is_deleted = True
         saved_variant.save()
 
@@ -178,11 +179,12 @@ class SaveVariantView(APIView):
 class TrackVariantView(APIView):
     serializer = TrackedVariantSerializer
 
-    def get_queryset(self):
-        return TrackedVariant.objects.filter(user_id=self.kwargs.get('user'), variant_id=self.kwargs.get('variant'))
+    def get_object(self):
+        return TrackedVariant.objects.filter(user_id=self.request.data.get('user'),
+                                             variant_id=self.request.data.get('variant')).first()
 
     def post(self, request, *args, **kwargs):
-        tracked_variant = self.get_queryset().first()
+        tracked_variant = self.get_object()
 
         if tracked_variant is None:
             serializer = self.serializer(data=request.data)
@@ -195,7 +197,7 @@ class TrackVariantView(APIView):
             return Response(status=status.HTTP_201_CREATED)
 
     def delete(self, request, *args, **kwargs):
-        tracked_variant = self.get_queryset().first()
+        tracked_variant = self.get_object()
         tracked_variant.is_deleted = True
         tracked_variant.save()
 
