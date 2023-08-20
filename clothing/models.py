@@ -8,9 +8,11 @@ class Category(models.Model):
     title = models.CharField(max_length=40)
     gender = models.CharField(max_length=1, choices=GenderChoices.choices)
     image = models.ImageField(upload_to='category_images/')
+    priority = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
         verbose_name_plural = 'Categories'
+        ordering = ('priority',)
 
     def __str__(self):
         return f'{self.title} / {self.get_gender_display()}'
@@ -128,7 +130,7 @@ class Variant(models.Model):
         return self.final_price < self.original_price
 
     def __str__(self):
-        return f'{self.id}: {self.product.shop.name} - {self.product.title}'
+        return str(self.id)
 
 
 class Sizing(models.Model):
