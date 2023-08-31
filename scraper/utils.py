@@ -21,7 +21,7 @@ def remove_html_tags(html_data: str):
 
 
 def find_proper_choice(choices: list, key: str) -> str:
-    # Choices should be a list of tuples contain database value and human readable text
+    # Choices should be a list of tuples contain database value and human-readable text
     for choice_db_value, human_readable_text in choices:
         if choice_db_value.lower() == key.lower() or human_readable_text.lower() == key.lower():
             return choice_db_value
@@ -29,16 +29,30 @@ def find_proper_choice(choices: list, key: str) -> str:
     raise Exception(f'Choice not found. choices: {choices}, key: {key}')
 
 
-def save_data_file(file_full_path: str, data: list):
-    # Make directory if does not exist
-    os.makedirs(os.path.dirname(file_full_path), exist_ok=True)
+def save_data_file(file_relative_path: str, data: list):
+    # Get absolute address of this package
+    package_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # save data in file
-    with open(file_full_path, 'w') as f:
+    # Get absolute address of file
+    file_path = os.path.join(package_dir, file_relative_path)
+
+    # Make directory if it does not exist
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+    # Save data in file
+    with open(file_path, 'w') as f:
         f.write(json.dumps(data))
 
 
 def read_data_json_file(file_path: str):
+    # Get absolute address of this package
+    package_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Get absolute address of file
+    file_path = os.path.join(package_dir, file_path)
+
+    # Read data from file
     with open(file_path, 'r') as f:
         data = json.loads(f.read())
+
     return data
