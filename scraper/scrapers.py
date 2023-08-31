@@ -40,7 +40,7 @@ class ShopifyScraper(ABC):
 
     def save_products(self, products: list):
         file_path = constants.SCRAPED_PRODUCTS_FILE_PATH.format(shop_name=self.shop.name)
-        utils.save_data_file(file_full_path=file_path, data=products)
+        utils.save_data_file(file_relative_path=file_path, data=products)
 
     @staticmethod
     def get_vendor_counts(products: list) -> Counter:
@@ -58,17 +58,12 @@ class ShopifyScraper(ABC):
         return Counter(map(lambda product: product['product_type'], products))
 
     @staticmethod
-    def get_attribute_counts(products: list) -> dict:
-        product_attributes = dict()
-
+    def get_attribute_counts(products: list) -> Counter:
+        c = Counter()
         for product in products:
-            for opt_name in list(map(lambda opt: opt['name'], product['options'])):
-                if opt_name not in product_attributes.keys():
-                    product_attributes[opt_name] = 1
-                else:
-                    product_attributes[opt_name] += 1
-
-        return product_attributes
+            for opt in product['options']:
+                c.update([opt['name']])
+        return c
 
     @staticmethod
     def get_all_option_value(products: list, option_name: str) -> Counter:

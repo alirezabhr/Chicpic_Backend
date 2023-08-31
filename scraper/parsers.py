@@ -3,7 +3,7 @@ import os
 from abc import ABC, abstractmethod
 from collections import Counter
 
-from scrapers import utils, constants
+from scraper import utils, constants
 
 
 class ShopifyParser(ABC):
@@ -49,7 +49,7 @@ class ShopifyParser(ABC):
 
     def save_products(self, products: list):
         file_path = constants.PARSED_PRODUCTS_FILE_PATH.format(shop_name=self.shop.name)
-        utils.save_data_file(file_full_path=file_path, data=products)
+        utils.save_data_file(file_relative_path=file_path, data=products)
 
     @staticmethod
     def parsed_product_attribute_position(product: dict, attribute_name: str):
