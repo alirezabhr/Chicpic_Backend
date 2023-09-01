@@ -7,12 +7,11 @@ from abc import ABC
 
 from scraper import utils, constants
 
-from user.models import GenderChoices
-
 # Set up the Django settings module
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "chicpic.settings")
 django.setup()
 
+from user.models import GenderChoices
 from clothing.models import Category, Shop, Attribute, Product, ProductAttribute, Variant, Sizing
 
 
@@ -30,11 +29,11 @@ class DataConverter(ABC):
             datefmt="%Y-%m-%d %H:%M:%S",
         )
 
-        # Create log file if does not exit
+        # Create log file if it does not exit
         if not os.path.isdir(constants.LOGS_DIR):
             os.makedirs(constants.LOGS_DIR)
 
-        log_file_path = constants.LOGS_FILE_PATH.format(module_name='converters.log')
+        log_file_path = constants.LOGS_FILE_PATH.format(module_name='converters')
 
         if not os.path.exists(log_file_path):
             open(log_file_path, "w").close()
