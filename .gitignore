@@ -411,4 +411,7 @@ media/*
 !media/fixtures
 
 scraper/data
+scraper/logs
 
+# Database data directory
+db_data/
