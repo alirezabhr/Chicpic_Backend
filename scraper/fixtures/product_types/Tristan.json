@@ -1,4 +1,10 @@
 {
+  "FL01001": {
+    "gender": "Women",
+    "category": "Underwear",
+    "is_acceptable": false,
+    "size_guide": null
+  },
   "FA08001": {
     "gender": "Women",
     "category": "Shoes",
