@@ -419,7 +419,8 @@ class TristanParser(ShopifyParser):
     def parse_products(self, scraped_products: list):
         scraped_product_types = set(map(lambda p: p['product_type'], scraped_products))
         current_product_types = set(self.PRODUCT_TYPES.keys())
-        assert current_product_types == scraped_product_types, scraped_product_types.difference(current_product_types)
+        assert scraped_product_types.issubset(current_product_types),\
+            'Some scraped product types are not in current product types'
         return super().parse_products(scraped_products)
 
     def _get_color_option_position(self, product: dict):
@@ -500,6 +501,12 @@ class ReebokParser(ShopifyParser):
 
         if any(word.lower() in self.UNACCEPTABLE_TAGS for word in product['title'].split()):
             return True
+
+        # TODO: refactor and fix it
+        if 'Footwear' in product['vendor']:
+            for opt in product['options']:
+                if opt['name'] == 'Size':
+                    return '/' in opt['values'][0]
 
         return False
 
