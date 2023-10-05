@@ -71,6 +71,12 @@
     "is_acceptable": true,
     "size_guide": "Women-Tops"
   },
+  "FV04002": {
+    "gender": "Women",
+    "category": "Sweaters-Cardigans",
+    "is_acceptable": true,
+    "size_guide": "Women-Tops"
+  },
   "FV04003": {
     "gender": "Women",
     "category": "Sweaters-Cardigans",
@@ -320,6 +326,12 @@
   "HA10001": {
     "gender": "Men",
     "category": "Miscellaneous-Accessories",
+    "is_acceptable": false,
+    "size_guide": null
+  },
+  "FA02001": {
+    "gender": "Women",
+    "category": "Gloves",
     "is_acceptable": false,
     "size_guide": null
   },

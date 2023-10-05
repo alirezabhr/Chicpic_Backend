@@ -420,7 +420,7 @@ class TristanParser(ShopifyParser):
         scraped_product_types = set(map(lambda p: p['product_type'], scraped_products))
         current_product_types = set(self.PRODUCT_TYPES.keys())
         assert scraped_product_types.issubset(current_product_types),\
-            'Some scraped product types are not in current product types'
+                f'Some scraped product types are not in current product types.\ndifferences: {scraped_product_types.difference(current_product_types)}'
         return super().parse_products(scraped_products)
 
     def _get_color_option_position(self, product: dict):
