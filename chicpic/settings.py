@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 import environ
-
+import sentry_sdk
 
 env = environ.Env()
 environ.Env.read_env()
@@ -31,6 +31,13 @@ SECRET_KEY = env.str('SECRET_KEY')
 DEBUG = env.bool('DEBUG', default=False)
 
 ALLOWED_HOSTS = []
+
+sentry_sdk.init(
+    dsn=env.str('SENTRY_DSN'),
+    environment=env.str('SENTRY_ENVIRONMENT'),
+    traces_sample_rate=1.0,
+    profiles_sample_rate=1.0,
+)
 
 
 # Application definition
