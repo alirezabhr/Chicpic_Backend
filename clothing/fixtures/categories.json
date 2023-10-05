@@ -4,7 +4,8 @@
     "fields": {
       "title": "Tops & Shirts",
       "gender": "W",
-      "image": "fixtures/categories/women_top.png"
+      "image": "fixtures/categories/women_top.png",
+      "priority": 1
     }
   },
   {
@@ -12,7 +13,8 @@
     "fields": {
       "title": "Dresses",
       "gender": "W",
-      "image": "fixtures/categories/women_dress.png"
+      "image": "fixtures/categories/women_dress.png",
+      "priority": 2
     }
   },
   {
@@ -20,7 +22,8 @@
     "fields": {
       "title": "Bottoms",
       "gender": "W",
-      "image": "fixtures/categories/women_bottom.png"
+      "image": "fixtures/categories/women_bottom.png",
+      "priority": 4
     }
   },
   {
@@ -28,7 +31,8 @@
     "fields": {
       "title": "Outerwear",
       "gender": "W",
-      "image": "fixtures/categories/women_outwear.png"
+      "image": "fixtures/categories/women_outerwear.png",
+      "priority": 3
     }
   },
   {
@@ -36,7 +40,8 @@
     "fields": {
       "title": "Activewear",
       "gender": "W",
-      "image": "fixtures/categories/women_activewear.png"
+      "image": "fixtures/categories/women_activewear.png",
+      "priority": 5
     }
   },
   {
@@ -44,7 +49,8 @@
     "fields": {
       "title": "Sweaters & Cardigans",
       "gender": "W",
-      "image": "fixtures/categories/women_sweater.png"
+      "image": "fixtures/categories/women_sweater.png",
+      "priority": 6
     }
   },
   {
@@ -52,7 +58,8 @@
     "fields": {
       "title": "Lingerie and Intimates",
       "gender": "W",
-      "image": "fixtures/categories/women_lingerie.png"
+      "image": "fixtures/categories/women_lingerie.png",
+      "priority": 10
     }
   },
   {
@@ -60,7 +67,8 @@
     "fields": {
       "title": "Shorts",
       "gender": "W",
-      "image": "fixtures/categories/women_shorts.png"
+      "image": "fixtures/categories/women_shorts.png",
+      "priority": 7
     }
   },
   {
@@ -68,7 +76,8 @@
     "fields": {
       "title": "Sleepwear & Loungewear",
       "gender": "W",
-      "image": "fixtures/categories/women_sleepwear.png"
+      "image": "fixtures/categories/women_sleepwear.png",
+      "priority": 9
     }
   },
   {
@@ -76,7 +85,8 @@
     "fields": {
       "title": "Shoes",
       "gender": "W",
-      "image": "fixtures/categories/women_shoes.png"
+      "image": "fixtures/categories/women_shoes.png",
+      "priority": 8
     }
   },
   {
@@ -84,7 +94,8 @@
     "fields": {
       "title": "Shirts",
       "gender": "M",
-      "image": "fixtures/categories/men_shirt.png"
+      "image": "fixtures/categories/men_shirt.png",
+      "priority": 1
     }
   },
   {
@@ -92,7 +103,8 @@
     "fields": {
       "title": "T-Shirts",
       "gender": "M",
-      "image": "fixtures/categories/men_t_shirt.png"
+      "image": "fixtures/categories/men_t_shirt.png",
+      "priority": 2
     }
   },
   {
@@ -100,7 +112,8 @@
     "fields": {
       "title": "Bottoms",
       "gender": "M",
-      "image": "fixtures/categories/men_bottom.png"
+      "image": "fixtures/categories/men_bottom.png",
+      "priority": 4
     }
   },
   {
@@ -108,7 +121,8 @@
     "fields": {
       "title": "Outerwear",
       "gender": "M",
-      "image": "fixtures/categories/men_outwear.png"
+      "image": "fixtures/categories/men_outerwear.png",
+      "priority": 3
     }
   },
   {
@@ -116,7 +130,8 @@
     "fields": {
       "title": "Activewear",
       "gender": "M",
-      "image": "fixtures/categories/men_activewear.png"
+      "image": "fixtures/categories/men_activewear.png",
+      "priority": 5
     }
   },
   {
@@ -124,7 +139,8 @@
     "fields": {
       "title": "Sweaters",
       "gender": "M",
-      "image": "fixtures/categories/men_sweater.png"
+      "image": "fixtures/categories/men_sweater.png",
+      "priority": 6
     }
   },
   {
@@ -132,7 +148,8 @@
     "fields": {
       "title": "Underwear",
       "gender": "M",
-      "image": "fixtures/categories/men_underwear.png"
+      "image": "fixtures/categories/men_underwear.png",
+      "priority": 10
     }
   },
   {
@@ -140,7 +157,8 @@
     "fields": {
       "title": "Shorts",
       "gender": "M",
-      "image": "fixtures/categories/men_short.png"
+      "image": "fixtures/categories/men_short.png",
+      "priority": 7
     }
   },
   {
@@ -148,7 +166,8 @@
     "fields": {
       "title": "Sleepwear & Loungewear",
       "gender": "M",
-      "image": "fixtures/categories/men_sleepwear.png"
+      "image": "fixtures/categories/men_sleepwear.png",
+      "priority": 9
     }
   },
   {
@@ -156,7 +175,8 @@
     "fields": {
       "title": "Shoes",
       "gender": "M",
-      "image": "fixtures/categories/men_shoes.png"
+      "image": "fixtures/categories/men_shoes.png",
+      "priority": 8
     }
   }
 ]
