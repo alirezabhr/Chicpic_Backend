@@ -147,7 +147,7 @@ class ShopifyParser(ABC):
 
 
 class KitAndAceParser(ShopifyParser):
-    UNACCEPTABLE_PRODUCT_TYPES = ['', 'Scarves', 'Underwear & Socks', 'Gift Cards', 'Hats']
+    UNACCEPTABLE_PRODUCT_TYPES = ['', 'Scarves', 'Underwear & Socks', 'Gift Cards', 'Hats', 'Shopping Totes', 'Gloves & Mittens']
     UNACCEPTABLE_TAGS = ['Accessories']
 
     def __init__(self):

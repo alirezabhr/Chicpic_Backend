@@ -21,13 +21,28 @@
   },
   {
     "gender": "Women",
+    "title": "Hoodies",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Women",
     "title": "Scarves & Shawls",
+    "equivalent_chicpic_name": "Sweaters & Cardigans"
+  },
+  {
+    "gender": "Women",
+    "title": "Sweater",
     "equivalent_chicpic_name": "Sweaters & Cardigans"
   },
   {
     "gender": "Women",
     "title": "Coats & Jackets",
     "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Women",
+    "title": "Dress",
+    "equivalent_chicpic_name": "Dresses"
   },
   {
     "gender": "Women",
@@ -42,7 +57,7 @@
   {
     "gender": "Women",
     "title": "Vests",
-    "equivalent_chicpic_name": "Sweaters & Cardigans"
+    "equivalent_chicpic_name": "Outerwear"
   },
   {
     "gender": "Women",
@@ -61,8 +76,18 @@
   },
   {
     "gender": "Men",
+    "title": "Sweater",
+    "equivalent_chicpic_name": "Sweaters"
+  },
+  {
+    "gender": "Men",
     "title": "Sleepwear & Loungewear",
     "equivalent_chicpic_name": "Sleepwear & Loungewear"
+  },
+  {
+    "gender": "Men",
+    "title": "Vests",
+    "equivalent_chicpic_name": "Outerwear"
   },
   {
     "gender": "Men",
@@ -90,3 +115,4 @@
     "equivalent_chicpic_name": "Shorts"
   }
 ]
+
