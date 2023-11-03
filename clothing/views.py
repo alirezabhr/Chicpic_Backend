@@ -11,6 +11,67 @@ from .serializers import CategorySerializer, ShopSerializer, ProductPreviewSeria
     VariantPreviewSerializer, ProductDetailSerializer, SavedVariantSerializer, TrackedVariantSerializer
 
 
+def get_best_fit_variant(user_additional: UserAdditional, variants_queryset):
+    # TODO: handle One Size Fit All (OSFA) products
+    gender_interested = user_additional.gender_interested
+    shoulder_size = user_additional.shoulder_size
+    bust_size = user_additional.bust_size
+    chest_size = user_additional.chest_size
+    waist_size = user_additional.waist_size
+    hips_size = user_additional.hips_size
+    inseam = user_additional.inseam
+    shoe_size = user_additional.shoe_size
+
+    # Filter variants based on gender and categories
+    queryset = variants_queryset.filter(
+        product__categories__gender=gender_interested
+    ).annotate(
+        diff_sum=Sum(
+            Case(
+                When(sizings__option='Shoulder', then=Abs(F('sizings__value') - shoulder_size)),
+                When(sizings__option='Bust', then=Abs(F('sizings__value') - bust_size)),
+                When(sizings__option='Chest', then=Abs(F('sizings__value') - chest_size)),
+                When(sizings__option='Waist', then=Abs(F('sizings__value') - waist_size)),
+                When(sizings__option='Hips', then=Abs(F('sizings__value') - hips_size)),
+                When(sizings__option='Inseam', then=Abs(F('sizings__value') - inseam)),
+                When(sizings__option='Shoe Size', then=Abs(F('sizings__value') - shoe_size)),
+                output_field=DecimalField(max_digits=4, decimal_places=1)
+            )
+        )
+    ).annotate(
+        rn=Window(
+            expression=RowNumber(),
+            partition_by=[F('product_id')],
+            order_by=(F('diff_sum'),)
+        )
+    ).filter(rn=1, is_available=True).order_by('-product_id', 'id')
+
+    return queryset
+
+
+def get_middle_variants(variants_queryset):
+    queryset = variants_queryset.filter(
+        is_available=True
+    ).annotate(
+        row_number=Window(
+            expression=RowNumber(),
+            partition_by=[F('product_id')],
+            order_by=(F('id'),)
+        ),
+        num_variants=Count('product__variants', distinct=True, output_field=IntegerField())
+    ).annotate(
+        middle_variant_id=Case(
+            When(row_number=Ceil(F('num_variants') / 2), then=F('id')),
+            default=None,
+            output_field=IntegerField()
+        )
+    ).filter(
+        middle_variant_id=F('id')
+    ).order_by('-product_id')
+
+    return queryset
+
+
 class CategoriesView(ListAPIView):
     serializer_class = CategorySerializer
     pagination_class = None
@@ -30,6 +91,25 @@ class CategoryProductsView(ListAPIView):
         return category.products.all()
 
 
+class CategoryVariantsView(ListAPIView):
+    serializer_class = VariantPreviewSerializer
+
+    def get_queryset(self):
+        category_variants = Variant.objects.filter(product__categories__id=self.kwargs.get('category_id'))
+
+        try:
+            user_additional = self.request.user.additional
+        except UserAdditional.DoesNotExist:
+            user_additional = None
+
+        if user_additional is not None:  # find the best fit clothes in that category if user additional exists
+            queryset = get_best_fit_variant(user_additional, category_variants)
+        else:
+            queryset = get_middle_variants(category_variants)
+
+        return queryset
+
+
 class ShopsView(ListAPIView):
     serializer_class = ShopSerializer
     queryset = Shop.objects.all()
@@ -44,7 +124,26 @@ class ShopProductsView(ListAPIView):
 
 class VariantsView(ListAPIView):
     serializer_class = VariantPreviewSerializer
-    queryset = Variant.objects.all()
+    
+    def get_queryset(self):
+        discount = self.request.query_params.get('discount')
+        if discount is not None:
+            variants_queryset = Variant.objects.annotate(discount=(F('original_price') - F('final_price')) / F(
+                'original_price') * 100).filter(discount__gte=discount).distinct()
+        else:
+            variants_queryset = Variant.objects.all()
+
+        try:
+            user_additional = self.request.user.additional
+        except UserAdditional.DoesNotExist:
+            user_additional = None
+
+        if user_additional is not None:  # find the best fit clothes in that category if user additional exists
+            queryset = get_best_fit_variant(user_additional, variants_queryset)
+        else:
+            queryset = get_middle_variants(variants_queryset)
+
+        return queryset
 
 
 class ExploreVariantsView(ListAPIView):
@@ -59,58 +158,9 @@ class ExploreVariantsView(ListAPIView):
             user_additional = None
 
         if user_additional is not None:  # find the best fit clothes if user additional exists
-            # TODO: handle One Size Fit All (OSFA) products
-            gender_interested = user_additional.gender_interested
-            shoulder_size = user_additional.shoulder_size
-            bust_size = user_additional.bust_size
-            chest_size = user_additional.chest_size
-            waist_size = user_additional.waist_size
-            hips_size = user_additional.hips_size
-            inseam = user_additional.inseam
-            shoe_size = user_additional.shoe_size
-
-            # Filter variants based on gender and categories
-            queryset = Variant.objects.filter(
-                product__categories__gender=gender_interested
-            ).annotate(
-                diff_sum=Sum(
-                    Case(
-                        When(sizings__option='Shoulder', then=Abs(F('sizings__value') - shoulder_size)),
-                        When(sizings__option='Bust', then=Abs(F('sizings__value') - bust_size)),
-                        When(sizings__option='Chest', then=Abs(F('sizings__value') - chest_size)),
-                        When(sizings__option='Waist', then=Abs(F('sizings__value') - waist_size)),
-                        When(sizings__option='Hips', then=Abs(F('sizings__value') - hips_size)),
-                        When(sizings__option='Inseam', then=Abs(F('sizings__value') - inseam)),
-                        When(sizings__option='Shoe Size', then=Abs(F('sizings__value') - shoe_size)),
-                        output_field=DecimalField(max_digits=4, decimal_places=1)
-                    )
-                )
-            ).annotate(
-                rn=Window(
-                    expression=RowNumber(),
-                    partition_by=[F('product_id')],
-                    order_by=(F('diff_sum'),)
-                )
-            ).filter(rn=1, is_available=True).order_by('-product_id', 'id')
+            queryset = get_best_fit_variant(user_additional, Variant.objects.all())
         else:
-            queryset = Variant.objects.filter(
-                is_available=True
-            ).annotate(
-                row_number=Window(
-                    expression=RowNumber(),
-                    partition_by=[F('product_id')],
-                    order_by=(F('id'),)
-                ),
-                num_variants=Count('product__variants', distinct=True, output_field=IntegerField())
-            ).annotate(
-                middle_variant_id=Case(
-                    When(row_number=Ceil(F('num_variants') / 2), then=F('id')),
-                    default=None,
-                    output_field=IntegerField()
-                )
-            ).filter(
-                middle_variant_id=F('id')
-            ).order_by('-product_id')
+            queryset = get_middle_variants(Variant.objects.all())
 
         return queryset
 
@@ -152,7 +202,7 @@ class SaveVariantView(APIView):
 
     def get_object(self):
         return SavedVariant.objects.filter(user_id=self.request.data.get('user'),
-                                             variant_id=self.request.data.get('variant')).first()
+                                           variant_id=self.request.data.get('variant')).first()
 
     def post(self, request, *args, **kwargs):
         saved_variant = self.get_object()
