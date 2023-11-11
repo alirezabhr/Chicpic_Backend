@@ -171,3 +171,20 @@ class OTPVerificationSerializer(serializers.Serializer):
         if otp.expire_at < timezone.now():
             raise serializers.ValidationError({"code": "OTP code has expired."})
         return attrs
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(min_length=8, write_only=True, required=True)
+    password2 = serializers.CharField(min_length=8, write_only=True, required=True)
+
+    def validate(self, attrs):
+        try:
+            User.objects.get(email=attrs['email'])
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User with this email does not exist.")
+
+        if attrs.get('password') != attrs.get('password2'):
+            raise serializers.ValidationError({"password": "Password fields didn't match."})
+
+        return attrs

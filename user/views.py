@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 
 from .models import UserAdditional
 from .serializers import UserRegistrationSerializer, UserLoginSerializer, UserReadonlySerializer, \
-    OTPRequestSerializer, OTPVerificationSerializer, UserAdditionalSerializer
+    OTPRequestSerializer, OTPVerificationSerializer, UserAdditionalSerializer, ResetPasswordSerializer
 
 
 class OncePerMinuteThrottle(UserRateThrottle):
@@ -62,6 +62,21 @@ class VerifyOTPView(APIView):
         if ser.is_valid():
             user = get_user_model().objects.get(email=ser.data.get('email'))
             user.is_verified = True
+            user.save()
+            return Response(status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# TODO: Fix security issues. Everyone can change password of any user.
+class ResetPasswordView(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        ser = ResetPasswordSerializer(data=request.data)
+        if ser.is_valid():
+            user = get_user_model().objects.get(email=ser.data.get('email'))
+            user.set_password(request.data.get('password'))
             user.save()
             return Response(status=status.HTTP_202_ACCEPTED)
         else:
