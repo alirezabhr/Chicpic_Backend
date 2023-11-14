@@ -3,8 +3,19 @@ import os
 import re
 import logging
 
-
 def log_function_call(func):
+
+    def wrapper(*args, **kwargs):
+        try:
+            result = func(*args, **kwargs)
+            return result
+        except Exception as e:
+            logging.error(f"Error in function {func.__name__} with args {args} and kwargs {kwargs}")
+            raise e
+
+    return wrapper
+
+def log_function_call2(func):
     logger = logging.getLogger(func.__name__)
 
     def wrapper(*args, **kwargs):
