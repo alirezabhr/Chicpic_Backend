@@ -79,8 +79,10 @@ class CategoriesView(ListAPIView):
     def get_queryset(self):
         gender = self.request.query_params.get('gender')
         if gender is not None:
-            return Category.objects.filter(gender=self.request.query_params.get('gender'))
-        return Category.objects.all()
+            # Categories with the gender specified and which has products
+            return Category.objects.filter(gender=gender, products__isnull=False).distinct()
+        else:
+            return Category.objects.all()
 
 
 class CategoryProductsView(ListAPIView):
