@@ -275,6 +275,12 @@
     "is_acceptable": false,
     "size_guide": null
   },
+  "HA02001": {
+    "gender": "Men",
+    "category": "Gloves",
+    "is_acceptable": false,
+    "size_guide": null
+  },
   "HL01002": {
     "gender": "Men",
     "category": "Underwear",
