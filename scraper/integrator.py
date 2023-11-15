@@ -4,7 +4,7 @@ import os
 from django.db import transaction, IntegrityError, DataError
 from scraper import constants, scrapers, parsers, converters
 
-from scraper.converters import Product, ProductAttribute, Variant
+from scraper.converters import Product, ProductAttribute, Variant, Sizing
 
 
 class DataIntegrator:
@@ -53,19 +53,30 @@ class DataIntegrator:
                 shop_obj = self._converter.shop
                 shop_obj.save()
 
+                # Delete products that are not in the parsed file
+                Product.objects.filter(
+                    shop_id=shop_obj.id,
+                    is_deleted=False
+                ).exclude(
+                    original_id__in=[p['product_id'] for p in self._parsed_product]
+                ).update(is_deleted=True)
+
                 for product in self._parsed_product:
+                    product_tmp_obj = self._converter.convert_product(product=product, shop=shop_obj)
+
                     # Check if the product already exists
                     try:
-                        product_obj = Product.objects.get(original_id=product['product_id'])
+                        product_obj = Product.objects.get(original_id=product_tmp_obj.original_id)
                         # Product already exists, update fields
-                        product_obj.brand = product['brand']
-                        product_obj.title = product['title']
-                        product_obj.description = product['description']
+                        product_obj.brand = product_tmp_obj.brand
+                        product_obj.title = product_tmp_obj.title
+                        product_obj.description = product_tmp_obj.description
                         product_obj.is_deleted = False  # Reset is_deleted flag
                         updated_objects_count['Products'] += 1
                     except Product.DoesNotExist:
                         # Product doesn't exist, create a new one
-                        product_obj = self._converter.convert_product(product=product, shop=shop_obj)
+                        product_obj = product_tmp_obj
+
                         created_objects_count['Products'] += 1
 
                     product_obj.save()
@@ -97,31 +108,43 @@ class DataIntegrator:
 
                     # Handle variants
                     for v in product.get('variants'):
+                        variant_tmp_obj = self._converter.convert_variant(variant=v, product=product_obj)
+
                         try:
-                            variant_obj = Variant.objects.get(original_id=v['variant_id'])
+                            variant_obj = Variant.objects.get(original_id=variant_tmp_obj.original_id)
                             # Variant already exists, update fields
-                            variant_obj.image_src = v['image_src']
-                            variant_obj.link = v['link']
-                            variant_obj.original_price = v['original_price']
-                            variant_obj.final_price = v['final_price']
-                            variant_obj.is_available = v['is_available']
-                            variant_obj.color_hex = v['color_hex']
-                            variant_obj.size = v['size']
-                            variant_obj.option1 = v['option1']
-                            variant_obj.option2 = v['option2']
+                            variant_obj.image_src = variant_tmp_obj.image_src
+                            variant_obj.link = variant_tmp_obj.link
+                            variant_obj.original_price = variant_tmp_obj.original_price
+                            variant_obj.final_price = variant_tmp_obj.final_price
+                            variant_obj.is_available = variant_tmp_obj.is_available
+                            variant_obj.color_hex = variant_tmp_obj.color_hex
+                            variant_obj.size = variant_tmp_obj.size
+                            variant_obj.option1 = variant_tmp_obj.option1
+                            variant_obj.option2 = variant_tmp_obj.option2
                             updated_objects_count['Variants'] += 1
                         except Variant.DoesNotExist:
                             # Variant doesn't exist, create a new one
-                            variant_obj = self._converter.convert_variant(variant=v, product=product_obj)
+                            variant_obj = variant_tmp_obj
                             created_objects_count['Variants'] += 1
 
                         variant_obj.save()
 
                         # Handle sizings
-                        sizing_objects = self._converter.convert_sizings(product=product, variant=variant_obj)
-                        for sizing_obj in sizing_objects:
+                        sizing_tmp_objects = self._converter.convert_sizings(product=product, variant=variant_obj)
+                        for sizing_tmp_obj in sizing_tmp_objects:
+                            # Check if the sizing already exists
+                            try:
+                                sizing_obj = Sizing.objects.get(variant=variant_obj, option=sizing_tmp_obj.option)
+                                # Sizing already exists, update fields
+                                sizing_obj.value = sizing_tmp_obj.value
+                                updated_objects_count['Sizings'] += 1
+                            except Sizing.DoesNotExist:
+                                # Sizing doesn't exist, create a new one
+                                sizing_obj = sizing_tmp_obj
+                                created_objects_count['Sizings'] += 1
+
                             sizing_obj.save()
-                            created_objects_count['Sizings'] += 1
 
                 print("Created Objects:", created_objects_count)
                 print("Updated Objects:", updated_objects_count)
