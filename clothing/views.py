@@ -24,6 +24,7 @@ def get_best_fit_variant(user_additional: UserAdditional, variants_queryset):
 
     # Filter variants based on gender and categories
     queryset = variants_queryset.filter(
+        product__is_deleted=False,
         product__categories__gender=gender_interested
     ).annotate(
         diff_sum=Sum(
@@ -51,6 +52,7 @@ def get_best_fit_variant(user_additional: UserAdditional, variants_queryset):
 
 def get_middle_variants(variants_queryset):
     queryset = variants_queryset.filter(
+        product__is_deleted=False,
         is_available=True
     ).annotate(
         row_number=Window(
@@ -97,7 +99,8 @@ class CategoryVariantsView(ListAPIView):
     serializer_class = VariantPreviewSerializer
 
     def get_queryset(self):
-        category_variants = Variant.objects.filter(product__categories__id=self.kwargs.get('category_id'))
+        category_variants = Variant.objects.filter(product__categories__id=self.kwargs.get('category_id'),
+                                                   product__is_deleted=False)
 
         try:
             user_additional = self.request.user.additional
@@ -121,7 +124,7 @@ class ShopProductsView(ListAPIView):
     serializer_class = ProductPreviewSerializer
 
     def get_queryset(self):
-        return Product.objects.filter(shop_id=self.kwargs.get('shop_id'))
+        return Product.objects.filter(shop_id=self.kwargs.get('shop_id'), is_deleted=False)
 
 
 class VariantsView(ListAPIView):
@@ -130,10 +133,10 @@ class VariantsView(ListAPIView):
     def get_queryset(self):
         discount = self.request.query_params.get('discount')
         if discount is not None:
-            variants_queryset = Variant.objects.annotate(discount=(F('original_price') - F('final_price')) / F(
+            variants_queryset = Variant.objects.filter(product__is_deleted=False).annotate(discount=(F('original_price') - F('final_price')) / F(
                 'original_price') * 100).filter(discount__gte=discount).distinct()
         else:
-            variants_queryset = Variant.objects.all()
+            variants_queryset = Variant.objects.filter(product__is_deleted=False)
 
         try:
             user_additional = self.request.user.additional
@@ -173,9 +176,9 @@ class ProductsView(ListAPIView):
     def get_queryset(self):
         discount = self.request.query_params.get('discount')
         if discount is not None:
-            return Product.objects.annotate(discount=(F('variants__original_price') - F('variants__final_price')) / F(
+            return Product.objects.filter(is_deleted=False).annotate(discount=(F('variants__original_price') - F('variants__final_price')) / F(
                 'variants__original_price') * 100).filter(discount__gte=discount).distinct()
-        return Product.objects.all()
+        return Product.objects.filter(is_deleted=False)
 
 
 class ProductDetailView(RetrieveAPIView):
@@ -190,7 +193,7 @@ class ProductSearch(ListAPIView):
 
     def get_queryset(self):
         query = self.request.query_params.get('q')
-        return Product.objects.filter(
+        return Product.objects.filter(is_deleted=False).filter(
             Q(title__icontains=query) |
             Q(shop__name__icontains=query) |
             Q(brand__icontains=query) |
