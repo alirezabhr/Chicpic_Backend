@@ -104,7 +104,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class UserLoginSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=30)
     password = serializers.CharField(write_only=True, required=True)
-    additional = UserAdditionalSerializer(read_only=True)
+    additional = UserAdditionalSerializer(read_only=True, allow_null=True)
 
     class Meta:
         model = User
@@ -127,7 +127,10 @@ class UserLoginSerializer(serializers.ModelSerializer):
         attrs['email'] = user.email
         attrs['is_verified'] = user.is_verified
         attrs['tokens'] = user.tokens()
-        attrs['additional'] = user.additional
+        try:
+            attrs['additional'] = user.additional
+        except UserAdditional.DoesNotExist:
+            attrs['additional'] = None
         return attrs
 
 
