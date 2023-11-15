@@ -178,6 +178,7 @@ class KitAndAceDataConverter(DataConverter):
 
     def convert_variant(self, variant: dict, product: Product) -> Variant:
         return Variant(
+            original_id=variant['variant_id'],
             product=product,
             image_src=variant['image']['src'],
             link=variant['link'],

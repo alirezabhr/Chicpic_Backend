@@ -2,9 +2,9 @@ import logging
 import os
 
 from django.db import transaction, IntegrityError, DataError
-
-from clothing.models import Product, ProductAttribute, Variant
 from scraper import constants, scrapers, parsers, converters
+
+from scraper.converters import Product, ProductAttribute, Variant
 
 
 class DataIntegrator:
@@ -72,11 +72,9 @@ class DataIntegrator:
 
                     # Handle categories
                     categories = self._converter.convert_categories(product)
-                    # TODO: check the following statement
-                    product_obj.categories.bulk_update(categories, ['title'])
-                    # product_obj.categories.clear()
-                    # product_obj.categories.set(categories)
-                    # created_objects_count['Product Categories'] += len(categories)
+                    product_obj.categories.clear()
+                    product_obj.categories.set(categories)
+                    created_objects_count['Product Categories'] += len(categories)
 
                     # Handle attributes
                     for attr in product.get('attributes'):
