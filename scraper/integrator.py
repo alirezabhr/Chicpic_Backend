@@ -130,3 +130,63 @@ class DataIntegrator:
             self.logger.exception(error)
         except Exception as error:
             self.logger.exception(error)
+
+
+if __name__ == '__main__':
+    shops = {
+        constants.Shops.KIT_AND_ACE.value.name: {
+            'scraper': scrapers.KitAndAceScraper(),
+            'parser': parsers.KitAndAceParser(),
+            'converter': converters.KitAndAceDataConverter(),
+        },
+        constants.Shops.FRANK_AND_OAK.value.name: {
+            'scraper': scrapers.FrankAndOakScraper(),
+            'parser': parsers.FrankAndOakParser(),
+            'converter': converters.FrankAndOakDataConverter(),
+        },
+        constants.Shops.TRISTAN.value.name: {
+            'scraper': scrapers.TristanScraper(),
+            'parser': parsers.TristanParser(),
+            'converter': converters.TristanDataConverter(),
+        },
+        constants.Shops.REEBOK.value.name: {
+            'scraper': scrapers.ReebokScraper(),
+            'parser': parsers.ReebokParser(),
+            'converter': converters.ReebokDataConverter(),
+        },
+    }
+
+    shop_name = None
+    while shop_name not in shops.keys():
+        for shop in shops.keys():
+            print(f'[{shop}]')
+        shop_name = input('Please enter a shop name: ')
+
+    my_integrator = DataIntegrator(
+        scraper=shops[shop_name]['scraper'],
+        parser=shops[shop_name]['parser'],
+        converter=shops[shop_name]['converter'],
+    )
+
+    need_scrape = None
+    while need_scrape not in ['y', 'n']:
+        need_scrape = input('Do you want to scrape? (y/n): ')
+
+    if need_scrape == 'y':
+        my_integrator.scrape_save()
+
+    need_parse = None
+    while need_parse not in ['y', 'n']:
+        need_parse = input('Do you want to parse? (y/n): ')
+
+    if need_parse == 'y':
+        my_integrator.parse_save()
+    else:
+        my_integrator.load_parsed_products()
+
+    need_integrate = None
+    while need_integrate not in ['y', 'n']:
+        need_integrate = input('Do you want to integrate? (y/n): ')
+
+    if need_integrate == 'y':
+        my_integrator.integrate()
