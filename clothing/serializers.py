@@ -41,7 +41,8 @@ class VariantPreviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Variant
-        fields = '__all__'
+        fields = ('id', 'product', 'has_discount', 'image_src', 'link', 'original_price', 'final_price', 'is_available',
+                  'color_hex', 'size', 'option1', 'option2')
 
 
 class VariantDetailSerializer(serializers.ModelSerializer):

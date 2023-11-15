@@ -57,6 +57,7 @@ class DataConverter(ABC):
     @utils.log_function_call
     def convert_product(self, product: dict, shop: Shop) -> Product:
         return Product(
+            original_id=product['product_id'],
             shop=shop,
             brand=product['brand'],
             title=product['title'],
@@ -66,6 +67,7 @@ class DataConverter(ABC):
     @utils.log_function_call
     def convert_variant(self, variant: dict, product: Product) -> Variant:
         return Variant(
+            original_id=variant['variant_id'],
             product=product,
             image_src=variant['image']['src'],
             link=variant['link'],

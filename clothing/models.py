@@ -49,12 +49,14 @@ class Attribute(models.Model):
 
 
 class Product(models.Model):
+    original_id = models.BigIntegerField(unique=True)
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='products')
     brand = models.CharField(max_length=30)
     title = models.CharField(max_length=80)
     description = models.TextField(blank=True)
     categories = models.ManyToManyField(Category, related_name='products')
     created_at = models.DateTimeField(auto_now_add=True)
+    is_deleted = models.BooleanField(default=False)
 
     @property
     def variants(self):
@@ -110,6 +112,7 @@ def variant_image_upload_path(variant_obj, uploaded_file_name):
 
 
 class Variant(models.Model):
+    original_id = models.BigIntegerField(unique=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
     image_src = models.URLField(max_length=300)
     link = models.URLField(max_length=256)
