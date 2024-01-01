@@ -39,3 +39,4 @@ class Shops(Enum):
     FRANK_AND_OAK = ShopConstant(name='Frank and Oak', website='https://ca.frankandoak.com/')
     TRISTAN = ShopConstant(name='Tristan', website='https://www.tristanstyle.com/')
     REEBOK = ShopConstant(name='Reebok', website='https://www.reebok.ca/')
+    PAJAR = ShopConstant(name='Pajar', website='https://ca.pajar.com/')

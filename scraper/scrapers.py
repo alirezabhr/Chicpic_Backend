@@ -125,3 +125,10 @@ class ReebokScraper(ShopifyScraper):
 
     def __init__(self):
         super().__init__(self.SHOP)
+
+
+class PajarScraper(ShopifyScraper):
+    SHOP = constants.Shops.PAJAR.value
+
+    def __init__(self):
+        super().__init__(self.SHOP)

@@ -1,7 +1,10 @@
+import json
 import logging
 import os
 from abc import ABC, abstractmethod
 from collections import Counter
+
+import requests
 
 from scraper import utils, constants
 
@@ -112,6 +115,17 @@ class ShopifyParser(ABC):
     def _product_categories(self, product: dict) -> tuple:
         pass
 
+    # TODO: refactor and fix it
+    # @utils.log_function_call
+    # @abstractmethod
+    # def _variant_size(self, product: dict, variant: dict):
+    #     pass
+    #
+    # @utils.log_function_call
+    # @abstractmethod
+    # def _variant_color(self, product: dict, variant: dict):
+    #     pass
+
     @utils.log_function_call
     def _parse_product(self, product: dict):
         return {
@@ -126,6 +140,20 @@ class ShopifyParser(ABC):
             'variants': self._parse_variants(product),
             'attributes': self._parse_attributes(product),
         }
+
+    @utils.log_function_call
+    def _get_size_option_position(self, product: dict):
+        for opt in product['options']:
+            if opt['name'] == 'Size':
+                return opt['position']
+        return None
+
+    @utils.log_function_call
+    def _get_color_option_position(self, product: dict):
+        for opt in product['options']:
+            if opt['name'] == 'Color':
+                return opt['position']
+        return None
 
     @utils.log_function_call
     def parse_products(self, scraped_products: list):
@@ -147,23 +175,12 @@ class ShopifyParser(ABC):
 
 
 class KitAndAceParser(ShopifyParser):
-    UNACCEPTABLE_PRODUCT_TYPES = ['', 'Scarves', 'Underwear & Socks', 'Gift Cards', 'Hats', 'Shopping Totes', 'Gloves & Mittens']
+    UNACCEPTABLE_PRODUCT_TYPES = ['', 'Scarves', 'Underwear & Socks', 'Gift Cards', 'Hats', 'Shopping Totes',
+                                  'Gloves & Mittens']
     UNACCEPTABLE_TAGS = ['Accessories']
 
     def __init__(self):
         super().__init__(shop=constants.Shops.KIT_AND_ACE.value)
-
-    def _get_color_option_position(self, product: dict):
-        for opt in product['options']:
-            if opt['name'] == 'Color':
-                return opt['position']
-        return None
-
-    def _get_size_option_position(self, product: dict):
-        for opt in product['options']:
-            if opt['name'] == 'Size':
-                return opt['position']
-        return None
 
     def _product_categories(self, product: dict) -> tuple:
         return (product['product_type'],)
@@ -248,9 +265,6 @@ class FrankAndOakParser(ShopifyParser):
             return True  # Remove products with more than 1 gender because of confusion in frank & oak size guide
         return super().is_unacceptable_product(product)
 
-    def _product_categories(self, product: dict):
-        return (product['product_type'],)
-
     def _product_genders(self, product: dict) -> list:
         division_key = 'division:'
         division_tags = list(
@@ -314,12 +328,6 @@ class FrankAndOakParser(ShopifyParser):
             variants.append(v)
 
         return variants
-
-    def _get_size_option_position(self, product: dict):
-        for opt in product['options']:
-            if opt['name'] == 'Size':
-                return opt['position']
-        return None
 
     def _product_color(self, product: dict):
         tag_key = 'color_hex:'
@@ -419,19 +427,13 @@ class TristanParser(ShopifyParser):
     def parse_products(self, scraped_products: list):
         scraped_product_types = set(map(lambda p: p['product_type'], scraped_products))
         current_product_types = set(self.PRODUCT_TYPES.keys())
-        assert scraped_product_types.issubset(current_product_types),\
-                f'Some scraped product types are not in current product types.\ndifferences: {scraped_product_types.difference(current_product_types)}'
+        assert scraped_product_types.issubset(current_product_types), \
+            f'Some scraped product types are not in current product types.\ndifferences: {scraped_product_types.difference(current_product_types)}'
         return super().parse_products(scraped_products)
 
     def _get_color_option_position(self, product: dict):
         for opt in product['options']:
             if opt['name'] == 'Color' or opt['name'] == 'Colour':
-                return opt['position']
-        return None
-
-    def _get_size_option_position(self, product: dict):
-        for opt in product['options']:
-            if opt['name'] == 'Size':
                 return opt['position']
         return None
 
@@ -589,8 +591,142 @@ class ReebokParser(ShopifyParser):
         if len(color_tags) > 0:
             return color_tags[0]
 
-    def _get_size_option_position(self, product: dict):
-        for opt in product['options']:
-            if opt['name'] == 'Size':
-                return opt['position']
-        return None
+
+class PajarParser(ShopifyParser):
+    UNACCEPTABLE_PRODUCT_TYPES = ['Repair - Heritage', ]
+    UNACCEPTABLE_TAGS = ['ACCESSORIES', 'kids', 'fits: Kids', 'BOYS', 'GIRLS', 'pup', 'fits: Pup']
+
+    def __init__(self):
+        super().__init__(shop=constants.Shops.PAJAR.value)
+
+    def _product_brand(self, product: dict) -> str:
+        return 'Pajar'
+
+    def _product_genders(self, product: dict) -> list:
+        split_title = product['title'].lower().split(' ')
+
+        if "men's" in split_title:
+            return ['Men']
+        elif "women's" in split_title:
+            return ['Women']
+        else:
+            return []
+
+    def _parse_variants(self, product: dict):
+        product_variants = product['variants']
+        available_positions = [1, 2, 3]
+
+        color_opt_position = self._get_color_option_position(product)
+        size_opt_position = self._get_size_option_position(product)
+
+        if color_opt_position is not None:
+            available_positions.remove(color_opt_position)
+        if size_opt_position is not None:
+            available_positions.remove(size_opt_position)
+
+        color_hex = self._get_color_hex(product)
+
+        variants = []
+        for variant in product_variants:
+            size = None if size_opt_position is None else variant[f'option{size_opt_position}']
+            option1 = variant[f'option{available_positions[0]}']
+
+            v = {
+                'variant_id': variant['id'],
+                'product_id': variant['product_id'],
+                'available': variant['available'],
+                'original_price': variant['compare_at_price'] if variant['compare_at_price'] else variant['price'],
+                'final_price': variant['price'],
+                'option1': option1,
+                'option2': None,
+                'color_hex': color_hex,
+                'size': size,
+                'link': f'{self.shop.website}products/{product["handle"]}?variant={variant["id"]}',
+            }
+
+            featured_image = variant.get('featured_image')
+            if featured_image is None and len(product['images']) != 0:
+                featured_image = product['images'][0]
+
+            v['image'] = {
+                'width': featured_image['width'],
+                'height': featured_image['height'],
+                'src': featured_image['src'],
+            }
+
+            variants.append(v)
+
+        return variants
+
+    def _product_categories(self, product: dict) -> tuple:
+        if "_tabs_mens-footwear-size-conversion" in product['tags'] or "_tabs_womens-footwear-size-conversion" in product['tags']:
+            return ('Footwear',)
+        elif "_tabs_mens-outerwear-nude-body-measurements" in product['tags'] or "_tabs_womens-outerwear-nude-body-measurements" in product['tags']:
+            return ('Outerwear',)
+        else:
+            return ()
+
+    def _product_size_guide(self, product: dict):
+        if "_tabs_mens-footwear-size-conversion" in product['tags']:
+            return 'Men-Footwear'
+        elif "_tabs_womens-footwear-size-conversion" in product['tags']:
+            return 'Women-Footwear'
+        elif "_tabs_mens-outerwear-nude-body-measurements" in product['tags']:
+            return 'Men-Outerwear'
+        elif "_tabs_womens-outerwear-nude-body-measurements" in product['tags']:
+            return 'Women-Outerwear'
+
+    def _get_color_hex(self, product: dict):
+        color_opt = list(filter(lambda opt: opt['name'] == 'Color', product['options']))
+        if len(color_opt) == 0:
+            return None
+
+        color_name = color_opt[0]['values'][0]
+
+        with open(constants.COLORS_CONVERTER_FILE_PATH.format(shop_name=self.shop.name), 'r') as f:
+            shop_colors = json.load(f)
+
+        if color_name.upper() in shop_colors:
+            if shop_colors[color_name].startswith('#'):
+                if '|' in shop_colors[color_name]:
+                    # Color value includes multiple hex values
+                    return f'{shop_colors[color_name][1:7]}/{shop_colors[color_name][9:15]}'
+                else:
+                    return shop_colors[color_name][1:]
+            else:
+                # Color value is not hex. It might be an image url
+                return None
+        else:
+            # Color value is not in the colors converter file
+            color_value = self.__write_colors_converter(product)
+            if shop_colors[color_name].startswith('#'):
+                if '|' in shop_colors[color_name]:
+                    # Color value includes multiple hex values
+                    return f'{shop_colors[color_name][1:7]}/{shop_colors[color_name][9:15]}'
+                else:
+                    return shop_colors[color_name][1:]
+            else:
+                # Color value is not hex. It might be an image url
+                return None
+
+    def __write_colors_converter(self, product: dict):
+        with open(constants.COLORS_CONVERTER_FILE_PATH.format(shop_name=self.shop.name), 'r') as f:
+            shop_colors = json.load(f)
+
+        url = f'https://s-pc.webyze.com/ProductColors/productGroup-pajar-canada6-{product["id"]}.json'
+        response = requests.get(url).json()
+
+        if 'error' in response.keys():
+            return None
+
+        data = response['data']
+        color_value = None
+        for item in data:
+            shop_colors[item['name']] = item['data']
+            if item['id'] == product['id']:
+                color_value = item['data']
+
+        with open(constants.COLORS_CONVERTER_FILE_PATH.format(shop_name=self.shop.name), 'w') as f:
+            f.write(json.dumps(shop_colors, indent=4))
+
+        return color_value

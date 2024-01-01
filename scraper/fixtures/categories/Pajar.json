@@ -1,0 +1,37 @@
+[
+  {
+    "gender": "Women",
+    "title": "Footwear",
+    "equivalent_chicpic_name": "Shoes"
+  },
+  {
+    "gender": "Men",
+    "title": "Footwear",
+    "equivalent_chicpic_name": "Shoes"
+  },
+  {
+    "gender": "Women",
+    "title": "Outerwear",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Men",
+    "title": "Outerwear",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Women",
+    "title": "Tops",
+    "equivalent_chicpic_name": "Tops & Shirts"
+  },
+  {
+    "gender": "Women",
+    "title": "Bottoms",
+    "equivalent_chicpic_name": "Bottoms"
+  },
+  {
+    "gender": "Men",
+    "title": "Bottoms",
+    "equivalent_chicpic_name": "Bottoms"
+  }
+]
