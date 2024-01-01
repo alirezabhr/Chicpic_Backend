@@ -116,8 +116,8 @@ class Variant(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
     image_src = models.URLField(max_length=300)
     link = models.URLField(max_length=256)
-    original_price = models.DecimalField(max_digits=5, decimal_places=2)
-    final_price = models.DecimalField(max_digits=5, decimal_places=2)
+    original_price = models.DecimalField(max_digits=6, decimal_places=2)
+    final_price = models.DecimalField(max_digits=6, decimal_places=2)
     is_available = models.BooleanField(verbose_name='Available')
     # color_hex size is 20 because it can be combination of up to 3 colors
     color_hex = models.CharField(max_length=20, null=True, blank=True)
