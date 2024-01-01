@@ -1,3 +1,5 @@
+import importlib
+import json
 import logging
 import os
 
@@ -155,40 +157,43 @@ class DataIntegrator:
             self.logger.exception(error)
 
 
+def get_valid_shop_selection(shops):
+    # Display available shops
+    for index, shop in enumerate(shops):
+        print(f"{index+1}. {shop['name']}")
+
+    shop_names = [shop['name'] for shop in shops]
+    item_numbers = [str(index + 1) for index, shop in enumerate(shops)]
+
+    while True:
+        user_input = input(f"Please enter a shop name or item number: ")
+
+        if user_input in shop_names:
+            return next((shop for shop in shops if shop['name'] == user_input), None)
+        elif user_input in item_numbers:
+            return shops[int(user_input) - 1]
+
+        print("Invalid selection. Please try again.")
+
+
 if __name__ == '__main__':
-    shops = {
-        constants.Shops.KIT_AND_ACE.value.name: {
-            'scraper': scrapers.KitAndAceScraper(),
-            'parser': parsers.KitAndAceParser(),
-            'converter': converters.KitAndAceDataConverter(),
-        },
-        constants.Shops.FRANK_AND_OAK.value.name: {
-            'scraper': scrapers.FrankAndOakScraper(),
-            'parser': parsers.FrankAndOakParser(),
-            'converter': converters.FrankAndOakDataConverter(),
-        },
-        constants.Shops.TRISTAN.value.name: {
-            'scraper': scrapers.TristanScraper(),
-            'parser': parsers.TristanParser(),
-            'converter': converters.TristanDataConverter(),
-        },
-        constants.Shops.REEBOK.value.name: {
-            'scraper': scrapers.ReebokScraper(),
-            'parser': parsers.ReebokParser(),
-            'converter': converters.ReebokDataConverter(),
-        },
-    }
+    # Load shop information from the configuration file
+    local_dir = os.path.dirname(os.path.abspath(__file__))
+    with open(f'{local_dir}/shops_config.json', 'r') as file:
+        shop_config = json.load(file)
 
-    shop_name = None
-    while shop_name not in shops.keys():
-        for shop in shops.keys():
-            print(f'[{shop}]')
-        shop_name = input('Please enter a shop name: ')
+    selected_shop = get_valid_shop_selection(shop_config['shops'])
 
+    # Dynamically import the classes
+    scraper_module = importlib.import_module('scrapers')
+    parser_module = importlib.import_module('parsers')
+    converter_module = importlib.import_module('converters')
+
+    # Create instances of the classes
     my_integrator = DataIntegrator(
-        scraper=shops[shop_name]['scraper'],
-        parser=shops[shop_name]['parser'],
-        converter=shops[shop_name]['converter'],
+        scraper=getattr(scraper_module, selected_shop['scraper'])(),
+        parser=getattr(parser_module, selected_shop['parser'])(),
+        converter=getattr(converter_module, selected_shop['converter'])(),
     )
 
     need_scrape = None
@@ -196,10 +201,12 @@ if __name__ == '__main__':
         need_scrape = input('Do you want to scrape? (y/n): ')
 
     if need_scrape == 'y':
+        print(f'Scraping {selected_shop["name"]}...')
         my_integrator.scrape_save()
 
     need_parse = None
     while need_parse not in ['y', 'n']:
+        print(f'Parsing {selected_shop["name"]}...')
         need_parse = input('Do you want to parse? (y/n): ')
 
     if need_parse == 'y':
@@ -209,6 +216,7 @@ if __name__ == '__main__':
 
     need_integrate = None
     while need_integrate not in ['y', 'n']:
+        print(f'Integrating {selected_shop["name"]}...')
         need_integrate = input('Do you want to integrate? (y/n): ')
 
     if need_integrate == 'y':

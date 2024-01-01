@@ -1,0 +1,39 @@
+{
+    "shops": [
+        {
+            "name": "Kit and Ace",
+            "website": "https://www.kitandace.com/",
+            "scraper": "KitAndAceScraper",
+            "parser": "KitAndAceParser",
+            "converter": "KitAndAceDataConverter"
+        },
+        {
+            "name": "Frank and Oak",
+            "website": "https://ca.frankandoak.com/",
+            "scraper": "FrankAndOakScraper",
+            "parser": "FrankAndOakParser",
+            "converter": "FrankAndOakDataConverter"
+        },
+        {
+            "name": "Tristan",
+            "website": "https://www.tristanstyle.com/",
+            "scraper": "TristanScraper",
+            "parser": "TristanParser",
+            "converter": "TristanDataConverter"
+        },
+        {
+            "name": "Reebok",
+            "website": "https://www.reebok.ca/",
+            "scraper": "ReebokScraper",
+            "parser": "ReebokParser",
+            "converter": "ReebokDataConverter"
+        },
+        {
+            "name": "Pajar",
+            "website": "https://ca.pajar.com/",
+            "scraper": "PajarScraper",
+            "parser": "PajarParser",
+            "converter": "PajarDataConverter"
+        }
+    ]
+}
