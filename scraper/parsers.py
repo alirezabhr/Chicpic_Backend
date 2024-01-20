@@ -659,9 +659,11 @@ class PajarParser(ShopifyParser):
         return variants
 
     def _product_categories(self, product: dict) -> tuple:
-        if "_tabs_mens-footwear-size-conversion" in product['tags'] or "_tabs_womens-footwear-size-conversion" in product['tags']:
+        if "_tabs_mens-footwear-size-conversion" in product['tags'] \
+                or "_tabs_womens-footwear-size-conversion" in product['tags']:
             return ('Footwear',)
-        elif "_tabs_mens-outerwear-nude-body-measurements" in product['tags'] or "_tabs_womens-outerwear-nude-body-measurements" in product['tags']:
+        elif "_tabs_mens-outerwear-nude-body-measurements" in product['tags'] \
+                or "_tabs_womens-outerwear-nude-body-measurements" in product['tags']:
             return ('Outerwear',)
         else:
             return ()
@@ -730,3 +732,101 @@ class PajarParser(ShopifyParser):
             f.write(json.dumps(shop_colors, indent=4))
 
         return color_value
+
+
+class VessiParser(ShopifyParser):
+    ## Only shoes are acceptable
+    UNACCEPTABLE_PRODUCT_TYPES = ['Apparel', 'Socks', '', 'Gloves', 'Bag', 'Donation', 'Hats', 'Face Masks',
+                                  'Gift Card']
+    UNACCEPTABLE_TAGS = ['Gender: Kids', 'Style: Kids', 'kids', 'Product: Kids Weekend Sale']
+
+    def __init__(self):
+        super().__init__(shop=constants.Shops.VESSI.value)
+
+    def _get_size_option_position(self, product: dict):
+        for opt in product['options']:
+            if opt['name'] == 'Size' or opt['name'] == 'US Size':
+                return opt['position']
+        return None
+
+    def _product_brand(self, product: dict) -> str:
+        return 'Vessi'
+
+    def _product_genders(self, product: dict) -> list:
+        if 'Gender: Men' in product['tags'] or 'Style: Men' not in product['tags']:
+            return ['Men']
+        else:
+            return ['Women']
+
+    def _product_categories(self, product: dict) -> tuple:
+        ## Only shoes are acceptable
+        return ('Footwear',)
+
+    def _parse_variants(self, product: dict):
+        product_variants = product['variants']
+        available_positions = [1, 2, 3]
+
+        color_opt_position = self._get_color_option_position(product)
+        size_opt_position = self._get_size_option_position(product)
+
+        if color_opt_position is not None:
+            available_positions.remove(color_opt_position)
+        if size_opt_position is not None:
+            available_positions.remove(size_opt_position)
+
+        variants = []
+        for variant in product_variants:
+            size = None if size_opt_position is None else variant[f'option{size_opt_position}']
+            if not size.isnumeric():
+                # Remove variants with size like "7U" or "6G"
+                continue
+
+            option1 = variant[f'option{available_positions[0]}']
+
+            # There is no discount price in data of Vessi
+            price = variant['price']
+
+            v = {
+                'variant_id': variant['id'],
+                'product_id': variant['product_id'],
+                'available': variant['available'],
+                'original_price': price,
+                'final_price': price,
+                'option1': option1,
+                'option2': None,
+                'color_hex': self._get_color_hex(product),
+                'size': size,
+                'link': f'{self.shop.website}products/{product["handle"]}',
+            }
+
+            image = variant.get('featured_image') if variant.get('featured_image') else product['images'][0]
+            v['image'] = {
+                'width': image['width'],
+                'height': image['height'],
+                'src': image['src'],
+            }
+
+            variants.append(v)
+
+        return variants
+
+    def _product_size_guide(self, product: dict):
+        return f'{self._product_genders(product)[0]}-{self._product_categories(product)[0]}'
+
+    def _get_color_hex(self, product: dict):
+        with open(constants.COLORS_CONVERTER_FILE_PATH.format(shop_name=self.shop.name), 'r') as f:
+            color_map = json.load(f)
+        color_tags = list(map(lambda ct: color_map[ct[7:]], filter(lambda t: t.startswith('Color:'), product['tags'])))
+        return "/".join(color_tags)
+
+    def _parse_attributes(self, product: dict):
+        attributes = []
+        position = 1
+
+        for opt in product['options']:
+            if opt['name'] in ['Color', 'Colour', 'Size', 'US Size']:
+                continue
+            attributes.append({'name': opt['name'], 'position': position})
+            position += 1
+
+        return attributes

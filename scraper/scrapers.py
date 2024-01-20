@@ -132,3 +132,10 @@ class PajarScraper(ShopifyScraper):
 
     def __init__(self):
         super().__init__(self.SHOP)
+
+
+class VessiScraper(ShopifyScraper):
+    SHOP = constants.Shops.VESSI.value
+
+    def __init__(self):
+        super().__init__(self.SHOP)

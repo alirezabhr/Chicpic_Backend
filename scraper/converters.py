@@ -278,3 +278,16 @@ class ReebokDataConverter(DataConverter):
 class PajarDataConverter(DataConverter):
     def __init__(self):
         super().__init__(shop=constants.Shops.PAJAR.value)
+
+
+class VessiDataConverter(DataConverter):
+    def __init__(self):
+        super().__init__(shop=constants.Shops.VESSI.value)
+
+    def convert_sizings(self, product: dict, variant: Variant) -> list[Sizing]:
+        if product['size_guide'] in ('Men-Footwear', 'Women-Footwear'):
+            variant_size = variant.size
+            size_value = round(float(variant_size), 1)
+            return [Sizing(variant=variant, option=Sizing.SizingOptionChoices.SHOE_SIZE, value=size_value)]
+        else:
+            return super().convert_sizings(product, variant)
