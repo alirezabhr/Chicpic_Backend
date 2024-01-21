@@ -51,8 +51,8 @@ class Attribute(models.Model):
 class Product(models.Model):
     original_id = models.BigIntegerField(unique=True)
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='products')
-    brand = models.CharField(max_length=30)
-    title = models.CharField(max_length=80)
+    brand = models.CharField(max_length=60)
+    title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     categories = models.ManyToManyField(Category, related_name='products')
     created_at = models.DateTimeField(auto_now_add=True)
