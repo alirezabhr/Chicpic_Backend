@@ -139,3 +139,10 @@ class VessiScraper(ShopifyScraper):
 
     def __init__(self):
         super().__init__(self.SHOP)
+
+
+class KeenScraper(ShopifyScraper):
+    SHOP = constants.Shops.KEEN.value
+
+    def __init__(self):
+        super().__init__(self.SHOP)

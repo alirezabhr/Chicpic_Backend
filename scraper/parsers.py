@@ -830,3 +830,94 @@ class VessiParser(ShopifyParser):
             position += 1
 
         return attributes
+
+
+class KeenParser(ShopifyParser):
+    UNACCEPTABLE_PRODUCT_TYPES = ['Accessories']
+    UNACCEPTABLE_TAGS = []
+
+    def __init__(self):
+        super().__init__(shop=constants.Shops.KEEN.value)
+
+    def is_unacceptable_product(self, product: dict) -> bool:
+        if product['product_type'].lower().startswith('kid'):
+            return True
+        return super().is_unacceptable_product(product)
+
+    def _product_genders(self, product: dict) -> list:
+        key = 'gender:'
+        genders = list(map(lambda st: st[len(key):], filter(lambda t: t.startswith(key), product['tags'])))
+        if 'All Gender' in genders:
+            return ['Men', 'Women']
+        if genders[0] == "Women's":
+            return ['Women']
+        if genders[0] == "Men's":
+            return ['Men']
+        return []
+
+    def _product_categories(self, product: dict) -> tuple:
+        return ('Footwear',)
+
+    def _parse_variants(self, product: dict):
+        product_variants = product['variants']
+        available_positions = [1, 2, 3]
+
+        color_opt_position = self._get_color_option_position(product)
+        size_opt_position = self._get_size_option_position(product)
+
+        if color_opt_position is not None:
+            available_positions.remove(color_opt_position)
+        if size_opt_position is not None:
+            available_positions.remove(size_opt_position)
+
+        variants = []
+        for variant in product_variants:
+            size = None if size_opt_position is None else variant[f'option{size_opt_position}']
+            option1 = variant[f'option{available_positions[0]}']
+
+            final_price = variant['price']
+            original_price = variant['compare_at_price'] if variant['compare_at_price'] else final_price
+
+            v = {
+                'variant_id': variant['id'],
+                'product_id': variant['product_id'],
+                'available': variant['available'],
+                'original_price': original_price,
+                'final_price': final_price,
+                'option1': option1,
+                'option2': None,
+                'color_hex': self._get_color_hex(product),
+                'size': size,
+                'link': f'{self.shop.website}products/{product["handle"]}',
+            }
+
+            image = variant.get('featured_image') if variant.get('featured_image') else product['images'][0]
+            v['image'] = {
+                'width': image['width'],
+                'height': image['height'],
+                'src': image['src'],
+            }
+
+            variants.append(v)
+
+        return variants
+
+    def _get_color_hex(self, product: dict):
+        with open(constants.COLORS_CONVERTER_FILE_PATH.format(shop_name=self.shop.name), 'r') as f:
+            color_map = json.load(f)
+        # Color 'misc' does not load in parsed file
+        key = 'filtercolor:'
+        colors = list(map(lambda ct: color_map[ct[len(key):]], filter(lambda t: t.startswith(key), product['tags'])))
+        return "/".join(colors)
+
+    def _product_size_guide(self, product: dict):
+        key = 'size_guide:'
+        size_guide = list(map(lambda st: st[len(key):], filter(lambda t: t.startswith(key), product['tags'])))[0]
+        if size_guide == 'womens':
+            return f'Women-Footwear'
+        elif size_guide == 'mens':
+            return f'Men-Footwear'
+        elif size_guide == 'all gender':
+            return f'Men-Footwear'
+        else:
+            return None

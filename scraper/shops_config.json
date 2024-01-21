@@ -41,6 +41,13 @@
             "scraper": "VessiScraper",
             "parser": "VessiParser",
             "converter": "VessiDataConverter"
+        },
+        {
+            "name": "Keen",
+            "website": "https://www.keenfootwear.ca/",
+            "scraper": "KeenScraper",
+            "parser": "KeenParser",
+            "converter": "KeenDataConverter"
         }
     ]
 }
