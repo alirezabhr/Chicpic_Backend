@@ -412,6 +412,7 @@ media/*
 
 scraper/data
 scraper/logs
+scraper/archive
 
 # Database data directory
 db_data/
