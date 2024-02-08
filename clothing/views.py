@@ -198,17 +198,32 @@ class ProductDetailView(RetrieveAPIView):
         return Product.objects.get(id=self.kwargs.get('product_id'))
 
 
-class ProductSearch(ListAPIView):
-    serializer_class = ProductPreviewSerializer
+class VariantSearchView(ListAPIView):
+    serializer_class = VariantPreviewSerializer
 
     def get_queryset(self):
-        query = self.request.query_params.get('q')
-        return Product.objects.filter(is_deleted=False).filter(
-            Q(title__icontains=query) |
-            Q(shop__name__icontains=query) |
-            Q(brand__icontains=query) |
-            Q(description__icontains=query)
+        query_param = self.request.query_params.get('q')
+
+        queryset = Variant.objects.filter(product__is_deleted=False).filter(
+            Q(product__title__icontains=query_param) |
+            Q(product__shop__name__icontains=query_param) |
+            Q(product__brand__icontains=query_param) |
+            Q(product__description__icontains=query_param)
         )
+
+        user = self.request.user
+
+        try:
+            user_additional = user.additional
+        except UserAdditional.DoesNotExist:
+            user_additional = None
+
+        if user_additional is not None:  # find the best fit clothes if user additional exists
+            queryset = get_best_fit_variant(user_additional, queryset)
+        else:
+            queryset = get_middle_variants(queryset)
+
+        return queryset
 
 
 # TODO: refactor this view
