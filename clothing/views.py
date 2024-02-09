@@ -11,7 +11,7 @@ from .serializers import CategorySerializer, ShopSerializer, ProductPreviewSeria
     VariantPreviewSerializer, ProductDetailSerializer, SavedVariantSerializer, TrackedVariantSerializer
 
 
-def get_best_fit_variant(user_additional: UserAdditional, variants_queryset):
+def get_best_fit_variant(user_additional: UserAdditional, sorted_variants_queryset):
     # TODO: handle One Size Fit All (OSFA) products
     shoulder_size = user_additional.shoulder_size
     bust_size = user_additional.bust_size
@@ -22,7 +22,7 @@ def get_best_fit_variant(user_additional: UserAdditional, variants_queryset):
     shoe_size = user_additional.shoe_size
 
     # Filter variants based on gender and categories
-    queryset = variants_queryset.filter(
+    queryset = sorted_variants_queryset.filter(
         product__is_deleted=False
     ).annotate(
         diff_sum=Sum(
@@ -43,18 +43,18 @@ def get_best_fit_variant(user_additional: UserAdditional, variants_queryset):
             partition_by=[F('product_id')],
             order_by=(F('diff_sum'),)
         )
-    ).filter(rn=1, is_available=True).order_by('-product_id', 'id')
+    ).filter(rn=1, is_available=True)
 
     return queryset
 
 
-def get_middle_variants(variants_queryset):
-    queryset = variants_queryset.filter(
+def get_middle_variants(sorted_variants_queryset):
+    queryset = sorted_variants_queryset.filter(
         product__is_deleted=False,
         is_available=True
     ).annotate(
         row_number=Window(
-            expression=RowNumber(),
+            expression=RowNumber(output_field=IntegerField()),
             partition_by=[F('product_id')],
             order_by=(F('id'),)
         ),
@@ -67,7 +67,7 @@ def get_middle_variants(variants_queryset):
         )
     ).filter(
         middle_variant_id=F('id')
-    ).order_by('-product_id')
+    )
 
     return queryset
 
@@ -171,10 +171,13 @@ class ExploreVariantsView(ListAPIView):
         except UserAdditional.DoesNotExist:
             user_additional = None
 
+        # Variants in random order
+        queryset = Variant.objects.all().order_by('?')
+
         if user_additional is not None:  # find the best fit clothes if user additional exists
-            queryset = get_best_fit_variant(user_additional, Variant.objects.all())
+            queryset = get_best_fit_variant(user_additional, queryset)
         else:
-            queryset = get_middle_variants(Variant.objects.all())
+            queryset = get_middle_variants(queryset)
 
         return queryset
 
