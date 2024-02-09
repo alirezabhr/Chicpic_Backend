@@ -185,9 +185,9 @@ if __name__ == '__main__':
     selected_shop = get_valid_shop_selection(shop_config['shops'])
 
     # Dynamically import the classes
-    scraper_module = importlib.import_module('scrapers')
-    parser_module = importlib.import_module('parsers')
-    converter_module = importlib.import_module('converters')
+    scraper_module = importlib.import_module('scraper.scrapers')
+    parser_module = importlib.import_module('scraper.parsers')
+    converter_module = importlib.import_module('scraper.converters')
 
     # Create instances of the classes
     my_integrator = DataIntegrator(
