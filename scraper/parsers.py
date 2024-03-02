@@ -279,6 +279,9 @@ class FrankAndOakParser(ShopifyParser):
 
         return genders
 
+    def _product_categories(self, product: dict):
+        return (product['product_type'],)
+
     def _product_size_guide(self, product: dict):
         genders = self._product_genders(product)
         if len(genders) == 0:
