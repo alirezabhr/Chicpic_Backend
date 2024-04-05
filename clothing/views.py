@@ -100,12 +100,16 @@ class CategoryVariantsView(ListAPIView):
         category_variants = Variant.objects.filter(product__categories__id=self.kwargs.get('category_id'),
                                                    product__is_deleted=False)
 
+        # Get the boolean value of a query parameter
+        show_recommendations_qp = self.request.query_params.get('recom')
+        show_recommendations = show_recommendations_qp is not None and show_recommendations_qp.lower() in ('true', '1')
+
         try:
             user_additional = self.request.user.additional
         except UserAdditional.DoesNotExist:
             user_additional = None
 
-        if user_additional is not None:  # find the best fit clothes in that category if user additional exists
+        if show_recommendations and user_additional is not None:  # find the best fit clothes in that category if user additional exists
             queryset = get_best_fit_variant(user_additional, category_variants)
         else:
             queryset = get_middle_variants(category_variants)
@@ -147,12 +151,16 @@ class VariantsView(ListAPIView):
     def get_queryset(self):
         variants_queryset = self.filter_discount(self.filter_gender(Variant.objects.all()))
 
+        # Get the boolean value of a query parameter
+        show_recommendations_qp = self.request.query_params.get('recom')
+        show_recommendations = show_recommendations_qp is not None and show_recommendations_qp.lower() in ('true', '1')
+
         try:
             user_additional = self.request.user.additional
         except UserAdditional.DoesNotExist:
             user_additional = None
 
-        if user_additional is not None:  # find the best fit clothes in that category if user additional exists
+        if show_recommendations and user_additional is not None:  # find the best fit clothes in that category if user additional exists
             queryset = get_best_fit_variant(user_additional, variants_queryset)
         else:
             queryset = get_middle_variants(variants_queryset)
@@ -166,6 +174,10 @@ class ExploreVariantsView(ListAPIView):
     def get_queryset(self):
         user = self.request.user
 
+        # Get the boolean value of a query parameter
+        show_recommendations_qp = self.request.query_params.get('recom')
+        show_recommendations = show_recommendations_qp is not None and show_recommendations_qp.lower() in ('true', '1')
+
         try:
             user_additional = user.additional
         except UserAdditional.DoesNotExist:
@@ -174,7 +186,8 @@ class ExploreVariantsView(ListAPIView):
         # Variants in random order
         queryset = Variant.objects.all().order_by('?')
 
-        if user_additional is not None:  # find the best fit clothes if user additional exists
+        if show_recommendations and user_additional is not None:  # find the best fit clothes if user additional exists
+            queryset = queryset.filter(product__categories__gender=user_additional.gender_interested)
             queryset = get_best_fit_variant(user_additional, queryset)
         else:
             queryset = get_middle_variants(queryset)
@@ -216,12 +229,16 @@ class VariantSearchView(ListAPIView):
 
         user = self.request.user
 
+        # Get the boolean value of a query parameter
+        show_recommendations_qp = self.request.query_params.get('recom')
+        show_recommendations = show_recommendations_qp is not None and show_recommendations_qp.lower() in ('true', '1')
+
         try:
             user_additional = user.additional
         except UserAdditional.DoesNotExist:
             user_additional = None
 
-        if user_additional is not None:  # find the best fit clothes if user additional exists
+        if show_recommendations and user_additional is not None:  # find the best fit clothes if user additional exists
             queryset = get_best_fit_variant(user_additional, queryset)
         else:
             queryset = get_middle_variants(queryset)
