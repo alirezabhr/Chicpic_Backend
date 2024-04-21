@@ -37,12 +37,14 @@ class ProductPreviewSerializer(serializers.ModelSerializer):
 
 class VariantPreviewSerializer(serializers.ModelSerializer):
     product = serializers.IntegerField(source='product_id')
+    title = serializers.CharField(source='product.title')
     has_discount = serializers.BooleanField(read_only=True)
+    discount_rate = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Variant
-        fields = ('id', 'product', 'has_discount', 'image_src', 'link', 'original_price', 'final_price', 'is_available',
-                  'color_hex', 'size', 'option1', 'option2')
+        fields = ('id', 'product', 'title', 'has_discount', 'discount_rate', 'image_src', 'link', 'original_price', 'final_price',
+                  'is_available', 'color_hex', 'size', 'option1', 'option2')
 
 
 class VariantDetailSerializer(serializers.ModelSerializer):

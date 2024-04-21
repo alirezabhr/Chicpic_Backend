@@ -132,6 +132,10 @@ class Variant(models.Model):
     def has_discount(self):
         return self.final_price < self.original_price
 
+    @property
+    def discount_rate(self):
+        return int((self.original_price - self.final_price) / self.original_price * 100)
+
     def __str__(self):
         return str(self.id)
 
