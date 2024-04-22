@@ -9,6 +9,7 @@ urlpatterns = [
     path('categories/<int:category_id>/variants/', views.CategoryVariantsView.as_view(), name='category_variants'),
     path('shops/', views.ShopsView.as_view(), name='shops'),
     path('shops/<int:shop_id>/products/', views.ShopProductsView.as_view(), name='shop_products'),
+    path('shops/<int:shop_id>/variants/', views.ShopVariantsView.as_view(), name='shop_variants'),
     path('variants/', views.VariantsView.as_view(), name='variants'),
     path('explore/variants/', views.ExploreVariantsView.as_view(), name='explore_variants'),
     path('products/', views.ProductsView.as_view(), name='products'),

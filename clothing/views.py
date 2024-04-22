@@ -129,6 +129,34 @@ class ShopProductsView(ListAPIView):
         return Product.objects.filter(shop_id=self.kwargs.get('shop_id'), is_deleted=False)
 
 
+class ShopVariantsView(ListAPIView):
+    serializer_class = VariantPreviewSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+
+        # Get the boolean value of a query parameter
+        show_recommendations_qp = self.request.query_params.get('recom')
+        show_recommendations = show_recommendations_qp is not None and show_recommendations_qp.lower() in ('true', '1')
+
+        try:
+            user_additional = user.additional
+        except UserAdditional.DoesNotExist:
+            user_additional = None
+
+        # Variants in random order
+        queryset = Variant.objects.filter(product__shop_id=self.kwargs.get('shop_id'))
+
+        if show_recommendations and user_additional is not None:  # find the best fit clothes if user additional exists
+            queryset = queryset.filter(product__categories__gender=user_additional.gender_interested)
+            queryset = get_best_fit_variant(user_additional, queryset)
+        else:
+            queryset = get_middle_variants(queryset)
+
+        return queryset
+
+
+
 class VariantsView(ListAPIView):
     serializer_class = VariantPreviewSerializer
 
