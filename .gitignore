@@ -410,6 +410,8 @@ media/*
 !media/default.png
 !media/fixtures
 
+static/
+
 scraper/data
 scraper/logs
 scraper/archive
