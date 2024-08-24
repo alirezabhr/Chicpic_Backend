@@ -5,6 +5,7 @@ from . import views
 
 
 urlpatterns = [
+    path('social-auth/google/', views.GoogleAuthentication.as_view(), name='google_auth'),
     path('signup/', views.SignupView.as_view(), name='signup'),
     path('login/', views.LoginView.as_view(), name='login'),
     path('details/', views.UserDetailView.as_view(), name='user_detail'),

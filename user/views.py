@@ -4,6 +4,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.throttling import UserRateThrottle
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from dj_rest_auth.registration.views import SocialLoginView
 
 from django.contrib.auth import get_user_model
 
@@ -14,6 +17,11 @@ from .serializers import UserRegistrationSerializer, UserLoginSerializer, UserRe
 
 class OncePerMinuteThrottle(UserRateThrottle):
     rate = '1/minute'
+
+
+class GoogleAuthentication(SocialLoginView):
+    adapter_class = GoogleOAuth2Adapter
+    client_class = OAuth2Client
 
 
 class SignupView(CreateAPIView):

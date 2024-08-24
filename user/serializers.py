@@ -134,6 +134,15 @@ class UserLoginSerializer(serializers.ModelSerializer):
         return attrs
 
 
+class UserDetailsSerializer(serializers.ModelSerializer):
+    additional = UserAdditionalSerializer()
+
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'username', 'is_verified', 'additional')
+        read_only_fields = ('id', 'email', 'username', 'is_verified', 'additional')
+
+
 class UserReadonlySerializer(serializers.ModelSerializer):
     additional = UserAdditionalSerializer()
 

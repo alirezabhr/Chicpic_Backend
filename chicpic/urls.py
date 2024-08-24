@@ -22,4 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('users/', include('user.urls')),
     path('clothing/', include('clothing.urls')),
+    path('accounts/', include('allauth.urls')), # It is only added for some reverse() calls in dj-rest-auth package
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
