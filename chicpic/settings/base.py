@@ -197,6 +197,8 @@ REST_AUTH = {
     'JWT_AUTH_HTTPONLY': False,
 }
 
+SOCIALACCOUNT_ADAPTER = 'user.adapters.CustomSocialAccountAdapter'
+
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': [
