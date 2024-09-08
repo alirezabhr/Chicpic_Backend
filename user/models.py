@@ -23,6 +23,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_superuser = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
+    birth_date = models.DateField(null=True, blank=True)
     groups = None
     user_permissions = None
 
@@ -52,7 +53,6 @@ class UserAdditional(models.Model):
     gender_interested = models.CharField(max_length=10, choices=GenderChoices.choices)
     weight = models.PositiveSmallIntegerField()
     height = models.PositiveSmallIntegerField()
-    birth_date = models.DateField()
     shoulder_size = models.PositiveSmallIntegerField()  # cm
     chest_size = models.PositiveSmallIntegerField(null=True, blank=True)  # cm
     bust_size = models.PositiveSmallIntegerField(null=True, blank=True)  # cm
