@@ -24,3 +24,7 @@ urlpatterns = [
     path('clothing/', include('clothing.urls')),
     path('accounts/', include('allauth.urls')), # It is only added for some reverse() calls in dj-rest-auth package
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    from debug_toolbar.toolbar import debug_toolbar_urls
+    urlpatterns += debug_toolbar_urls()
