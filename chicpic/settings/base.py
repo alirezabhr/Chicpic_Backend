@@ -193,7 +193,7 @@ SITE_ID = 1
 REST_AUTH = {
     'TOKEN_MODEL': None,
     'USE_JWT': True,
-    'USER_DETAILS_SERIALIZER': 'user.serializers.UserDetailsSerializer',
+    'USER_DETAILS_SERIALIZER': 'user.serializers.UserSerializer',
     'JWT_AUTH_HTTPONLY': False,
 }
 

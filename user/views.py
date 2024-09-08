@@ -1,22 +1,20 @@
-from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveAPIView, UpdateAPIView
+from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveAPIView, UpdateAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.throttling import UserRateThrottle
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from dj_rest_auth.registration.views import SocialLoginView
 
 from django.contrib.auth import get_user_model
 
+from chicpic.settings.throttling import OncePerMinuteThrottle
+from chicpic.settings.permissions import IsAdminOrSelf
+
 from .models import UserAdditional
 from .serializers import UserRegistrationSerializer, UserLoginSerializer, UserReadonlySerializer, \
-    OTPRequestSerializer, OTPVerificationSerializer, UserAdditionalSerializer, ResetPasswordSerializer
-
-
-class OncePerMinuteThrottle(UserRateThrottle):
-    rate = '1/minute'
+    OTPRequestSerializer, OTPVerificationSerializer, UserAdditionalSerializer, ResetPasswordSerializer, UserSerializer
 
 
 class GoogleAuthentication(SocialLoginView):
@@ -40,7 +38,7 @@ class LoginView(GenericAPIView):
         return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserDetailView(RetrieveAPIView):
+class UserCheckAuthView(RetrieveAPIView):
     serializer_class = UserReadonlySerializer
     queryset = get_user_model().objects.all()
 
@@ -74,6 +72,14 @@ class VerifyOTPView(APIView):
             return Response(status=status.HTTP_202_ACCEPTED)
         else:
             return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserView(RetrieveUpdateAPIView):
+    permission_classes = (IsAdminOrSelf,)
+    serializer_class = UserSerializer
+    queryset = get_user_model().objects.all()
+    lookup_field = 'id'
+    lookup_url_kwarg = 'id'
 
 
 # TODO: Fix security issues. Everyone can change password of any user.

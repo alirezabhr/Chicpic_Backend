@@ -69,7 +69,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'username', 'is_verified', 'password', 'password2', 'tokens', 'additional')
+        fields = ('id', 'email', 'username', 'is_verified', 'password', 'password2', 'tokens', 'additional',
+                  'birth_date')
         read_only_fields = ('id', 'tokens', 'additional')
 
     def validate(self, attrs):
@@ -108,7 +109,7 @@ class UserLoginSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'username', 'is_verified', 'password', 'tokens', 'additional')
+        fields = ('id', 'email', 'username', 'is_verified', 'password', 'tokens', 'additional', 'birth_date')
         read_only_fields = ('id', 'email', 'tokens', 'additional')
 
     def validate(self, attrs):
@@ -127,6 +128,7 @@ class UserLoginSerializer(serializers.ModelSerializer):
         attrs['email'] = user.email
         attrs['is_verified'] = user.is_verified
         attrs['tokens'] = user.tokens()
+        attrs['birth_date'] = user.birth_date
         try:
             attrs['additional'] = user.additional
         except UserAdditional.DoesNotExist:
@@ -134,12 +136,12 @@ class UserLoginSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class UserDetailsSerializer(serializers.ModelSerializer):
-    additional = UserAdditionalSerializer()
+class UserSerializer(serializers.ModelSerializer):
+    additional = UserAdditionalSerializer(read_only=True)
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'username', 'is_verified', 'additional')
+        fields = ('id', 'email', 'username', 'is_verified', 'additional', 'birth_date')
         read_only_fields = ('id', 'email', 'username', 'is_verified', 'additional')
 
 
@@ -148,8 +150,8 @@ class UserReadonlySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'username', 'is_verified', 'tokens', 'additional')
-        read_only_fields = ('id', 'email', 'username', 'is_verified', 'tokens', 'additional')
+        fields = ('id', 'email', 'username', 'is_verified', 'tokens', 'additional', 'birth_date')
+        read_only_fields = ('id', 'email', 'username', 'is_verified', 'tokens', 'additional', 'birth_date')
 
 
 class OTPRequestSerializer(serializers.Serializer):

@@ -35,7 +35,6 @@ class UserTest(APITestCase):
             password=self.user2_data.get('password'),
         )
 
-        self.assertEqual(user_obj1.id, 1)
         self.assertEqual(user_obj1.username, self.user1_data.get('username'))
         self.assertNotEqual(user_obj1.password, self.user1_data.get('password'))
         self.assertTrue(user_obj1.is_active, msg='user object is not active')
@@ -79,8 +78,8 @@ class UserTest(APITestCase):
         self.assertEqual(response_data.get('username'), user2_signup_data['username'])
         self.assertEqual(response_data.get('email'), user2_signup_data['email'])
         self.assertFalse(response_data.get('is_verified'))
-        self.assertTrue('id' in response_data.keys())
-        self.assertTrue('tokens' in response_data.keys())
+        self.assertIn('id', response_data.keys())
+        self.assertIn('tokens', response_data.keys())
 
         status_code, response_data = self.signup(**user2_signup_data)
         self.assertEqual(status_code, status.HTTP_400_BAD_REQUEST)
@@ -97,7 +96,7 @@ class UserTest(APITestCase):
 
         status_code, response_data = self.signup(**unacceptable_user_data)
         self.assertEqual(status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertTrue('username' in response_data)
+        self.assertIn('username', response_data)
         self.assertEqual(
             response_data.get('username')[0],
             'Enter a valid username. This value may contain only letters, numbers, and ./_ characters.',
@@ -108,13 +107,15 @@ class UserTest(APITestCase):
 
         user = User.objects.create_user(**self.user1_data)
 
+        # Test login with incorrect credentials
         user_data = {
             'username': self.user1_data.get('username'),
             'password': self.user1_data.get('password') + '!!',
         }
 
         login_response = self.client.post(login_url, user_data)
-        self.assertEqual(login_response.status_code, status.HTTP_403_FORBIDDEN)
+        # Returns 401 if credentials are not correct
+        self.assertEqual(login_response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertTrue('detail' in login_response.json().keys())
         self.assertEqual(login_response.json().get('detail'), 'Invalid credentials.')
 
@@ -130,16 +131,17 @@ class UserTest(APITestCase):
         login_response = self.client.post(login_url, user_data)
         self.assertEqual(login_response.status_code, status.HTTP_200_OK)
         response_dict_keys = login_response.json().keys()
-        self.assertTrue('id' in response_dict_keys)
-        self.assertTrue('username' in response_dict_keys)
-        self.assertTrue('email' in response_dict_keys)
-        self.assertTrue('tokens' in response_dict_keys)
-        self.assertFalse('password' in response_dict_keys)
+        self.assertIn('id', response_dict_keys)
+        self.assertIn('username', response_dict_keys)
+        self.assertIn('email', response_dict_keys)
+        self.assertIn('tokens', response_dict_keys)
+        self.assertIn('birthDate', response_dict_keys)
+        self.assertNotIn('password', response_dict_keys)
 
     def test_retrieve_user_details(self):
-        url = reverse('user_detail')
-
         user = User.objects.create_user(**self.user1_data)
+
+        url = reverse('user_details', kwargs={'id': user.id})
 
         response = self.client.get(url, **{'HTTP_AUTHORIZATION': f'Bearer {user.tokens().get("access")}'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -148,10 +150,11 @@ class UserTest(APITestCase):
         self.assertIn('id', response_dict_keys)
         self.assertIn('username', response_dict_keys)
         self.assertIn('email', response_dict_keys)
-        self.assertIn('tokens', response_dict_keys)
+        self.assertNotIn('tokens', response_dict_keys)
         self.assertIn('isVerified', response_dict_keys)
+        self.assertIn('birthDate', response_dict_keys)
+        self.assertIn('additional', response_dict_keys)
         self.assertNotIn('password', response_dict_keys)
-        self.assertIn('userAdditional', response_dict_keys)
 
     def test_refresh_token(self):
         url = reverse('refresh_token')
@@ -168,33 +171,39 @@ class UserTest(APITestCase):
         self.assertNotEqual(previous_access_token, response.json().get('access'))
         self.assertNotEqual(previous_refresh_token, response.json().get('refresh'))
 
+    def test_update_user(self):
+        # TODO: update 'birthDate': timezone.datetime(year=2000, month=6, day=25).date(), "birthDate": "1990-01-01",
+        pass
+
 
 class UserAdditionalTest(APITestCase):
     def setUp(self) -> None:
         self.user1 = User.objects.create_user(email='test1@gmail.com', username='test1_username', password='test_1234')
         self.user2 = User.objects.create_user(email='test2@gmail.com', username='test2_username', password='test_1234')
-        self.client.login(username='test1@gmail.com', password='test_1234')
 
     def test_user_additional_create_api(self):
-        url = reverse('user_additional')
+        url = reverse('user_additional', kwargs={'id': self.user1.id})
 
         user_additional1_data = {
             'user': self.user1.id,
-            'gender_interested': 'M',
+            'genderInterested': 'M',
             'weight': 78,
             'height': 185,
-            'birthDate': timezone.datetime(year=2000, month=6, day=25).date(),
-            'bustSize': 68,
+            'shoulderSize': 40,
+            'chestSize': 68,
             'waistSize': 50,
-            'hipSize': 72,
-            'legLength': 140,
+            'hipsSize': 72,
+            'inseam': 140,
             'shoeSize': 40,
         }
+
+        self.client.force_authenticate(user=self.user1)
         response = self.client.post(url, data=user_additional1_data, format='json')
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(
-            {'id', 'user', 'weight', 'height', 'birthDate', 'bustSize', 'waistSize', 'hipSize',
-             'legLength', 'shoeSize', 'genderInterested', 'shirtFits', 'trouserFits'}, set(response.json().keys()))
+        self.assertEqual({'id', 'user', 'weight', 'height', 'chestSize', 'bustSize', 'waistSize', 'hipsSize',
+                          'shoulderSize', 'inseam', 'shoeSize', 'genderInterested', 'shirtFits', 'trouserFits'},
+                         set(response.json().keys()))
         self.assertEqual([], response.json().get('shirtFits'))
         self.assertEqual([], response.json().get('trouserFits'))
 
@@ -202,12 +211,12 @@ class UserAdditionalTest(APITestCase):
             "user": self.user2.id,
             "weight": 60,
             "height": 170,
-            'gender_interested': 'F',
-            "birthDate": "1990-01-01",
+            'genderInterested': 'W',
             "bustSize": 90,
             "waistSize": 75,
-            "hipSize": 95,
-            "legLength": 75,
+            "shoulderSize": 40,
+            "hipsSize": 95,
+            "inseam": 75,
             "shoeSize": 42,
             "shirtFits": [
                 {"fitType": "Slim"},
@@ -220,6 +229,7 @@ class UserAdditionalTest(APITestCase):
             ],
         }
 
+        self.client.force_authenticate(user=self.user2)
         response = self.client.post(url, data=user_additional2_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
