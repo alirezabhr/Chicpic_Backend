@@ -7,12 +7,13 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils import timezone
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .managers import CustomUserManager
+from core.models import SoftDeleteModel
+from .managers import SoftDeleteCustomUserManager
 from .validators import CustomUsernameValidator
 
 
 # Create your models here.
-class User(AbstractBaseUser, PermissionsMixin):
+class User(AbstractBaseUser, PermissionsMixin, SoftDeleteModel):
     username_validator = CustomUsernameValidator()
 
     email = models.EmailField(max_length=60, unique=True)
@@ -27,7 +28,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     groups = None
     user_permissions = None
 
-    objects = CustomUserManager()
+    objects = SoftDeleteCustomUserManager()
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
@@ -41,6 +42,13 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
+
+
+class DeletedUser(User):
+    class Meta:
+        proxy = True
+        verbose_name = 'Deleted User'
+        verbose_name_plural = 'Deleted Users'
 
 
 class GenderChoices(models.TextChoices):
