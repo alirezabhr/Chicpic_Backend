@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
 
     # Local Apps
+    'core.apps.CoreConfig',
     'user.apps.UserConfig',
     'clothing.apps.ClothingConfig',
 ]

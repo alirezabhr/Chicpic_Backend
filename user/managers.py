@@ -1,5 +1,7 @@
 from django.contrib.auth.base_user import BaseUserManager
 
+from core.managers import SoftDeleteManager
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, username, password=None):
@@ -25,3 +27,7 @@ class CustomUserManager(BaseUserManager):
         user.is_staff = True
         user.save()
         return user
+
+
+class SoftDeleteCustomUserManager(CustomUserManager, SoftDeleteManager):
+    pass

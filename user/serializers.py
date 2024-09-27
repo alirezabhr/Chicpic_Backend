@@ -82,13 +82,14 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def validate_username(self, username):
         if len(username) < 2:
             raise serializers.ValidationError('Username must contain at least 2 characters.')
-        if self.Meta.model.objects.filter(username__iexact=username).exists():
+        if self.Meta.model.objects.with_deleted().filter(username__iexact=username).exists():
             raise serializers.ValidationError('User with this username already exists.')
 
         return username
 
     def validate_email(self, email):
-        if self.Meta.model.objects.filter(email__iexact=self.Meta.model.objects.normalize_email(email)).exists():
+        if self.Meta.model.objects.with_deleted().filter(
+                email__iexact=self.Meta.model.objects.normalize_email(email)).exists():
             raise serializers.ValidationError('User with this email already exists.')
 
         return email

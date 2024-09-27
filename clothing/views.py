@@ -126,7 +126,7 @@ class ShopProductsView(ListAPIView):
     serializer_class = ProductPreviewSerializer
 
     def get_queryset(self):
-        return Product.objects.filter(shop_id=self.kwargs.get('shop_id'), is_deleted=False)
+        return Product.objects.filter(shop_id=self.kwargs.get('shop_id'))
 
 
 class ShopVariantsView(ListAPIView):
@@ -229,17 +229,17 @@ class ProductsView(ListAPIView):
     def get_queryset(self):
         discount = self.request.query_params.get('discount')
         if discount is not None:
-            return Product.objects.filter(is_deleted=False).annotate(
+            return Product.objects.annotate(
                 discount=(F('variants__original_price') - F('variants__final_price')) / F(
                     'variants__original_price') * 100).filter(discount__gte=discount).distinct()
-        return Product.objects.filter(is_deleted=False)
+        return Product.objects.all()
 
 
 class ProductDetailView(RetrieveAPIView):
     serializer_class = ProductDetailSerializer
 
     def get_object(self):
-        return Product.objects.get(id=self.kwargs.get('product_id'))
+        return Product.objects.with_deleted().get(id=self.kwargs.get('product_id'))
 
 
 class VariantSearchView(ListAPIView):

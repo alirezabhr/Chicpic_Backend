@@ -55,25 +55,28 @@ class DataIntegrator:
                 shop_obj = self._converter.shop
                 shop_obj.save()
 
-                # Delete products that are not in the parsed file
+                # Soft-Delete products that are not in the parsed file
                 Product.objects.filter(
-                    shop_id=shop_obj.id,
-                    is_deleted=False
+                    shop_id=shop_obj.id
                 ).exclude(
                     original_id__in=[p['product_id'] for p in self._parsed_product]
-                ).update(is_deleted=True)
+                ).delet()
 
                 for product in self._parsed_product:
                     product_tmp_obj = self._converter.convert_product(product=product, shop=shop_obj)
 
                     # Check if the product already exists
                     try:
-                        product_obj = Product.objects.get(original_id=product_tmp_obj.original_id)
+                        product_obj = Product.objects.with_deleted().get(original_id=product_tmp_obj.original_id)
                         # Product already exists, update fields
                         product_obj.brand = product_tmp_obj.brand
                         product_obj.title = product_tmp_obj.title
                         product_obj.description = product_tmp_obj.description
-                        product_obj.is_deleted = False  # Reset is_deleted flag
+
+                        # Restore the product if it was soft-deleted
+                        if product_obj.is_deleted:
+                            product_obj.restore()
+
                         updated_objects_count['Products'] += 1
                     except Product.DoesNotExist:
                         # Product doesn't exist, create a new one
