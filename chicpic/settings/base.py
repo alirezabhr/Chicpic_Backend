@@ -198,10 +198,12 @@ REST_AUTH = {
 }
 
 SOCIALACCOUNT_ADAPTER = 'user.adapters.CustomSocialAccountAdapter'
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': [
+            'openid'
             'profile',
             'email',
         ],
@@ -212,6 +214,7 @@ SOCIALACCOUNT_PROVIDERS = {
         'AUTH_PARAMS': {
             'access_type': 'online',
         },
+        'EMAIL_AUTHENTICATION': True,
     }
 }
 
