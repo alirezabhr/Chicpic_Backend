@@ -6,6 +6,9 @@ class SoftDeleteQuerySet(models.QuerySet):
     def delete(self):
         return self.update(is_deleted=True, deleted_at=timezone.now())
 
+    def restore(self):
+        return self.update(is_deleted=False, deleted_at=None)
+
     def hard_delete(self):
         return super().delete()
 

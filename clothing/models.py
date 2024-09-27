@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import F
 
+from core.models import SoftDeleteModel
 from user.models import User, GenderChoices
 
 
@@ -24,7 +25,7 @@ def shop_image_upload_path(shop_obj, uploaded_file_name):
     return f'shops/{shop_obj.name}/{file_name_and_format}'
 
 
-class Shop(models.Model):
+class Shop(SoftDeleteModel):
     name = models.CharField(max_length=50, unique=True)
     website = models.URLField()
     image = models.ImageField(upload_to=shop_image_upload_path, default='default.png')
@@ -32,6 +33,10 @@ class Shop(models.Model):
 
     class Meta:
         ordering = ('name',)
+
+    @property
+    def products(self):
+        return Product.objects.with_deleted().filter(shop=self)
 
     def __str__(self):
         return f'{self.id}: {self.name}'
@@ -41,14 +46,14 @@ class Attribute(models.Model):
     name = models.CharField(max_length=20, unique=True, verbose_name='Attribute Name')
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         ordering = ('-id',)
 
+    def __str__(self):
+        return self.name
 
-class Product(models.Model):
+
+class Product(SoftDeleteModel):
     original_id = models.BigIntegerField(unique=True)
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='products')
     brand = models.CharField(max_length=60)
@@ -56,7 +61,6 @@ class Product(models.Model):
     description = models.TextField(blank=True)
     categories = models.ManyToManyField(Category, related_name='products')
     created_at = models.DateTimeField(auto_now_add=True)
-    is_deleted = models.BooleanField(default=False)
 
     @property
     def variants(self):
