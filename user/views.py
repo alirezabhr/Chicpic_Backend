@@ -1,4 +1,5 @@
-from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveAPIView, UpdateAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveAPIView, UpdateAPIView, \
+    RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
@@ -74,7 +75,7 @@ class VerifyOTPView(APIView):
             return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserView(RetrieveUpdateAPIView):
+class UserView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAdminOrSelf,)
     serializer_class = UserSerializer
     queryset = get_user_model().objects.all()
