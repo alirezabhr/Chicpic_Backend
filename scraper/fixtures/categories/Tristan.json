@@ -11,7 +11,12 @@
   },
   {
     "gender": "Women",
-    "title": "Shirts-Blouses",
+    "title": "Shirts & Blouses",
+    "equivalent_chicpic_name": "Tops & Shirts"
+  },
+  {
+    "gender": "Women",
+    "title": "Shirts & Overshirts",
     "equivalent_chicpic_name": "Tops & Shirts"
   },
   {
@@ -21,12 +26,12 @@
   },
   {
     "gender": "Women",
-    "title": "T-shirts",
+    "title": "T-Shirts",
     "equivalent_chicpic_name": "Tops & Shirts"
   },
   {
     "gender": "Women",
-    "title": "Sweaters-Cardigans",
+    "title": "Sweaters & Cardigans",
     "equivalent_chicpic_name": "Sweaters & Cardigans"
   },
   {
@@ -71,12 +76,17 @@
   },
   {
     "gender": "Men",
-    "title": "T-shirts",
+    "title": "T-Shirts",
     "equivalent_chicpic_name": "T-Shirts"
   },
   {
     "gender": "Men",
-    "title": "Shirts",
+    "title": "Shirts & Blouses",
+    "equivalent_chicpic_name": "Shirts"
+  },
+  {
+    "gender": "Men",
+    "title": "Shirts & Overshirts",
     "equivalent_chicpic_name": "Shirts"
   },
   {
@@ -86,7 +96,7 @@
   },
   {
     "gender": "Men",
-    "title": "Sweaters-Cardigans",
+    "title": "Sweaters & Cardigans",
     "equivalent_chicpic_name": "Sweaters"
   },
   {

@@ -67,3 +67,30 @@ def read_data_json_file(file_path: str):
         data = json.loads(f.read())
 
     return data
+
+
+def get_valid_shop():
+    # Load shop information from the configuration file
+    local_dir = os.path.dirname(os.path.abspath(__file__))
+    with open(f'{local_dir}/shops_config.json', 'r') as file:
+        shop_config = json.load(file)
+
+    shops = shop_config['shops']
+
+    # Display available shops
+    for index, shop in enumerate(shops):
+        print(f"{index+1}. {shop['name']}")
+
+    shop_names = [shop['name'] for shop in shops]
+    item_numbers = [str(index + 1) for index, shop in enumerate(shops)]
+
+    # Wait for user to select a shop
+    while True:
+        user_input = input(f"Please enter a shop name or item number: ")
+
+        if user_input in shop_names:
+            return next((shop for shop in shops if shop['name'] == user_input), None)
+        elif user_input in item_numbers:
+            return shops[int(user_input) - 1]
+
+        print("Invalid selection. Please try again.")

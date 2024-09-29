@@ -243,9 +243,9 @@ class KitAndAceParser(ShopifyParser):
                 continue
             else:
                 v['image'] = {
+                    'src': featured_image['src'],
                     'width': featured_image['width'],
                     'height': featured_image['height'],
-                    'src': featured_image['src'],
                 }
 
             variants.append(v)
@@ -254,7 +254,8 @@ class KitAndAceParser(ShopifyParser):
 
 
 class FrankAndOakParser(ShopifyParser):
-    UNACCEPTABLE_PRODUCT_TYPES = ['', 'Lifestyle', 'Bodywear', 'Swimwear', 'Accessories', 'Gift Card', 'Grooming']
+    UNACCEPTABLE_PRODUCT_TYPES = ['', 'Lifestyle', 'Bodywear', 'Swimwear', 'Accessories', 'Gift Card', 'Grooming',
+                                  'Insurance']
     UNACCEPTABLE_TAGS = []
 
     def __init__(self):
@@ -347,33 +348,50 @@ class FrankAndOakParser(ShopifyParser):
 
 
 class TristanParser(ShopifyParser):
-    UNACCEPTABLE_PRODUCT_TYPES = None
+    UNACCEPTABLE_PRODUCT_TYPES = ['Socks', 'Jewellery', 'Scarves', 'Belts', 'Socks & Tights', 'Sunglasses', 'Hats',
+                                  'Ties', 'Bags', 'Underwear', 'Other Accessories', 'Miscellenious']
     UNACCEPTABLE_TAGS = []
-    PRODUCT_TYPES = None
+    ACCEPTABLE_CATEGORIES = {
+        'Shoes': ('Shoes',),
+        'Tops': ('T-Shirts', 'Shirts & Blouses', 'Shirts & Overshirts', 'Outerwear', 'Sweaters & Cardigans', 'Blazers',
+                 'Dresses', 'Vests'),
+        'Bottoms': ('Pants', 'Jeans', 'Skirts'),
+    }
 
     def __init__(self):
-        shop = constants.Shops.TRISTAN.value
-        # initialize product types
-        file_path = constants.SHOP_PRODUCT_TYPES_FILE_PATH.format(shop_name=shop.name)
-        self.PRODUCT_TYPES = utils.read_data_json_file(file_path=file_path)
-        assert self.PRODUCT_TYPES is not None, "PRODUCT_TYPES is None"
-        assert len(self.PRODUCT_TYPES) > 0, "PRODUCT_TYPES is empty"
-
-        self.UNACCEPTABLE_PRODUCT_TYPES = list(filter(lambda key: not self.PRODUCT_TYPES[key]['is_acceptable'],
-                                                      self.PRODUCT_TYPES.keys()))
-        super().__init__(shop=shop)
+        super().__init__(shop=constants.Shops.TRISTAN.value)
 
     def _product_description(self, product: dict):
-        return ''
+        return utils.remove_html_tags(product['body_html']) if product['body_html'] else ''
 
     def _product_genders(self, product: dict) -> list:
-        return [self.PRODUCT_TYPES[product['product_type']]['gender']]
+        tags = product['tags']
+        labels = [tag[8:] for tag in tags if tag.startswith('__label:')]
+        genders = []
+        for label in labels:
+            if label == 'Men':
+                genders.append('Men')
+            elif label == 'Women':
+                genders.append('Women')
+        return genders
 
     def _product_categories(self, product: dict) -> tuple:
-        return (self.PRODUCT_TYPES[product['product_type']]['category'],)
+        return (product['product_type'],)
 
     def _product_size_guide(self, product: dict):
-        return self.PRODUCT_TYPES[product['product_type']]['size_guide']
+        genders = self._product_genders(product)
+        if not genders:
+            return None
+
+        categories = self._product_categories(product)
+        category = categories[0] if categories else None
+
+        if category:
+            for key, value in self.ACCEPTABLE_CATEGORIES.items():
+                if category in value:
+                    return f'{genders[0]}-{key}'
+
+        return None
 
     def _parse_variants(self, product: dict):
         product_variants = product['variants']
@@ -426,13 +444,6 @@ class TristanParser(ShopifyParser):
             variants.append(v)
 
         return variants
-
-    def parse_products(self, scraped_products: list):
-        scraped_product_types = set(map(lambda p: p['product_type'], scraped_products))
-        current_product_types = set(self.PRODUCT_TYPES.keys())
-        assert scraped_product_types.issubset(current_product_types), \
-            f'Some scraped product types are not in current product types.\ndifferences: {scraped_product_types.difference(current_product_types)}'
-        return super().parse_products(scraped_products)
 
     def _get_color_option_position(self, product: dict):
         for opt in product['options']:
@@ -820,6 +831,8 @@ class VessiParser(ShopifyParser):
         with open(constants.COLORS_CONVERTER_FILE_PATH.format(shop_name=self.shop.name), 'r') as f:
             color_map = json.load(f)
         color_tags = list(map(lambda ct: color_map[ct[7:]], filter(lambda t: t.startswith('Color:'), product['tags'])))
+        # Up to 3 colors are acceptable
+        color_tags = color_tags[:3]
         return "/".join(color_tags)
 
     def _parse_attributes(self, product: dict):
@@ -911,6 +924,8 @@ class KeenParser(ShopifyParser):
         # Color 'misc' does not load in parsed file
         key = 'filtercolor:'
         colors = list(map(lambda ct: color_map[ct[len(key):]], filter(lambda t: t.startswith(key), product['tags'])))
+        # remove null values and limit it to up to 3 items
+        colors = [color for color in colors if color is not None][:3]
         return "/".join(colors)
 
     def _product_size_guide(self, product: dict):

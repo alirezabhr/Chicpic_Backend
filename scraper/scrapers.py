@@ -1,4 +1,5 @@
 import os
+import importlib
 from abc import ABC
 import requests
 import logging
@@ -146,3 +147,59 @@ class KeenScraper(ShopifyScraper):
 
     def __init__(self):
         super().__init__(self.SHOP)
+
+
+if __name__ == '__main__':
+    from .utils import get_valid_shop
+
+    selected_shop = get_valid_shop()
+
+    # Dynamically import the classes
+    scraper_module = importlib.import_module('scraper.scrapers')
+    scraper_cls = getattr(scraper_module, selected_shop['scraper'])()
+
+    need_scrape = None
+    while need_scrape not in ['y', 'n']:
+        need_scrape = input('Do you want to scrape? (y/n): ')
+
+    if need_scrape == 'y':
+        print(f'Scraping {selected_shop["name"]}...')
+        scraper_cls.save_products(scraper_cls.fetch_products())
+
+    selected_shop_products = scraper_cls.read_scraped_file_data()
+
+    # Check if user needs vendor counts
+    need_vendor_counts = None
+    while need_vendor_counts not in ['y', 'n']:
+        need_vendor_counts = input('get_vendor_counts? (y/n): ')
+
+    if need_vendor_counts == 'y':
+        print(f'get_vendor_counts {selected_shop["name"]}', scraper_cls.get_vendor_counts(selected_shop_products),
+              sep='\n', end='\n\n')
+
+    # Check if user needs product type counts
+    need_product_type_counts = None
+    while need_product_type_counts not in ['y', 'n']:
+        need_product_type_counts = input('get_product_type_counts? (y/n): ')
+
+    if need_product_type_counts == 'y':
+        print(f'get_product_type_counts {selected_shop["name"]}',
+              scraper_cls.get_product_type_counts(selected_shop_products), sep='\n', end='\n\n')
+
+    # Check if user needs tag counts
+    need_tag_counts = None
+    while need_tag_counts not in ['y', 'n']:
+        need_tag_counts = input('get_tag_counts? (y/n): ')
+
+    if need_tag_counts == 'y':
+        print(f'get_tag_counts {selected_shop["name"]}', scraper_cls.get_tag_counts(selected_shop_products), sep='\n',
+              end='\n\n')
+
+    # Check if user needs tag counts
+    need_attribute_counts = None
+    while need_attribute_counts not in ['y', 'n']:
+        need_attribute_counts = input('get_attribute_counts? (y/n): ')
+
+    if need_attribute_counts == 'y':
+        print(f'get_attribute_counts {selected_shop["name"]}', scraper_cls.get_attribute_counts(selected_shop_products),
+              sep='\n', end='\n\n')

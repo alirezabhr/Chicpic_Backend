@@ -170,6 +170,11 @@
     "equivalent_chicpic_name": "Outerwear"
   },
   {
+    "gender": "Men",
+    "title": "track top",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
     "gender": "Women",
     "title": "leotard",
     "equivalent_chicpic_name": "Outerwear"
@@ -228,6 +233,11 @@
   },
   {
     "gender": "Women",
+    "title": "tights",
+    "equivalent_chicpic_name": "Activewear"
+  },
+  {
+    "gender": "Men",
     "title": "tights",
     "equivalent_chicpic_name": "Activewear"
   },

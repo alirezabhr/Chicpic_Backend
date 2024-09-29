@@ -1,4 +1,5 @@
 {
+  "Orange": "D06538",
   "Black":  "181818",
   "Grey":   "ACACAC",
   "Beige":  "EDE1D7",
@@ -9,5 +10,6 @@
   "Brown":  "765748",
   "Green":  "58593F",
   "White":  "EFEFEF",
+  "Off-White": "E5D4BF",
   "Yellow": "F5AE43"
 }

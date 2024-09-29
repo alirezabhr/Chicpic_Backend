@@ -159,5 +159,7 @@
     "OFF WHITE": "#d7d7d7",
     "MULTI COLOR": "#000000",
     "DARK GREY": "#555260",
-    "LAMB": "#c9bfa6"
+    "LAMB": "#c9bfa6",
+    "LIGHT GREY": "#c2c7ca",
+    "TAUPE/BLACK": "#b09380|#000000"
 }

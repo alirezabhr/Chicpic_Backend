@@ -1,5 +1,4 @@
 import importlib
-import json
 import logging
 import os
 
@@ -21,7 +20,7 @@ class DataIntegrator:
     def __config_logger(self):
         os.makedirs(constants.LOGS_DIR, exist_ok=True)
         # create the file if not exists
-        open(constants.LOGS_FILE_PATH.format(module_name='integrator'), 'a').close()
+        open(constants.LOGS_FILE_PATH.format(module_name='integrator'), 'w').close()
         handler = logging.FileHandler(constants.LOGS_FILE_PATH.format(module_name='integrator'))
         formatter = logging.Formatter(
             fmt=f"%(asctime)s %(module)s %(levelname)s - %(message)s",
@@ -60,7 +59,7 @@ class DataIntegrator:
                     shop_id=shop_obj.id
                 ).exclude(
                     original_id__in=[p['product_id'] for p in self._parsed_product]
-                ).delet()
+                ).delete()
 
                 for product in self._parsed_product:
                     product_tmp_obj = self._converter.convert_product(product=product, shop=shop_obj)
@@ -160,32 +159,10 @@ class DataIntegrator:
             self.logger.exception(error)
 
 
-def get_valid_shop_selection(shops):
-    # Display available shops
-    for index, shop in enumerate(shops):
-        print(f"{index+1}. {shop['name']}")
-
-    shop_names = [shop['name'] for shop in shops]
-    item_numbers = [str(index + 1) for index, shop in enumerate(shops)]
-
-    while True:
-        user_input = input(f"Please enter a shop name or item number: ")
-
-        if user_input in shop_names:
-            return next((shop for shop in shops if shop['name'] == user_input), None)
-        elif user_input in item_numbers:
-            return shops[int(user_input) - 1]
-
-        print("Invalid selection. Please try again.")
-
-
 if __name__ == '__main__':
-    # Load shop information from the configuration file
-    local_dir = os.path.dirname(os.path.abspath(__file__))
-    with open(f'{local_dir}/shops_config.json', 'r') as file:
-        shop_config = json.load(file)
+    from .utils import get_valid_shop
 
-    selected_shop = get_valid_shop_selection(shop_config['shops'])
+    selected_shop = get_valid_shop()
 
     # Dynamically import the classes
     scraper_module = importlib.import_module('scraper.scrapers')

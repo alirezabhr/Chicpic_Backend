@@ -6,6 +6,36 @@
   },
   {
     "gender": "Women",
+    "title": "T-Shirts",
+    "equivalent_chicpic_name": "Tops & Shirts"
+  },
+  {
+    "gender": "Women",
+    "title": "Blouses",
+    "equivalent_chicpic_name": "Tops & Shirts"
+  },
+  {
+    "gender": "Women",
+    "title": "Shirts",
+    "equivalent_chicpic_name": "Tops & Shirts"
+  },
+  {
+    "gender": "Women",
+    "title": "Bodysuits",
+    "equivalent_chicpic_name": "Tops & Shirts"
+  },
+  {
+    "gender": "Women",
+    "title": "Long Sleeve Tops",
+    "equivalent_chicpic_name": "Tops & Shirts"
+  },
+  {
+    "gender": "Women",
+    "title": "Tank Tops",
+    "equivalent_chicpic_name": "Tops & Shirts"
+  },
+  {
+    "gender": "Women",
     "title": "Pants",
     "equivalent_chicpic_name": "Bottoms"
   },
@@ -21,6 +51,11 @@
   },
   {
     "gender": "Women",
+    "title": "Blazers",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Women",
     "title": "Hoodies",
     "equivalent_chicpic_name": "Outerwear"
   },
@@ -32,6 +67,16 @@
   {
     "gender": "Women",
     "title": "Sweater",
+    "equivalent_chicpic_name": "Sweaters & Cardigans"
+  },
+  {
+    "gender": "Women",
+    "title": "Cardigans",
+    "equivalent_chicpic_name": "Sweaters & Cardigans"
+  },
+  {
+    "gender": "Women",
+    "title": "Sweaters",
     "equivalent_chicpic_name": "Sweaters & Cardigans"
   },
   {
@@ -81,6 +126,11 @@
   },
   {
     "gender": "Men",
+    "title": "Sweaters",
+    "equivalent_chicpic_name": "Sweaters"
+  },
+  {
+    "gender": "Men",
     "title": "Sleepwear & Loungewear",
     "equivalent_chicpic_name": "Sleepwear & Loungewear"
   },
@@ -96,7 +146,27 @@
   },
   {
     "gender": "Men",
+    "title": "Polos",
+    "equivalent_chicpic_name": "T-Shirts"
+  },
+  {
+    "gender": "Men",
+    "title": "T-Shirts",
+    "equivalent_chicpic_name": "T-Shirts"
+  },
+  {
+    "gender": "Men",
     "title": "Shirts & Tops",
+    "equivalent_chicpic_name": "Shirts"
+  },
+  {
+    "gender": "Men",
+    "title": "Shirts",
+    "equivalent_chicpic_name": "Shirts"
+  },
+  {
+    "gender": "Men",
+    "title": "Long Sleeve Tops",
     "equivalent_chicpic_name": "Shirts"
   },
   {
@@ -107,6 +177,16 @@
   {
     "gender": "Men",
     "title": "Coats & Jackets",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Men",
+    "title": "Blazers",
+    "equivalent_chicpic_name": "Outerwear"
+  },
+  {
+    "gender": "Men",
+    "title": "Hoodies",
     "equivalent_chicpic_name": "Outerwear"
   },
   {
