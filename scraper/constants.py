@@ -42,3 +42,4 @@ class Shops(Enum):
     PAJAR = ShopConstant(name='Pajar', website='https://ca.pajar.com/')
     VESSI = ShopConstant(name='Vessi', website='https://ca.vessi.com/')
     KEEN = ShopConstant(name='Keen', website='https://www.keenfootwear.ca/')
+    PSYCHO_BUNNY = ShopConstant(name='Psycho Bunny', website='https://www.psychobunny.ca/')

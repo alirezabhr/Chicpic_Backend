@@ -304,3 +304,8 @@ class KeenDataConverter(DataConverter):
             return [Sizing(variant=variant, option=Sizing.SizingOptionChoices.SHOE_SIZE, value=size_value)]
         else:
             return super().convert_sizings(product, variant)
+
+
+class PsychoBunnyDataConverter(DataConverter):
+    def __init__(self):
+        super().__init__(shop=constants.Shops.PSYCHO_BUNNY.value)

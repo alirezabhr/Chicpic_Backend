@@ -48,6 +48,13 @@
             "scraper": "KeenScraper",
             "parser": "KeenParser",
             "converter": "KeenDataConverter"
+        },
+        {
+            "name": "Psycho Bunny",
+            "website": "https://www.psychobunny.ca/",
+            "scraper": "PsychoBunnyScraper",
+            "parser": "PsychoBunnyParser",
+            "converter": "PsychoBunnyDataConverter"
         }
     ]
 }

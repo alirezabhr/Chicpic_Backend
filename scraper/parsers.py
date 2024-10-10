@@ -939,3 +939,23 @@ class KeenParser(ShopifyParser):
             return f'Men-Footwear'
         else:
             return None
+
+
+class PsychoBunnyParser(ShopifyParser):
+    UNACCEPTABLE_PRODUCT_TYPES = []
+    UNACCEPTABLE_TAGS = []
+
+    def __init__(self):
+        super().__init__(shop=constants.Shops.PSYCHO_BUNNY.value)
+
+    def _parse_variants(self, product: dict):
+        pass
+
+    def _product_genders(self, product: dict) -> list:
+        pass
+
+    def _product_size_guide(self, product: dict):
+        pass
+
+    def _product_categories(self, product: dict) -> tuple:
+        pass
