@@ -942,20 +942,81 @@ class KeenParser(ShopifyParser):
 
 
 class PsychoBunnyParser(ShopifyParser):
-    UNACCEPTABLE_PRODUCT_TYPES = []
-    UNACCEPTABLE_TAGS = []
+    UNACCEPTABLE_PRODUCT_TYPES = [
+        'KIDS POLOS',
+        'Accessories',
+        'Gift Cards',
+        'MENS ACCESSORIES',
+        'KIDS ACCESSORIES'
+
+        ]
+    UNACCEPTABLE_TAGS = ['department:Kids']
 
     def __init__(self):
         super().__init__(shop=constants.Shops.PSYCHO_BUNNY.value)
 
-    def _parse_variants(self, product: dict):
-        pass
-
+    def _product_categories(self, product: dict) -> tuple:
+        return (product['product_type'],)
+       
     def _product_genders(self, product: dict) -> list:
-        pass
+        division_key = 'department:'
+        division_tags = list(
+            map(lambda t2: t2[len(division_key):], filter(lambda t: division_key in t, product['tags'])))
+
+        genders = []
+        for tag in division_tags:
+            if tag == 'Mens':
+                genders.append('Men')
+        return genders
 
     def _product_size_guide(self, product: dict):
         pass
 
-    def _product_categories(self, product: dict) -> tuple:
+    
+    def _parse_variants(self, product: dict):
+        product_variants = product['variants']
+        variants = []
+        available_positions = [1, 2, 3]
+
+        # color_hex = self._product_color(product)
+        size_opt_position = self._get_size_option_position(product)
+
+        if size_opt_position is not None:
+            available_positions.remove(size_opt_position)
+
+        for variant in product_variants:
+            final_price = float(variant['price'])
+            original_price = float(variant['compare_at_price'])
+            if original_price < final_price:
+                original_price = final_price
+
+            size = None if size_opt_position is None else variant[f'option{size_opt_position}']
+            option1 = variant[f'option{available_positions[0]}']
+            option2 = variant[f'option{available_positions[1]}']
+
+            v = {
+                'variant_id': variant['id'],
+                'product_id': variant['product_id'],
+                'available': variant['available'],
+                'original_price': original_price,
+                'final_price': final_price,
+                'option1': option1,
+                'option2': option2,
+                'color_hex': "test",
+                'size': size,
+                'link': f'{self.shop.website}products/{product["handle"]}',
+            }
+
+            image = product['images'][0]
+            v['image'] = {
+                'width': image['width'],
+                'height': image['height'],
+                'src': image['src'],
+            }
+
+            variants.append(v)
+
+        return variants
+    
+    def _product_color(self, product: dict):
         pass
