@@ -978,21 +978,25 @@ class PsychoBunnyParser(ShopifyParser):
         variants = []
         available_positions = [1, 2, 3]
 
-        # color_hex = self._product_color(product)
+        color_opt_position = self._get_color_option_position(product)
         size_opt_position = self._get_size_option_position(product)
 
+        if color_opt_position is not None:
+            available_positions.remove(color_opt_position)
         if size_opt_position is not None:
             available_positions.remove(size_opt_position)
 
         for variant in product_variants:
+            
             final_price = float(variant['price'])
             original_price = float(variant['compare_at_price'])
             if original_price < final_price:
                 original_price = final_price
-
+            
+            color_hex = None if color_opt_position is None else variant[f'option{color_opt_position}']
             size = None if size_opt_position is None else variant[f'option{size_opt_position}']
             option1 = variant[f'option{available_positions[0]}']
-            option2 = variant[f'option{available_positions[1]}']
+            # option2 = variant[f'option{available_positions[1]}']
 
             v = {
                 'variant_id': variant['id'],
@@ -1001,8 +1005,8 @@ class PsychoBunnyParser(ShopifyParser):
                 'original_price': original_price,
                 'final_price': final_price,
                 'option1': option1,
-                'option2': option2,
-                'color_hex': "test",
+                'option2': None,
+                'color_hex': color_hex,
                 'size': size,
                 'link': f'{self.shop.website}products/{product["handle"]}',
             }
