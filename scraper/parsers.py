@@ -947,8 +947,9 @@ class PsychoBunnyParser(ShopifyParser):
         'Accessories',
         'Gift Cards',
         'MENS ACCESSORIES',
-        'KIDS ACCESSORIES'
-
+        'KIDS ACCESSORIES',
+        'KIDS T-SHIRTS',
+        '',
         ]
     UNACCEPTABLE_TAGS = ['department:Kids']
 
@@ -956,7 +957,8 @@ class PsychoBunnyParser(ShopifyParser):
         super().__init__(shop=constants.Shops.PSYCHO_BUNNY.value)
 
     def _product_categories(self, product: dict) -> tuple:
-        return (product['product_type'],)
+        key = 'category:'
+        return tuple(map(lambda t2: t2[len(key):], filter(lambda t: t.startswith(key), product['tags'])))
        
     def _product_genders(self, product: dict) -> list:
         division_key = 'department:'
@@ -967,12 +969,13 @@ class PsychoBunnyParser(ShopifyParser):
         for tag in division_tags:
             if tag == 'Mens':
                 genders.append('Men')
+            elif tag == 'Womens':
+                genders.append('Women')
         return genders
 
     def _product_size_guide(self, product: dict):
         pass
 
-    
     def _parse_variants(self, product: dict):
         product_variants = product['variants']
         variants = []
@@ -987,7 +990,7 @@ class PsychoBunnyParser(ShopifyParser):
             available_positions.remove(size_opt_position)
 
         for variant in product_variants:
-            
+            # TODO: check if this is correct
             final_price = float(variant['price'])
             original_price = float(variant['compare_at_price'])
             if original_price < final_price:

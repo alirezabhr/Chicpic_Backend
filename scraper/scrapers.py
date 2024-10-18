@@ -165,6 +165,7 @@ if __name__ == '__main__':
     scraper_module = importlib.import_module('scraper.scrapers')
     scraper_cls = getattr(scraper_module, selected_shop['scraper'])()
 
+    # Check if user needs to scrape
     need_scrape = None
     while need_scrape not in ['y', 'n']:
         need_scrape = input('Do you want to scrape? (y/n): ')
@@ -173,7 +174,18 @@ if __name__ == '__main__':
         print(f'Scraping {selected_shop["name"]}...')
         scraper_cls.save_products(scraper_cls.fetch_products())
 
-    selected_shop_products = scraper_cls.read_scraped_file_data()
+    selected_products = scraper_cls.read_scraped_file_data()
+
+    # Check if user needs to work with acceptable products only
+    only_acceptable = None
+    while only_acceptable not in ['y', 'n']:
+        only_acceptable = input('Only acceptable products? (y/n): ')
+
+    if only_acceptable == 'y':
+        # Dynamically import the classes
+        parser_module = importlib.import_module('scraper.parsers')
+        parser_cls = getattr(parser_module, selected_shop['parser'])()
+        selected_products = list(filter(lambda p: not parser_cls.is_unacceptable_product(p), selected_products))
 
     # Check if user needs vendor counts
     need_vendor_counts = None
@@ -181,7 +193,7 @@ if __name__ == '__main__':
         need_vendor_counts = input('get_vendor_counts? (y/n): ')
 
     if need_vendor_counts == 'y':
-        print(f'get_vendor_counts {selected_shop["name"]}', scraper_cls.get_vendor_counts(selected_shop_products),
+        print(f'get_vendor_counts {selected_shop["name"]}', scraper_cls.get_vendor_counts(selected_products),
               sep='\n', end='\n\n')
 
     # Check if user needs product type counts
@@ -191,7 +203,7 @@ if __name__ == '__main__':
 
     if need_product_type_counts == 'y':
         print(f'get_product_type_counts {selected_shop["name"]}',
-              scraper_cls.get_product_type_counts(selected_shop_products), sep='\n', end='\n\n')
+              scraper_cls.get_product_type_counts(selected_products), sep='\n', end='\n\n')
 
     # Check if user needs tag counts
     need_tag_counts = None
@@ -199,7 +211,7 @@ if __name__ == '__main__':
         need_tag_counts = input('get_tag_counts? (y/n): ')
 
     if need_tag_counts == 'y':
-        print(f'get_tag_counts {selected_shop["name"]}', scraper_cls.get_tag_counts(selected_shop_products), sep='\n',
+        print(f'get_tag_counts {selected_shop["name"]}', scraper_cls.get_tag_counts(selected_products), sep='\n',
               end='\n\n')
 
     # Check if user needs tag counts
@@ -208,5 +220,17 @@ if __name__ == '__main__':
         need_attribute_counts = input('get_attribute_counts? (y/n): ')
 
     if need_attribute_counts == 'y':
-        print(f'get_attribute_counts {selected_shop["name"]}', scraper_cls.get_attribute_counts(selected_shop_products),
+        print(f'get_attribute_counts {selected_shop["name"]}', scraper_cls.get_attribute_counts(selected_products),
               sep='\n', end='\n\n')
+    
+    # Check if user needs option values
+    need_option_values = None
+    while need_option_values not in ['y', 'n']:
+        need_option_values = input('get_option_values? (y/n): ')
+    
+    if need_option_values == 'y':
+        options = scraper_cls.get_attribute_counts(selected_products).keys()
+
+        for option in options:
+            print(f'Values for -> {option}',
+                  scraper_cls.get_all_option_value(selected_products, option), sep='\n', end='\n\n')
