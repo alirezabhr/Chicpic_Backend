@@ -945,11 +945,22 @@ class PsychoBunnyParser(ShopifyParser):
     UNACCEPTABLE_PRODUCT_TYPES = [
         'KIDS POLOS',
         'Accessories',
+        'ACCESSORIES'
         'Gift Cards',
         'MENS ACCESSORIES',
         'KIDS ACCESSORIES',
         'KIDS T-SHIRTS',
         '',
+        'KIDS SWIMWEAR',
+        'KIDS HOODIES',
+        'KIDS SWEAT PANTS',
+        'KIDS SHORTS',
+        'KIDS SWEAT SHORTS',
+        'KIDS TOPS',
+        'KIDS JACKETS',
+        'KIDS SWEATSHIRTS'
+        'KIDS PANTS',
+        'KIDS SHIRTS',
         ]
     UNACCEPTABLE_TAGS = ['department:Kids']
 
@@ -971,10 +982,18 @@ class PsychoBunnyParser(ShopifyParser):
                 genders.append('Men')
             elif tag == 'Womens':
                 genders.append('Women')
+            
+        if genders == []:
+            genders.append('Men')
+            genders.append('Women')
         return genders
 
     def _product_size_guide(self, product: dict):
-        pass
+        genders = self._product_genders(product)
+        category = self._product_categories(product) 
+        if len(genders) == 0:
+            return None
+        return f"{genders[0]}-{category[0]}"
 
     def _parse_variants(self, product: dict):
         product_variants = product['variants']
@@ -991,10 +1010,13 @@ class PsychoBunnyParser(ShopifyParser):
 
         for variant in product_variants:
             # TODO: check if this is correct
-            final_price = float(variant['price'])
-            original_price = float(variant['compare_at_price'])
+            final_price = float(variant['price']) #60
+            original_price = float(variant['compare_at_price']) #90
             if original_price < final_price:
                 original_price = final_price
+                # price_is_ok = True
+            # else:
+                # price_is_ok = False
             
             color_hex = None if color_opt_position is None else variant[f'option{color_opt_position}']
             size = None if size_opt_position is None else variant[f'option{size_opt_position}']
@@ -1007,6 +1029,7 @@ class PsychoBunnyParser(ShopifyParser):
                 'available': variant['available'],
                 'original_price': original_price,
                 'final_price': final_price,
+                # 'price_is_ok': price_is_ok,
                 'option1': option1,
                 'option2': None,
                 'color_hex': color_hex,
