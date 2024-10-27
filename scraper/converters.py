@@ -150,12 +150,19 @@ class DataConverter(ABC):
             if category['gender'] == category_gender and category['title'] == category_title:
                 selected_category = category
                 break
-
+        
         if selected_category is None:
             self.logger.error(f'Proper category not found. title: {category_title}, gender: {category_gender}.')
         else:
-            gender = utils.find_proper_choice(GenderChoices.choices, selected_category['gender'])
-            return Category.objects.get(title=selected_category['equivalent_chicpic_name'], gender=gender)
+            try:
+                gender = utils.find_proper_choice(GenderChoices.choices, selected_category['gender'])
+                return Category.objects.get(title=selected_category['equivalent_chicpic_name'], gender=gender)
+            except Exception as e:
+                print(f"selected_category : {selected_category}")
+                print(f" selected_category['gender'] : { selected_category['gender']}")
+                print(f"category : {category}")
+                print(f"An error occurred ~~ Category.objects.get: {selected_category['equivalent_chicpic_name'], gender}")
+                self.logger.error(f"An error occurred ~~ Category.objects.get: {selected_category['equivalent_chicpic_name'], gender}")
 
     @property
     def shop(self) -> Shop:
@@ -309,3 +316,24 @@ class KeenDataConverter(DataConverter):
 class PsychoBunnyDataConverter(DataConverter):
     def __init__(self):
         super().__init__(shop=constants.Shops.PSYCHO_BUNNY.value)
+        
+    def __convert_color(self, color_name: str) -> str:
+        file_path = constants.COLORS_CONVERTER_FILE_PATH.format(shop_name=self.shop_name)
+        with open(file_path, 'r') as f:
+            colors_data = json.loads(f.read())
+        return colors_data.get(color_name)
+    
+    def convert_variant(self, variant: dict, product: Product) -> Variant:
+        return Variant(
+            original_id=variant['variant_id'],
+            product=product,
+            image_src=variant['image']['src'],
+            link=variant['link'],
+            original_price=variant['original_price'],
+            final_price=variant['final_price'],
+            is_available=variant['available'],
+            option1=variant['option1'],
+            option2=variant['option2'],
+            color_hex=self.__convert_color(variant['color_hex']),
+            size=variant['size'],
+        )

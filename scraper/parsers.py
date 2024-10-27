@@ -969,8 +969,15 @@ class PsychoBunnyParser(ShopifyParser):
 
     def _product_categories(self, product: dict) -> tuple:
         key = 'category:'
-        return tuple(map(lambda t2: t2[len(key):], filter(lambda t: t.startswith(key), product['tags'])))
-       
+        # Filter the tags that start with the 'category:' key
+        categories = tuple(map(lambda t2: t2[len(key):], filter(lambda t: t.startswith(key), product['tags'])))
+        # If no category tags are found, return the product type as a tuple
+        if categories:
+            return categories
+        return (product['product_type'],)
+        
+    
+
     def _product_genders(self, product: dict) -> list:
         division_key = 'department:'
         division_tags = list(
@@ -985,7 +992,7 @@ class PsychoBunnyParser(ShopifyParser):
             
         if genders == []:
             genders.append('Men')
-            genders.append('Women')
+            genders.append('Women') 
         return genders
 
     def _product_size_guide(self, product: dict):
@@ -1010,13 +1017,15 @@ class PsychoBunnyParser(ShopifyParser):
 
         for variant in product_variants:
             # TODO: check if this is correct
-            final_price = float(variant['price']) #60
-            original_price = float(variant['compare_at_price']) #90
+            final_price = float(variant['price'])
+    
+            # If compare_at_price is null, use final_price as the original_price
+            original_price = float(variant['compare_at_price']) if variant['compare_at_price'] is not None else final_price
+
+            # Ensure original_price is not less than final_price
             if original_price < final_price:
                 original_price = final_price
-                # price_is_ok = True
-            # else:
-                # price_is_ok = False
+
             
             color_hex = None if color_opt_position is None else variant[f'option{color_opt_position}']
             size = None if size_opt_position is None else variant[f'option{size_opt_position}']
