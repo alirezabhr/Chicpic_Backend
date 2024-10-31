@@ -11,6 +11,11 @@
   },
   {
       "gender": "Men",
+      "title": "T-SHIRTS",
+      "equivalent_chicpic_name": "T-Shirts"
+  },
+  {
+      "gender": "Men",
       "title": "Polos",
       "equivalent_chicpic_name": "T-Shirts"
   },
@@ -51,6 +56,11 @@
   },
   {
       "gender": "Women",
+      "title": "T-SHIRTS",
+      "equivalent_chicpic_name": "Tops & Shirts"
+  },
+  {
+      "gender": "Women",
       "title": "Outerwear",
       "equivalent_chicpic_name": "Outerwear"
   },
@@ -67,12 +77,12 @@
   {
       "gender": "Men",
       "title": "Sweatpants",
-      "equivalent_chicpic_name": "pants"
+      "equivalent_chicpic_name": "Bottoms"
   },
   {
       "gender": "Men",
       "title": "Lounge and Underwear",
-      "equivalent_chicpic_name": "Underwear"
+      "equivalent_chicpic_name": "Sleepwear & Loungewear"
   },
   {
       "gender": "Men",

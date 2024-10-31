@@ -35,7 +35,6 @@ def find_proper_choice(choices: list, key: str) -> str:
     # Choices should be a list of tuples contain database value and human-readable text
     for choice_db_value, human_readable_text in choices:
         if choice_db_value.lower() == key.lower() or human_readable_text.lower() == key.lower():
-            print(f"find proper choise : {choice_db_value}" )
             return choice_db_value
 
     raise Exception(f'Choice not found. choices: {choices}, key: {key}')

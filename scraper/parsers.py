@@ -945,7 +945,7 @@ class PsychoBunnyParser(ShopifyParser):
     UNACCEPTABLE_PRODUCT_TYPES = [
         'KIDS POLOS',
         'Accessories',
-        'ACCESSORIES'
+        'ACCESSORIES',
         'Gift Cards',
         'MENS ACCESSORIES',
         'KIDS ACCESSORIES',
@@ -958,12 +958,21 @@ class PsychoBunnyParser(ShopifyParser):
         'KIDS SWEAT SHORTS',
         'KIDS TOPS',
         'KIDS JACKETS',
-        'KIDS SWEATSHIRTS'
+        'KIDS SWEATSHIRTS',
         'KIDS PANTS',
         'KIDS SHIRTS',
+        'MENS BOXER BRIEFS',
+        'mens-mens-3-pack-boxer-breif-b6v198e200-001-black',
+        'MENS HATS',
+        'MENS SOCKS',
+        
         ]
-    UNACCEPTABLE_TAGS = ['department:Kids']
-
+    UNACCEPTABLE_TAGS = ['department:Kids','category:Accessories']
+    ACCEPTABLE_CATEGORIES = {
+            'Tops': ('Tees', 'Shirts', 'Polos', 'Outerwear', 'Sweatshirts and Hoodies', 'Outerwear',
+                    'Sweaters', 'Vests'),
+            'Bottoms': ('Pants', 'Swimwear', 'Sweatpants' ,'Shorts'),
+        }
     def __init__(self):
         super().__init__(shop=constants.Shops.PSYCHO_BUNNY.value)
 
@@ -974,6 +983,8 @@ class PsychoBunnyParser(ShopifyParser):
         # If no category tags are found, return the product type as a tuple
         if categories:
             return categories
+        if product['product_type'].lower().startswith('men') or product['product_type'].lower().startswith('women'):
+            return (' '.join(product['product_type'].split(' ')[1:]),)  
         return (product['product_type'],)
         
     
@@ -991,16 +1002,26 @@ class PsychoBunnyParser(ShopifyParser):
                 genders.append('Women')
             
         if genders == []:
-            genders.append('Men')
-            genders.append('Women') 
+            if product['product_type'].lower().startswith('men'):
+                genders.append('Men')
+            elif product['product_type'].lower().startswith('women'):
+                genders.append('Women') 
         return genders
 
     def _product_size_guide(self, product: dict):
         genders = self._product_genders(product)
-        category = self._product_categories(product) 
-        if len(genders) == 0:
+        if not genders:
             return None
-        return f"{genders[0]}-{category[0]}"
+
+        categories = self._product_categories(product)
+        category = categories[0] if categories else None
+
+        if category:
+            for key, value in self.ACCEPTABLE_CATEGORIES.items():
+                if category in value:
+                    return f'{genders[0]}-{key}'
+
+        return None
 
     def _parse_variants(self, product: dict):
         product_variants = product['variants']

@@ -86,7 +86,7 @@ class DataConverter(ABC):
 
         for cat in product['categories']:
             for gen in product['genders']:
-                category = self.convert_category(cat, gen)
+                category = self.convert_category(product, cat, gen)
                 if category:
                     categories.append(category)
 
@@ -139,7 +139,7 @@ class DataConverter(ABC):
         return sizings
 
     @utils.log_function_call
-    def convert_category(self, category_title: str, category_gender: str) -> Category:
+    def convert_category(self,product, category_title: str, category_gender: str) -> Category:
         # Load shop categories file
         with open(constants.SHOP_CATEGORIES_CONVERTER_FILE_PATH.format(shop_name=self.shop_name), 'r') as f:
             shop_categories_mapping = json.loads(f.read())
@@ -152,18 +152,11 @@ class DataConverter(ABC):
                 break
         
         if selected_category is None:
-            self.logger.error(f'Proper category not found. title: {category_title}, gender: {category_gender}.')
+            self.logger.error(f'Proper category not found. id: {product["product_id"]} title: {category_title}, gender: {category_gender}.')
         else:
-            try:
-                gender = utils.find_proper_choice(GenderChoices.choices, selected_category['gender'])
-                return Category.objects.get(title=selected_category['equivalent_chicpic_name'], gender=gender)
-            except Exception as e:
-                print(f"selected_category : {selected_category}")
-                print(f" selected_category['gender'] : { selected_category['gender']}")
-                print(f"category : {category}")
-                print(f"An error occurred ~~ Category.objects.get: {selected_category['equivalent_chicpic_name'], gender}")
-                self.logger.error(f"An error occurred ~~ Category.objects.get: {selected_category['equivalent_chicpic_name'], gender}")
-
+            gender = utils.find_proper_choice(GenderChoices.choices, selected_category['gender'])
+            return Category.objects.get(title=selected_category['equivalent_chicpic_name'], gender=gender)
+        
     @property
     def shop(self) -> Shop:
         try:
