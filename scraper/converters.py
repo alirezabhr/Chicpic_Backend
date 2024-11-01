@@ -139,7 +139,7 @@ class DataConverter(ABC):
         return sizings
 
     @utils.log_function_call
-    def convert_category(self,product, category_title: str, category_gender: str) -> Category:
+    def convert_category(self, product:dict , category_title: str, category_gender: str) -> Category:
         # Load shop categories file
         with open(constants.SHOP_CATEGORIES_CONVERTER_FILE_PATH.format(shop_name=self.shop_name), 'r') as f:
             shop_categories_mapping = json.loads(f.read())
